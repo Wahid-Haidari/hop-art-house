@@ -6,6 +6,8 @@ import { useTexture } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { PointerLockControls } from "@react-three/drei";
+import * as THREE from "three";
+
 
 
 
@@ -122,17 +124,51 @@ function useKeyboard() {
   return keys;
 }
 
+
+
+// Player _______________________________________________________________________________
 function Player() {
   const { camera } = useThree();
   const keys = useKeyboard();
 
   useFrame(() => {
-    const speed = 0.05; // walking speed
+    const speed = 0.05;
 
-    if (keys.current.w) camera.position.z -= speed;
-    if (keys.current.s) camera.position.z += speed;
-    if (keys.current.a) camera.position.x -= speed;
-    if (keys.current.d) camera.position.x += speed;
+    // 1. Get the direction the camera is facing
+    const forward = new THREE.Vector3();
+    camera.getWorldDirection(forward);
+    forward.y = 0; 
+    forward.normalize();
+
+    // 2. Right direction (perpendicular)
+    const right = new THREE.Vector3();
+    right.crossVectors(forward, camera.up).normalize();
+
+    // 3. Proposed movement
+    let nextX = camera.position.x;
+    let nextZ = camera.position.z;
+
+    if (keys.current.w) {
+      nextX += forward.x * speed;
+      nextZ += forward.z * speed;
+    }
+    if (keys.current.s) {
+      nextX -= forward.x * speed;
+      nextZ -= forward.z * speed;
+    }
+    if (keys.current.a) {
+      nextX -= right.x * speed;
+      nextZ -= right.z * speed;
+    }
+    if (keys.current.d) {
+      nextX += right.x * speed;
+      nextZ += right.z * speed;
+    }
+
+    // 4. Collisions
+    const limit = 9.5;
+    if (Math.abs(nextX) < limit) camera.position.x = nextX;
+    if (Math.abs(nextZ) < limit) camera.position.z = nextZ;
   });
 
   return null;
@@ -149,7 +185,7 @@ export default function Home() {
 
       <Canvas camera={{ position: [3, 3, 3] }}> {/*<Canvas> is the 3D scene container provided by React Three Fiber. */}
         {/* Light */}
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={1} />
         <directionalLight position={[5, 5, 5]} />
 
         {/* Floor -------------------------------------------------------------*/}
@@ -166,28 +202,29 @@ export default function Home() {
         {/* Back Wall -------------------------------------------------------------*/}
         <mesh position={[0, 1, -10]}>
           <planeGeometry args={[20, 4]} />
-          <meshStandardMaterial color="#ffffff" />
+          <meshBasicMaterial color="white" />
+
         </mesh>
 
 
         {/* Left Wall -------------------------------------------------------------*/}
         <mesh position={[-10, 1, 0]} rotation={[0, Math.PI / 2, 0]}>
           <planeGeometry args={[20, 4]} />
-          <meshStandardMaterial color="#ffffff" />
+          <meshBasicMaterial color="white" />
         </mesh>
 
 
         {/* Right Wall -------------------------------------------------------------*/}
         <mesh position={[10, 1, 0]} rotation={[0, -Math.PI / 2, 0]}>
           <planeGeometry args={[20, 4]} />
-          <meshStandardMaterial color="#ffffff" />
+          <meshBasicMaterial color="white" />
         </mesh>
 
 
         {/* Front Wall -------------------------------------------------------------*/}
         <mesh position={[0, 1, 10]} rotation={[0, Math.PI, 0]}>
           <planeGeometry args={[20, 4]} />
-          <meshStandardMaterial color="#ffffff" />
+          <meshBasicMaterial color="white" />
         </mesh>
 
 
@@ -214,10 +251,6 @@ export default function Home() {
 
         <Player />
         <PointerLockControls /> {/* Allows you to look around with the mouse. */}
-
-
-
-
 
 
 
