@@ -3,6 +3,12 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useTexture } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
+import { PointerLockControls } from "@react-three/drei";
+
+
+
 
 function Artwork() {
   const texture = useTexture("/art1.jpeg");
@@ -37,6 +43,103 @@ function ArtInfoCard() {
     </mesh>
   );
 }
+
+
+function Artwork2() {
+  const texture = useTexture("/art2.jpg");
+
+  return (
+    <mesh position={[-9.9, 1.5, 0]} rotation={[0, Math.PI / 2, 0]}>
+      <planeGeometry args={[1.5, 2.5]} />
+      <meshBasicMaterial map={texture} />
+    </mesh>
+  );
+}
+
+function ArtistCard2() {
+  const texture = useTexture("/artist2.jpg");  // update filename
+
+  return (
+    <mesh
+      position={[-9.9, 1.9, -1.2]}   // same spacing as back wall, but along Z
+      rotation={[0, Math.PI / 2, 0]} // same rotation as artwork2
+    >
+      <planeGeometry args={[0.5, 0.7]} />
+      <meshBasicMaterial map={texture} transparent />
+    </mesh>
+  );
+}
+
+function ArtInfoCard2() {
+  const texture = useTexture("/art2info.jpg"); // update filename
+
+  return (
+    <mesh
+      position={[-9.9, 1.1, -1.2]}   // same spacing pattern
+      rotation={[0, Math.PI / 2, 0]}
+    >
+      <planeGeometry args={[0.5, 0.7]} />
+      <meshBasicMaterial map={texture} transparent />
+    </mesh>
+  );
+}
+
+
+// WASD movements __________________________________________________
+
+type MovementKeys = "w" | "a" | "s" | "d";
+
+function useKeyboard() {
+  const keys = useRef<Record<MovementKeys, boolean>>({
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+  });
+
+  useEffect(() => {
+    const downHandler = (e: KeyboardEvent) => {
+      if ((e.key as MovementKeys) in keys.current) {
+        keys.current[e.key as MovementKeys] = true;
+      }
+    };
+
+    const upHandler = (e: KeyboardEvent) => {
+      if ((e.key as MovementKeys) in keys.current) {
+        keys.current[e.key as MovementKeys] = false;
+      }
+    };
+
+    window.addEventListener("keydown", downHandler);
+    window.addEventListener("keyup", upHandler);
+
+    return () => {
+      window.removeEventListener("keydown", downHandler);
+      window.removeEventListener("keyup", upHandler);
+    };
+  }, []);
+
+  return keys;
+}
+
+function Player() {
+  const { camera } = useThree();
+  const keys = useKeyboard();
+
+  useFrame(() => {
+    const speed = 0.05; // walking speed
+
+    if (keys.current.w) camera.position.z -= speed;
+    if (keys.current.s) camera.position.z += speed;
+    if (keys.current.a) camera.position.x -= speed;
+    if (keys.current.d) camera.position.x += speed;
+  });
+
+  return null;
+}
+
+
+
 
 
 
@@ -105,12 +208,22 @@ export default function Home() {
         <ArtInfoCard />
 
 
+        <Artwork2 />
+        <ArtistCard2 />
+        <ArtInfoCard2 />
+
+        <Player />
+        <PointerLockControls /> {/* Allows you to look around with the mouse. */}
+
+
+
+
+
 
 
         
 
-        {/* Controls to move camera with mouse */}
-        <OrbitControls />
+        
       </Canvas>
 
     </main>
