@@ -159,35 +159,35 @@ export default function Home() {
           position={[0, -1, 0]}
         > {/* Rotate -90° around the X-axis (because -Math.PI/2 = -90°) */}
           <planeGeometry args={[20, 20]} />
-          <meshStandardMaterial color="#444" />
+          <meshStandardMaterial color="#f5f5ff" />
         </mesh>
 
 
         {/* Back Wall -------------------------------------------------------------*/}
         <mesh position={[0, 1, -10]}>
           <planeGeometry args={[20, 4]} />
-          <meshStandardMaterial color="#888" />
+          <meshStandardMaterial color="#ffffff" />
         </mesh>
 
 
         {/* Left Wall -------------------------------------------------------------*/}
         <mesh position={[-10, 1, 0]} rotation={[0, Math.PI / 2, 0]}>
           <planeGeometry args={[20, 4]} />
-          <meshStandardMaterial color="#777" />
+          <meshStandardMaterial color="#ffffff" />
         </mesh>
 
 
         {/* Right Wall -------------------------------------------------------------*/}
         <mesh position={[10, 1, 0]} rotation={[0, -Math.PI / 2, 0]}>
           <planeGeometry args={[20, 4]} />
-          <meshStandardMaterial color="#777" />
+          <meshStandardMaterial color="#ffffff" />
         </mesh>
 
 
         {/* Front Wall -------------------------------------------------------------*/}
         <mesh position={[0, 1, 10]} rotation={[0, Math.PI, 0]}>
           <planeGeometry args={[20, 4]} />
-          <meshStandardMaterial color="#888" />
+          <meshStandardMaterial color="#ffffff" />
         </mesh>
 
 
