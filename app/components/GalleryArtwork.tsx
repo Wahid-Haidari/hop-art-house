@@ -37,7 +37,6 @@ export default function GalleryArtwork({
     const horizontal = (ART_WIDTH / 2) + (CARD_WIDTH / 2) + GAP;  // Space between the center of the art and the center of the cards that are to the right.
     const verticalDown = -((ART_HEIGHT / 2) - (CARD_HEIGHT / 2));; // This is the distance the art info card sits below the artwork.
     const verticalUp = verticalDown + CARD_HEIGHT + GAP // This is the distance the artist card sits above the artwork’s center.
-    const forwardOffset = 0.05; // prevents clipping
 
     // If rotation.y = 0 → artwork faces user (back wall)
     // If rotation.y != 0 → artwork is on left/right walls
@@ -54,7 +53,7 @@ export default function GalleryArtwork({
     : [
         position[0] + horizontal,           // X right
         position[1] + verticalUp,           // Y up
-        position[2] + forwardOffset         // Z forward
+        position[2]         // Z forward
       ];
 
   const infoCardPos: [number, number, number] = isSideWall
@@ -66,7 +65,7 @@ export default function GalleryArtwork({
     : [
         position[0] + horizontal,
         position[1] + verticalDown,
-        position[2] + forwardOffset
+        position[2]
       ];
 
   return (

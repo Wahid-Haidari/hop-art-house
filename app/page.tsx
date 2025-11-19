@@ -6,13 +6,14 @@ import Crosshair from "./components/Crosshair";
 import Player from "./components/Player";
 import GalleryArtwork from "./components/GalleryArtwork";
 import ClickToStart from "./components/ClickToStart";
+import PurchasePanel from "./components/PurchasePanel";
 
 
 export default function Home() {
   return (
     <main className="w-full h-screen"> {/* It tells the browser: "This is the primary content of this page. */}
       <ClickToStart>
-        <Canvas camera={{ position: [3, 3, 3] }}> {/*<Canvas> is the 3D scene container provided by React Three Fiber. */}
+        <Canvas camera={{ position: [3, 1.6, 3] }}> {/*<Canvas> is the 3D scene container provided by React Three Fiber. */}
           {/* Light */}
           <ambientLight intensity={1} />
           <directionalLight position={[5, 5, 5]} />
@@ -55,16 +56,7 @@ export default function Home() {
             <planeGeometry args={[20, 4]} />
             <meshBasicMaterial color="white" />
           </mesh>
-
-
-
-          {/* A simple cube -------------------------------------------------------*/}
-          {/* <mesh position={[0, 0, 0]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial color="orange" />
-          </mesh> */}
-
-          
+ 
 
           {/* Artwork #1 (back wall) */}
           <GalleryArtwork
@@ -74,6 +66,11 @@ export default function Home() {
             position={[0, 1.5, -9.95]}
             rotation={[0, 0, 0]}
           />
+
+          <PurchasePanel 
+            artPosition={[0, 1.5, -9.95]}
+            artRotation={[0, 0, 0]}
+          />  {/* new yellow bar */}
 
           {/* Artwork #2 (left wall) */}
           <GalleryArtwork
