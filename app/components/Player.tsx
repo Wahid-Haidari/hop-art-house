@@ -11,7 +11,8 @@ import * as THREE from "three";
 // WASD movements __________________________________________________ 
 
 
-type MovementKeys = "w" | "a" | "s" | "d";
+type MovementKeys = "w" | "a" | "s" | "d" | " " | "Shift";
+
 
 function useKeyboard() {
   const keys = useRef<Record<MovementKeys, boolean>>({
@@ -19,6 +20,8 @@ function useKeyboard() {
     a: false,
     s: false,
     d: false,
+    " ": false,       // space
+    Shift: false,     // shift
   });
 
   useEffect(() => {
@@ -87,11 +90,36 @@ export default function Player() {
       nextZ += right.z * speed;
     }
 
-    // 4. Collisions
+    // 4. Collisions for horizontal boundaries
     const limit = 9.5;
     if (Math.abs(nextX) < limit) camera.position.x = nextX;
     if (Math.abs(nextZ) < limit) camera.position.z = nextZ;
+
+
+
+    // Vertical movement
+    let nextY = camera.position.y;
+
+    if (keys.current[" "]) {       // Space → go UP
+      nextY += speed;
+    }
+    if (keys.current.Shift) {     // Shift → go DOWN
+      nextY -= speed;
+    }
+
+    // Collisions for vertical boundaries
+    const minY = 0;     // floor limit
+    const maxY = 3;     // ceiling limit
+
+    if (nextY > minY && nextY < maxY) {
+      camera.position.y = nextY;
+    }
+
+
   });
+
+
+
 
   return null;
 }
