@@ -34,7 +34,7 @@ export default function GalleryArtwork({
     const infoTex = useTexture(infoCard);
 
     // Card offsets based on YOUR layout
-    const horizontal = (ART_WIDTH / 2) + (CARD_WIDTH / 2) + GAP;  // Space between the center of the art and the center of the cards that are to the right.
+    const artSideOffset = (ART_WIDTH / 2) + (CARD_WIDTH / 2) + GAP;  // Space between the center of the art and the center of the cards that are to the right.
     const verticalDown = -((ART_HEIGHT / 2) - (CARD_HEIGHT / 2));; // This is the distance the art info card sits below the artwork.
     const verticalUp = verticalDown + CARD_HEIGHT + GAP // This is the distance the artist card sits above the artwork’s center.
 
@@ -48,10 +48,10 @@ export default function GalleryArtwork({
     ? [
         position[0],                        // X same
         position[1] + verticalUp,           // Y up
-        position[2] - horizontal            // Z right relative to rotation
+        position[2] - artSideOffset           // Z right relative to rotation
       ]
     : [
-        position[0] + horizontal,           // X right
+        position[0] + artSideOffset,           // X right
         position[1] + verticalUp,           // Y up
         position[2]         // Z forward
       ];
@@ -60,10 +60,10 @@ export default function GalleryArtwork({
     ? [
         position[0],
         position[1] + verticalDown,
-        position[2] - horizontal
+        position[2] - artSideOffset
       ]
     : [
-        position[0] + horizontal,
+        position[0] + artSideOffset,
         position[1] + verticalDown,
         position[2]
       ];
