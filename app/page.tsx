@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <main className="w-full h-screen"> {/* It tells the browser: "This is the primary content of this page. */}
       <ClickToStart>
-        <Canvas camera={{ position: [3, 1.6, 3] }}> {/*<Canvas> is the 3D scene container provided by React Three Fiber. */}
+        <Canvas camera={{ position: [3, 1.6, 3], fov: 35 }}> {/*<Canvas> is the 3D scene container provided by React Three Fiber. */}
           {/* Light */}
           <ambientLight intensity={1} />
           <directionalLight position={[5, 5, 5]} />
