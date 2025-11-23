@@ -58,8 +58,8 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
     const sizeX = artRightEdge - (SIZE_WIDTH / 2);
     const quantityX = sizeX - (SIZE_WIDTH / 2) - GAP - (QUANTITY_WIDTH / 2);
 
-    const ICON_SIZE = 0.06;   // adjust to your preferred visual size
-    const FONT_SIZE = 0.07;
+    const ICON_SIZE = 0.05;   // adjust to your preferred visual size
+    const FONT_SIZE = 0.06;
 
 
 
@@ -96,10 +96,6 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
     const ITEM_SPACING = 0.12;
 
 
-
-
-
-
     function renderQuantityGroup() {
         const iconW = ICON_SIZE;
         const textW = quantityTextWidth;
@@ -111,6 +107,8 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
         const minusX = -groupWidth / 2 + iconW / 2;
         const textX = 0; // centered
         const plusX = groupWidth / 2 - iconW / 2;
+
+
 
         return (
             <>
@@ -126,7 +124,7 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
 
                 {/* Visible Icon */}
                 <mesh position={[0, 0, 0.005]}>
-                    <planeGeometry args={[ICON_SIZE, ICON_SIZE]} />
+                    <planeGeometry args={[ICON_SIZE, 0.01]} />
                     <meshBasicMaterial map={minusTex} transparent />
                 </mesh>
             </mesh>
@@ -134,13 +132,13 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
 
             {/* Quantity Number */}
             <Text
-                ref={quantityTextRef}
+            ref={quantityTextRef}
                 onSync={(text) => {
                     const bbox = text.geometry.boundingBox;
                     const width = bbox.max.x - bbox.min.x;
                     setQuantityTextWidth(width);
                 }}
-                position={[textX, 0, 0.01]}
+                position={[textX, 0, 0.015]}
                 fontSize={FONT_SIZE}
                 color="black"
                 anchorX="center"
@@ -148,6 +146,8 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
             >
                 {quantity}
             </Text>
+
+
 
 
             {/* Plus Button */}
@@ -204,7 +204,7 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
 
                 {/* Dropdown Icon */}
                 <mesh position={[iconX, 0, 0.01]}>
-                    <planeGeometry args={[ICON_SIZE, ICON_SIZE]} />
+                    <planeGeometry args={[ICON_SIZE, 0.03]} />
                     <meshBasicMaterial map={dropdownTex} transparent />
                 </mesh>
             </>
@@ -255,7 +255,6 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
         // smooth interpolation (0.1 = smoothness)
         setSlide(s => s + (target - s) * 0.15);
     });
-
 
 
 
