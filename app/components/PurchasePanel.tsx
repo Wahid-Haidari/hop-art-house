@@ -1,6 +1,7 @@
 "use client";
 
 import { Text, useTexture } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import { useRef, useState } from "react";
 
 
@@ -65,14 +66,7 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
     const infoCardCenterX = artRightEdge + CARD_WIDTH / 2 + GAP;
     const addToCartX = infoCardCenterX;
 
-
-
-
-  
-
-
-
-
+ 
     {/* This is to make the icons locations dynamic based on text width*/}
     const sizeTextRef = useRef<any>(null);
     const [sizeTextWidth, setSizeTextWidth] = useState(0);
@@ -83,6 +77,26 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
 
     const addTextRef = useRef<any>(null);
     const [addTextWidth, setAddTextWidth] = useState(0);
+
+    
+    {/*Quantity state for number of purchase */}
+    const [quantity, setQuantity] = useState(1);
+
+    
+    {/* Size state for dropdown */}
+    const sizes = ["8x10", "12x16", "16x20", "18x24", "24x36"]; 
+    const [sizeIndex, setSizeIndex] = useState(0);
+    const [sizeOpen, setSizeOpen] = useState(false);
+    const [slide, setSlide] = useState(0); // 0 = hidden, 1 = fully visible
+
+
+    {/* some measurements for drop down */}
+    const OPEN_Y_TOP = 0.3;
+    const CLOSED_Y_TOP = 0.05;
+    const ITEM_SPACING = 0.12;
+
+
+
 
 
 
@@ -101,18 +115,30 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
         return (
             <>
             {/* Minus Button */}
-            <mesh position={[minusX, 0, 0.01]}>
-                <planeGeometry args={[ICON_SIZE, ICON_SIZE]} />
-                <meshBasicMaterial map={minusTex} transparent />
+            {/* Minus Button Click Area */}
+            <mesh
+                position={[minusX, 0, 0.01]}
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+            >
+                {/* INVISIBLE HITBOX */}
+                <planeGeometry args={[0.15, 0.15]} />  
+                <meshBasicMaterial transparent opacity={0} />
+
+                {/* Visible Icon */}
+                <mesh position={[0, 0, 0.005]}>
+                    <planeGeometry args={[ICON_SIZE, ICON_SIZE]} />
+                    <meshBasicMaterial map={minusTex} transparent />
+                </mesh>
             </mesh>
+
 
             {/* Quantity Number */}
             <Text
                 ref={quantityTextRef}
                 onSync={(text) => {
-                const bbox = text.geometry.boundingBox;
-                const width = bbox.max.x - bbox.min.x;
-                setQuantityTextWidth(width);
+                    const bbox = text.geometry.boundingBox;
+                    const width = bbox.max.x - bbox.min.x;
+                    setQuantityTextWidth(width);
                 }}
                 position={[textX, 0, 0.01]}
                 fontSize={FONT_SIZE}
@@ -120,13 +146,25 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
                 anchorX="center"
                 anchorY="middle"
             >
-                1
+                {quantity}
             </Text>
 
+
             {/* Plus Button */}
-            <mesh position={[plusX, 0, 0.01]}>
-                <planeGeometry args={[ICON_SIZE, ICON_SIZE]} />
-                <meshBasicMaterial map={plusTex} transparent />
+            {/* Plus Button Click Area */}
+            <mesh
+                position={[plusX, 0, 0.01]}
+                onClick={() => setQuantity(q => q + 1)}
+            >
+                {/* INVISIBLE HITBOX */}
+                <planeGeometry args={[0.15, 0.15]} />
+                <meshBasicMaterial transparent opacity={0} />
+
+                {/* Visible Icon */}
+                <mesh position={[0, 0, 0.005]}>
+                    <planeGeometry args={[ICON_SIZE, ICON_SIZE]} />
+                    <meshBasicMaterial map={plusTex} transparent />
+                </mesh>
             </mesh>
             </>
         );
@@ -143,6 +181,9 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
         const textX = -groupWidth / 2 + textW / 2;
         const iconX = groupWidth / 2 - iconW / 2;
 
+
+        const currentSize = sizes[sizeIndex];
+
         return (
             <>
                 {/* Size text */}
@@ -158,7 +199,7 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
                     color="black"
                     anchorY="middle"
                 >
-                    Size
+                    {sizes[sizeIndex]}
                 </Text>
 
                 {/* Dropdown Icon */}
@@ -207,6 +248,15 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
         );
     }
 
+    useFrame(() => {
+        // target position based on open/closed
+        const target = sizeOpen ? 1 : 0;
+
+        // smooth interpolation (0.1 = smoothness)
+        setSlide(s => s + (target - s) * 0.15);
+    });
+
+
 
 
 
@@ -221,19 +271,75 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
 
 
             {/* Size Dropdown Box */}
-            <mesh position={[sizeX, baseY, baseZ]}>
+            <mesh
+                position={[sizeX, baseY, baseZ]}
+                onClick={() => setSizeOpen(o => !o)}   // ← toggle open/closed
+            >
+
                 <planeGeometry args={[SIZE_WIDTH, BUTTON_HEIGHT]} />
                 <meshBasicMaterial color="#FFC72C" />
-                {renderSizeGroup()}     
+
+                {renderSizeGroup()}
             </mesh>
 
+
             {/* Add to Cart Box */}
-            <mesh position={[addToCartX, baseY, baseZ]}>
+            <mesh position={[addToCartX, baseY, baseZ]}
+            >
                 <planeGeometry args={[ADD_TO_CART_WIDTH, BUTTON_HEIGHT]} />
                 <meshBasicMaterial color="#FFC72C" />
                 {/* Add to Cart Label */}
                 {renderAddToCartGroup()}
             </mesh>
+            {/* Dropdown Panel */}
+            <mesh
+                position={[
+                    sizeX,
+                    baseY - BUTTON_HEIGHT - (0.7 * slide) / 2,
+                    baseZ
+                ]}
+                visible={slide > 0.01}   // stay hidden when fully closed
+            >
+                <planeGeometry args={[SIZE_WIDTH, 0.7 * slide]} />
+
+                <meshBasicMaterial color="#FFE999" opacity={0.95} transparent />
+
+                
+
+                {sizes.map((s, i) => (
+                    <Text
+                        key={i}
+                        position={[
+                             0,
+                            CLOSED_Y_TOP +
+                                (OPEN_Y_TOP - CLOSED_Y_TOP) * slide +
+                                (-i * ITEM_SPACING) * slide,
+                            0.01
+                        ]}
+                        fontSize={0.07}
+                        color="black"
+                        anchorX="center"
+                        anchorY="middle"
+                        onClick={() => {
+                            setSizeIndex(i);
+                            setSizeOpen(false);
+                        }}
+                    >
+                        {s}
+                    </Text>
+                ))}
+
+
+        
+
+
+
+
+
+            </mesh>
+
+
+
         </>
     );
 }
