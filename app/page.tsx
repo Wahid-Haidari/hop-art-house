@@ -5,7 +5,6 @@ import { PointerLockControls } from "@react-three/drei";
 import Crosshair from "./components/Crosshair";
 import Player from "./components/Player";
 import GalleryArtwork from "./components/GalleryArtwork";
-import ClickToStart from "./components/ClickToStart";
 import PurchasePanel from "./components/PurchasePanel";
 import { useState } from "react"; 
 import FullscreenOverlay from "./components/FullscreenOverlay";
@@ -14,22 +13,43 @@ import Floor from "./components/Floor";
 import { PlayerProvider } from "./components/PlayerContext";
 import ProximityMessage from "./components/ProximityMessage";
 import Tree from "./components/Tree";
-import { artworks } from "./components/artworks";
+import { artworks } from "./artworks";
+import LandingPage from "./components/LandingPage";
+import ClickToLook from "./components/ClickToLook";
+import { useRef, useEffect } from "react";
 
 export default function Home() {
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
+  const [showLanding, setShowLanding] = useState(true);
+  const controlsRef = useRef<any>(null);
+
+  // Auto-lock pointer when landing page disappears
+  useEffect(() => {
+    if (!showLanding && controlsRef.current) {
+      // Remove auto-lock since browser requires user interaction
+    }
+  }, [showLanding]);
+
+  const handleLock = () => {
+    if (controlsRef.current) {
+      controlsRef.current.lock();
+    }
+  };
 
   return (
     <PlayerProvider>
+      {showLanding && (
+        <>
+          <LandingPage onEnter={() => setShowLanding(false)} />
+          {/* Spacer to enable scrolling */}
+          <div className="h-[200vh]" />
+        </>
+      )}
       <main className="w-full h-screen">
-        <ClickToStart>
-          <div
-            id="canvas-wrapper"
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
-          >
+        <div
+          id="canvas-wrapper"
+          className="w-full h-full"
+        >
             <Canvas 
               camera={{ position: [3, 2.6, 5], fov: 30 }}
               onCreated={({ camera }) => {
@@ -74,15 +94,15 @@ export default function Home() {
               ))}
 
               <Player />
-              <PointerLockControls enabled={!overlayImage} />
+              <PointerLockControls ref={controlsRef} enabled={!overlayImage} />
             </Canvas>
           </div>
-        </ClickToStart>
         <Crosshair visible={!overlayImage} />
         <FullscreenOverlay
           image={overlayImage}
           onClose={() => setOverlayImage(null)}
         />
+        {!showLanding && <ClickToLook onLock={handleLock} />}
       </main>
     </PlayerProvider>
   );

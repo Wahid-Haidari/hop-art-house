@@ -33,7 +33,7 @@ export default function ProximityMessage({
   if (!isNear) return null;
 
   // Position message above the artwork
-  const messageY = artY + 2.5;
+  const messageY = artY + 1.5;
 
   return (
     <Text
