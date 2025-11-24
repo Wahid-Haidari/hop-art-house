@@ -99,8 +99,8 @@ export default function Player() {
     }
 
     // Collisions for vertical boundaries
-    const minY = 0;
-    const maxY = 3;
+    const minY = 1;
+    const maxY = 100;
 
     if (nextY > minY && nextY < maxY) {
       camera.position.y = nextY;

@@ -13,6 +13,8 @@ import Wall from "./components/Wall";
 import Floor from "./components/Floor";
 import { PlayerProvider } from "./components/PlayerContext";
 import ProximityMessage from "./components/ProximityMessage";
+import Tree from "./components/Tree";
+import { artworks } from "./components/artworks";
 
 export default function Home() {
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
@@ -28,51 +30,48 @@ export default function Home() {
               height: "100%",
             }}
           >
-            <Canvas camera={{ position: [3, 1.6, 3], fov: 30 }}>
+            <Canvas 
+              camera={{ position: [3, 2.6, 5], fov: 30 }}
+              onCreated={({ camera }) => {
+                camera.lookAt(0, 2, -10);
+              }}
+            >
               {/* Light */}
               <ambientLight intensity={1} />
               <directionalLight position={[5, 5, 5]} />
               <Floor/>
+              <Tree position={[0, 0, 0]} scale={0.4} />
 
               {/* Walls */}
-              <Wall position={[0, 1, -10]} />  {/* Back */}
-              <Wall position={[-10, 1, 0]} rotation={[0, Math.PI / 2, 0]} />  {/* Left */}
-              <Wall position={[10, 1, 0]} rotation={[0, -Math.PI / 2, 0]} />  {/* Right */}
-              <Wall position={[0, 1, 10]} rotation={[0, Math.PI, 0]} />  {/* Front */}
+              <Wall position={[0, 2, -10]} />
+              <Wall position={[-10, 2, 0]} rotation={[0, Math.PI / 2, 0]} />
+              <Wall position={[10, 2, 0]} rotation={[0, -Math.PI / 2, 0]} />
+              <Wall position={[0, 2, 10]} rotation={[0, Math.PI, 0]} />
 
-              {/* Artwork #1 (back wall) */}
-              <GalleryArtwork
-                art="/art1.jpeg"
-                artistCard="/artist1.jpeg"
-                infoCard="/art1info.jpeg"
-                position={[0, 1.5, -9.95]}
-                rotation={[0, 0, 0]}
-                onOpenOverlay={setOverlayImage}
-              />
+              {/* Artworks - Loop through all artworks */}
+              {artworks.map((artwork) => (
+                <group key={artwork.id}>
+                  <GalleryArtwork
+                    art={artwork.art}
+                    artistCard={artwork.artistCard}
+                    infoCard={artwork.infoCard}
+                    position={artwork.position}
+                    rotation={artwork.rotation}
+                    onOpenOverlay={setOverlayImage}
+                  />
 
-      
-              <ProximityMessage
-                artPosition={[0, 1.5, -9.95]}
-                artRotation={[0, 0, 0]}
-                triggerDistance={7}
-              />
+                  <ProximityMessage
+                    artPosition={artwork.position}
+                    artRotation={artwork.rotation}
+                    triggerDistance={7}
+                  />
 
-
-
-              <PurchasePanel 
-                artPosition={[0, 1.5, -9.95]}
-                artRotation={[0, 0, 0]}
-              />
-
-              {/* Artwork #2 (left wall) */}
-              <GalleryArtwork
-                art="/art2.jpg"
-                artistCard="/artist2.jpg"
-                infoCard="/art2info.jpg"
-                position={[-9.9, 1.5, 0]}
-                rotation={[0, Math.PI / 2, 0]}
-                onOpenOverlay={setOverlayImage}
-              />
+                  <PurchasePanel 
+                    artPosition={artwork.position}
+                    artRotation={artwork.rotation}
+                  />
+                </group>
+              ))}
 
               <Player />
               <PointerLockControls enabled={!overlayImage} />
