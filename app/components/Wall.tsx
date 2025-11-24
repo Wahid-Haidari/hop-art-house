@@ -10,7 +10,7 @@ export default function Wall({
   position, 
   rotation = [0, 0, 0],
   width = 20,
-  height = 4,
+  height = 5,
   color = "white"
 }: WallProps) {
   return (

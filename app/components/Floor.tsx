@@ -6,7 +6,7 @@ interface FloorProps {
 }
 
 export default function Floor({ 
-  position = [0, -1, 0],
+  position = [0, 0, 0],
   width = 20,
   height = 20,
   color = "#f5f5ff"
