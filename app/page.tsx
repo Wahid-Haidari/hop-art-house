@@ -7,13 +7,19 @@ import Player from "./components/Player";
 import GalleryArtwork from "./components/GalleryArtwork";
 import ClickToStart from "./components/ClickToStart";
 import PurchasePanel from "./components/PurchasePanel";
+import { useState } from "react"; 
+import FullscreenOverlay from "./components/FullscreenOverlay";
+
 
 
 export default function Home() {
+
+  const [overlayImage, setOverlayImage] = useState<string | null>(null);
+
   return (
     <main className="w-full h-screen"> {/* It tells the browser: "This is the primary content of this page. */}
       <ClickToStart>
-        <Canvas camera={{ position: [3, 1.6, 3], fov: 35 }}> {/*<Canvas> is the 3D scene container provided by React Three Fiber. */}
+        <Canvas camera={{ position: [3, 1.6, 3], fov: 30 }}> {/*<Canvas> is the 3D scene container provided by React Three Fiber. */}
           {/* Light */}
           <ambientLight intensity={1} />
           <directionalLight position={[5, 5, 5]} />
@@ -65,6 +71,7 @@ export default function Home() {
             infoCard="/art1info.jpeg"
             position={[0, 1.5, -9.95]}
             rotation={[0, 0, 0]}
+            onOpenOverlay={setOverlayImage}
           />
 
           <PurchasePanel 
@@ -79,6 +86,7 @@ export default function Home() {
             infoCard="/art2info.jpg"
             position={[-9.9, 1.5, 0]}
             rotation={[0, Math.PI / 2, 0]}
+            onOpenOverlay={setOverlayImage}
           />
 
 
@@ -87,6 +95,11 @@ export default function Home() {
         </Canvas>
       </ClickToStart>
       <Crosshair />
+      <FullscreenOverlay
+        image={overlayImage}
+        onClose={() => setOverlayImage(null)}
+      />
+
 
 
     </main>
