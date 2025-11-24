@@ -1,18 +1,12 @@
-
-
 "use client";
 import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-
-
-
+import { usePlayerPosition } from "./PlayerContext";
 
 // WASD movements __________________________________________________ 
 
-
 type MovementKeys = "w" | "a" | "s" | "d" | " " | "Shift";
-
 
 function useKeyboard() {
   const keys = useRef<Record<MovementKeys, boolean>>({
@@ -20,8 +14,8 @@ function useKeyboard() {
     a: false,
     s: false,
     d: false,
-    " ": false,       // space
-    Shift: false,     // shift
+    " ": false,
+    Shift: false,
   });
 
   useEffect(() => {
@@ -49,12 +43,11 @@ function useKeyboard() {
   return keys;
 }
 
-
-
 // Player _______________________________________________________________________________
 export default function Player() {
   const { camera } = useThree();
   const keys = useKeyboard();
+  const { setPosition } = usePlayerPosition();
 
   useFrame(() => {
     const speed = 0.05;
@@ -95,31 +88,27 @@ export default function Player() {
     if (Math.abs(nextX) < limit) camera.position.x = nextX;
     if (Math.abs(nextZ) < limit) camera.position.z = nextZ;
 
-
-
     // Vertical movement
     let nextY = camera.position.y;
 
-    if (keys.current[" "]) {       // Space → go UP
+    if (keys.current[" "]) {
       nextY += speed;
     }
-    if (keys.current.Shift) {     // Shift → go DOWN
+    if (keys.current.Shift) {
       nextY -= speed;
     }
 
     // Collisions for vertical boundaries
-    const minY = 0;     // floor limit
-    const maxY = 3;     // ceiling limit
+    const minY = 0;
+    const maxY = 3;
 
     if (nextY > minY && nextY < maxY) {
       camera.position.y = nextY;
     }
 
-
+    // Update position in context
+    setPosition([camera.position.x, camera.position.y, camera.position.z]);
   });
-
-
-
 
   return null;
 }
