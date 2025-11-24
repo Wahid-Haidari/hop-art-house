@@ -1,11 +1,27 @@
 "use client";
 
+import { useEffect } from "react";
+
 interface FullscreenOverlayProps {
   image: string | null;
   onClose: () => void;
 }
 
 export default function FullscreenOverlay({ image, onClose }: FullscreenOverlayProps) {
+  useEffect(() => {
+    if (image) {
+      // Force exit pointer lock
+      document.exitPointerLock();
+      
+      // Retry after a small delay to ensure it takes effect
+      setTimeout(() => {
+        document.exitPointerLock();
+      }, 50);
+      
+      document.body.style.cursor = "auto";
+    }
+  }, [image]);
+
   if (!image) return null;
 
   return (
@@ -21,7 +37,8 @@ export default function FullscreenOverlay({ image, onClose }: FullscreenOverlayP
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        cursor: "default", // <-- normal mouse
+        cursor: "auto",
+        pointerEvents: "auto",     
         zIndex: 9999,
       }}
     >
