@@ -41,13 +41,13 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
             <div className="flex items-center gap-1 text-black">
                 <img
-                    src="/cart.svg"   // ← put your cart SVG in /public/cart.svg
+                    src="/Cart.svg"   // ← put your cart SVG in /public/cart.svg
                     className="w-5 h-5"
                     alt="cart"
                 />
                 <span>0</span>
             </div>
-            
+
         </div>
       </div>
 
