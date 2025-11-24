@@ -8,6 +8,7 @@ interface GalleryArtworkProps {
   infoCard: string;
   position: [number, number, number];
   rotation?: [number, number, number];
+  onOpenOverlay: (img: string) => void;
 }
 
 export default function GalleryArtwork({
@@ -16,6 +17,7 @@ export default function GalleryArtwork({
   infoCard,
   position,
   rotation = [0, 0, 0],
+  onOpenOverlay
 }: GalleryArtworkProps) {
 
     // Artwork size
@@ -71,19 +73,19 @@ export default function GalleryArtwork({
   return (
     <>
       {/* ARTWORK */}
-      <mesh position={position} rotation={rotation}>
+      <mesh position={position} rotation={rotation} onClick={() => onOpenOverlay(art)}>
         <planeGeometry args={[ART_WIDTH, ART_HEIGHT]} />
         <meshBasicMaterial map={artTex} />
       </mesh>
 
       {/* ARTIST CARD */}
-      <mesh position={artistCardPos} rotation={rotation}>
+      <mesh position={artistCardPos} rotation={rotation} onClick={() => onOpenOverlay(artistCard)}>
         <planeGeometry args={[CARD_WIDTH, CARD_HEIGHT]} />
         <meshBasicMaterial map={artistTex} transparent />
       </mesh>
 
       {/* ART INFO CARD */}
-      <mesh position={infoCardPos} rotation={rotation}>
+      <mesh position={infoCardPos} rotation={rotation} onClick={() => onOpenOverlay(infoCard)}>
         <planeGeometry args={[CARD_WIDTH, CARD_HEIGHT]} />
         <meshBasicMaterial map={infoTex} transparent />
       </mesh>
