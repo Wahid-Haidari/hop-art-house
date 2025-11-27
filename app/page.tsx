@@ -10,6 +10,7 @@ import { useState, useRef, useEffect } from "react";
 import FullscreenOverlay from "./components/FullscreenOverlay";
 import Wall from "./components/Wall";
 import Floor from "./components/Floor";
+import Ceiling from "./components/Ceiling";
 import { PlayerProvider } from "./components/PlayerContext";
 import ProximityMessage from "./components/ProximityMessage";
 import Tree from "./components/Tree";
@@ -124,13 +125,14 @@ export default function Home() {
               <ambientLight intensity={1} />
               <directionalLight position={[5, 5, 5]} />
               <Floor/>
+              <Ceiling/>
               <Tree position={[0, 0, 0]} scale={0.4} />
 
               {/* Walls */}
-              <Wall position={[0, 2, -10]} />
-              <Wall position={[-10, 2, 0]} rotation={[0, Math.PI / 2, 0]} />
-              <Wall position={[10, 2, 0]} rotation={[0, -Math.PI / 2, 0]} />
-              <Wall position={[0, 2, 10]} rotation={[0, Math.PI, 0]} />
+              <Wall position={[0, 3.75, -10]} />
+              <Wall position={[-10, 3.75, 0]} rotation={[0, Math.PI / 2, 0]} />
+              <Wall position={[10, 3.75, 0]} rotation={[0, -Math.PI / 2, 0]} />
+              <Wall position={[0, 3.75, 10]} rotation={[0, Math.PI, 0]} />
 
               {/* Artworks - Loop through all artworks */}
               {artworks.map((artwork) => (

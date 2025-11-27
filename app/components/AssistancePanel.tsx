@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { COLORS } from "../colors";
 
 interface AssistancePanelProps {
   visible: boolean;
@@ -34,7 +35,7 @@ export default function AssistancePanel({ visible }: AssistancePanelProps) {
           onMouseLeave={() => setHoverShowInstructions(false)}
         >
           <div 
-            className="bg-[#FFC72C] border-4 border-black rounded-lg p-6 shadow-lg"
+            className="bg-[#F7C41A] border-4 border-black rounded-lg p-6 shadow-lg"
             style={{ width: "240px" }}
           >
             <div className="text-black text-sm font-medium leading-loose space-y-2">

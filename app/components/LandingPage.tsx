@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useCart } from "./CartContext";
+import { COLORS } from "../colors";
 
 interface LandingPageProps {
   onEnter: () => void;
@@ -30,63 +31,39 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
   return (
     <div
-      className="fixed top-0 left-0 w-screen h-screen bg-[#FFC72C] flex flex-col justify-center items-center px-[10%] z-[1000]"
+      className="fixed top-0 left-0 w-screen h-screen bg-[#F7C41A] flex flex-col justify-start items-center px-[10%] z-[1000] pt-[100px]"
       style={{ opacity, pointerEvents }}
     >
-      {/* Logo - Bottom Left */}
-      <div className="fixed bottom-8 left-8 z-50 pointer-events-auto">
+      {/* Center Logo - At the top */}
+      <div 
+        className="pointer-events-auto mb-[60px]"
+        style={{
+          width: "520.63px",
+          height: "272px",
+        }}
+      >
         <img
-          src="/Frog Logo.svg"
-          className="w-12 h-12"
-          alt="Hop Art House"
+          src="/Landing Page Logo.svg"
+          alt="Hop Art House Logo"
+          className="w-full h-full object-contain"
         />
       </div>
 
-      {/* Header - Bottom Right */}
-      <div className="fixed bottom-8 right-8 z-50 pointer-events-auto">
-        <div className="flex gap-6 items-center px-6 py-4 rounded-full">
-          <a href="#about" className="text-black no-underline hover:opacity-70 cursor-pointer text-sm font-medium">About</a>
-          <a href="#hi" className="text-black no-underline hover:opacity-70 cursor-pointer text-sm font-medium">Hi@HopArt.House</a>
-          <a href="#featured" className="text-black no-underline hover:opacity-70 cursor-pointer text-sm font-medium">Get Featured</a>
-          
-          <div className="flex items-center gap-2 text-black cursor-pointer hover:opacity-70 pl-4 border-l border-black/20">
-            <img
-              src="/Cart.svg"
-              className="w-6 h-6"
-              alt="cart"
-            />
-            <span className="font-semibold">{getTotalItems()}</span>
-          </div>
-        </div>
-      </div>
+      {/* Main Content - Centered */}
+      <div className="text-center max-w-[800px]">
 
-      {/* Main Content */}
-      <div className="max-w-[1000px] text-left">
-        <h1 className="text-[80px] font-bold m-0 mb-8 leading-tight text-black">
-          HOP ART HOUSE
-        </h1>
-
-        <h2 className="text-[28px] font-semibold m-0 mb-5 text-black">
+        <h2 className="text-[32px] font-semibold m-0 mb-8 text-black leading-relaxed">
           Without Van Gogh, no AI could make an image in his style.
           <br />
           Only a human can create a truly unique work of art.
         </h2>
 
-        <p className="text-lg leading-relaxed mb-8 text-black">
-          Replacing art with AI-generated images for the sake of efficiency is like turning a
-          breathtaking waterfall into a water park slide: profitable and practical, perhaps,
-          but stripped of its natural beauty.
-        </p>
-
-        <p className="text-lg leading-relaxed text-black">
-          Hop Art House celebrates human-made digital art in the age of AI. We showcase
-          authentic, soulful creations and turn them into physical editions that honour the
-          artist's touch and intention.
+        <p className="text-lg leading-relaxed text-black mb-8">
+          As AI floods the world with hollow imagery, we stand with human-made art. True art emerges from the dialogue between artist and work, expressing what words cannot, and carrying the unmistakable imprint of its creator.
         </p>
 
         {/* Scroll Indicator */}
-        <div className="mt-[60px] text-base flex items-center gap-3 text-black">
-          <span>Scroll down to enter gallery</span>
+        <div className="mt-[60px] text-base flex items-center justify-center gap-3 text-black">
           <span className="text-2xl">↓</span>
         </div>
       </div>

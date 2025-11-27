@@ -1,19 +1,19 @@
-interface FloorProps {
+interface CeilingProps {
   position?: [number, number, number];
   width?: number;
   height?: number;
   color?: string;
 }
 
-export default function Floor({ 
-  position = [0, 0, 0],
+export default function Ceiling({ 
+  position = [0, 7.5, 0],
   width = 20,
   height = 20,
   color = "#ffffff"
-}: FloorProps) {
+}: CeilingProps) {
   return (
     <mesh 
-      rotation={[-Math.PI / 2, 0, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
       position={position}
     >
       <planeGeometry args={[width, height]} />
