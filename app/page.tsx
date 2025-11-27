@@ -3,10 +3,10 @@
 import { Canvas } from "@react-three/fiber";
 import { PointerLockControls } from "@react-three/drei";
 import Crosshair from "./components/Crosshair";
-import Player from "./components/Player";
+import Player, { KeyboardProvider } from "./components/Player";
 import GalleryArtwork from "./components/GalleryArtwork";
 import PurchasePanel from "./components/PurchasePanel";
-import { useState } from "react"; 
+import { useState, useRef, useEffect, useCallback } from "react"; 
 import FullscreenOverlay from "./components/FullscreenOverlay";
 import Wall from "./components/Wall";
 import Floor from "./components/Floor";
@@ -15,15 +15,63 @@ import ProximityMessage from "./components/ProximityMessage";
 import Tree from "./components/Tree";
 import { artworks } from "./artworks";
 import LandingPage from "./components/LandingPage";
-import ClickToLook from "./components/ClickToLook";
 import { CartProvider } from "./components/CartContext";
 import GalleryHeader from "./components/GalleryHeader";
-import { useRef, useEffect } from "react";
+import AssistancePanel from "./components/AssistancePanel";
 
 export default function Home() {
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [showLanding, setShowLanding] = useState(true);
   const controlsRef = useRef<any>(null);
+  const keysRef = useRef<Record<string, boolean>>({
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+    " ": false,
+    Shift: false,
+  });
+
+  // Track keyboard state
+  useEffect(() => {
+    const downHandler = (e: KeyboardEvent) => {
+      const key = e.key === " " ? " " : e.key.toLowerCase();
+      if (key in keysRef.current) {
+        keysRef.current[key] = true;
+        // Lock pointer when movement key is pressed
+        if (!document.pointerLockElement && controlsRef.current) {
+          controlsRef.current.lock();
+        }
+      }
+    };
+
+    const upHandler = (e: KeyboardEvent) => {
+      const key = e.key === " " ? " " : e.key.toLowerCase();
+      if (key in keysRef.current) {
+        keysRef.current[key] = false;
+      }
+    };
+
+    window.addEventListener("keydown", downHandler);
+    window.addEventListener("keyup", upHandler);
+
+    return () => {
+      window.removeEventListener("keydown", downHandler);
+      window.removeEventListener("keyup", upHandler);
+    };
+  }, []);
+
+  // Check periodically if any movement keys are pressed, unlock if none are
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const anyKeyPressed = Object.values(keysRef.current).some(v => v);
+      if (!anyKeyPressed && document.pointerLockElement && controlsRef.current) {
+        document.exitPointerLock();
+      }
+    }, 100); // Check every 100ms
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto-lock pointer when landing page disappears
   useEffect(() => {
@@ -41,6 +89,7 @@ export default function Home() {
   return (
     <CartProvider>
       <PlayerProvider>
+      <KeyboardProvider>
       {showLanding && (
         <>
           <LandingPage onEnter={() => setShowLanding(false)} />
@@ -103,14 +152,14 @@ export default function Home() {
               <PointerLockControls ref={controlsRef} enabled={!overlayImage} />
             </Canvas>
           </div>
-        <Crosshair visible={!overlayImage} />
         <FullscreenOverlay
           image={overlayImage}
           onClose={() => setOverlayImage(null)}
         />
-        {!showLanding && <ClickToLook onLock={handleLock} />}
         {!showLanding && <GalleryHeader />}
+        {!showLanding && <AssistancePanel visible={!showLanding} />}
       </main>
+      </KeyboardProvider>
     </PlayerProvider>
     </CartProvider>
   );
