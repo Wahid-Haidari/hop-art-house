@@ -4,6 +4,7 @@ import { Text, useTexture } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
+import { COLORS } from "../colors";
 
 interface QuantityButtonProps {
   position: [number, number, number];
@@ -108,7 +109,7 @@ export default function QuantityButton({
       {/* Background Box */}
       <mesh>
         <planeGeometry args={[width, height]} />
-        <meshBasicMaterial color="#FFC72C" />
+        <meshBasicMaterial color={COLORS.primary} />
       </mesh>
 
       {/* Minus Button */}

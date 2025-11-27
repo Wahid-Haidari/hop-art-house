@@ -1,10 +1,11 @@
 "use client";
 
 import { Text, useTexture } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useThree, useFrame } from "@react-three/fiber";
 import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { SIZES } from "../sizes";
+import { COLORS } from "../colors";
 
 interface SizeDropdownProps {
   position: [number, number, number];
@@ -122,7 +123,7 @@ export default function SizeDropdown({
       {/* Main Size Button */}
       <mesh ref={mainButtonRef}>
         <planeGeometry args={[width, height]} />
-        <meshBasicMaterial color="#FFC72C" />
+        <meshBasicMaterial color={COLORS.primary} />
 
         {/* Size Text */}
         <Text
