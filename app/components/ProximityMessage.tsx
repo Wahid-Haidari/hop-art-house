@@ -28,7 +28,7 @@ export default function ProximityMessage({
   // Only show message if player is close enough
   const isNear = distance < triggerDistance;
 
-  console.log("Distance to art:", distance, "Is near:", isNear); // Debug log
+  // console.log("Distance to art:", distance, "Is near:", isNear); // Debug log
 
   if (!isNear) return null;
 

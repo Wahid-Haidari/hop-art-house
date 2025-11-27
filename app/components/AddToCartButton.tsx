@@ -1,7 +1,7 @@
 "use client";
 
 import { Text, useTexture } from "@react-three/drei";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 
 interface AddToCartButtonProps {
   position: [number, number, number];
@@ -20,6 +20,7 @@ export default function AddToCartButton({
 }: AddToCartButtonProps) {
   const addTextRef = useRef<any>(null);
   const [addTextWidth, setAddTextWidth] = useState(0);
+  const clickProcessedRef = useRef(false);
 
   const cartTex = useTexture("/Cart.svg");
 
@@ -34,35 +35,44 @@ export default function AddToCartButton({
   const iconX = -groupWidth / 2 + iconW / 2;
   const textX = groupWidth / 2 - textW / 2;
 
+  const handleClick = useCallback((e: any) => {
+    e.stopPropagation();
+    console.log("AddToCartButton clicked");
+    
+    if (onAddToCart) {
+      onAddToCart();
+    }
+  }, [onAddToCart]);
+
   return (
-    <group position={position} rotation={rotation}>
+    <group position={position} rotation={rotation} onClick={handleClick}>
       {/* Background Box */}
-      <mesh onClick={onAddToCart}>
+      <mesh>
         <planeGeometry args={[width, height]} />
         <meshBasicMaterial color="#FFC72C" />
-
-        {/* Cart Icon */}
-        <mesh position={[iconX, 0, 0.01]}>
-          <planeGeometry args={[ICON_SIZE, ICON_SIZE]} />
-          <meshBasicMaterial map={cartTex} transparent />
-        </mesh>
-
-        {/* Add to Cart Text */}
-        <Text
-          ref={addTextRef}
-          onSync={(text) => {
-            const bbox = text.geometry.boundingBox;
-            const width = bbox.max.x - bbox.min.x;
-            setAddTextWidth(width);
-          }}
-          position={[textX, 0, 0.01]}
-          fontSize={FONT_SIZE}
-          color="black"
-          anchorY="middle"
-        >
-          Add to Cart
-        </Text>
       </mesh>
+
+      {/* Cart Icon */}
+      <mesh position={[iconX, 0, 0.01]}>
+        <planeGeometry args={[ICON_SIZE, ICON_SIZE]} />
+        <meshBasicMaterial map={cartTex} transparent />
+      </mesh>
+
+      {/* Add to Cart Text */}
+      <Text
+        ref={addTextRef}
+        onSync={(text) => {
+          const bbox = text.geometry.boundingBox;
+          const width = bbox.max.x - bbox.min.x;
+          setAddTextWidth(width);
+        }}
+        position={[textX, 0, 0.01]}
+        fontSize={FONT_SIZE}
+        color="black"
+        anchorY="middle"
+      >
+        Add to Cart
+      </Text>
     </group>
   );
 }

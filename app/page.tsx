@@ -16,6 +16,8 @@ import Tree from "./components/Tree";
 import { artworks } from "./artworks";
 import LandingPage from "./components/LandingPage";
 import ClickToLook from "./components/ClickToLook";
+import { CartProvider } from "./components/CartContext";
+import GalleryHeader from "./components/GalleryHeader";
 import { useRef, useEffect } from "react";
 
 export default function Home() {
@@ -37,7 +39,8 @@ export default function Home() {
   };
 
   return (
-    <PlayerProvider>
+    <CartProvider>
+      <PlayerProvider>
       {showLanding && (
         <>
           <LandingPage onEnter={() => setShowLanding(false)} />
@@ -87,6 +90,9 @@ export default function Home() {
                   />
 
                   <PurchasePanel 
+                    artworkId={artwork.id}
+                    artworkTitle={artwork.title}
+                    artworkImage={artwork.art}
                     artPosition={artwork.position}
                     artRotation={artwork.rotation}
                   />
@@ -103,7 +109,9 @@ export default function Home() {
           onClose={() => setOverlayImage(null)}
         />
         {!showLanding && <ClickToLook onLock={handleLock} />}
+        {!showLanding && <GalleryHeader />}
       </main>
     </PlayerProvider>
+    </CartProvider>
   );
 }
