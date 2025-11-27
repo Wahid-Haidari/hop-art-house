@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, createContext, useContext } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { usePlayerPosition } from "./PlayerContext";
@@ -8,7 +8,18 @@ import { usePlayerPosition } from "./PlayerContext";
 
 type MovementKeys = "w" | "a" | "s" | "d" | " " | "Shift";
 
-function useKeyboard() {
+// Create a context to expose keyboard state
+const KeyboardContext = createContext<{ keys: React.MutableRefObject<Record<MovementKeys, boolean>> } | null>(null);
+
+export function useKeyboardState() {
+  const context = useContext(KeyboardContext);
+  if (!context) {
+    throw new Error("useKeyboardState must be used within a KeyboardProvider");
+  }
+  return context;
+}
+
+export function KeyboardProvider({ children }: { children: React.ReactNode }) {
   const keys = useRef<Record<MovementKeys, boolean>>({
     w: false,
     a: false,
@@ -40,7 +51,19 @@ function useKeyboard() {
     };
   }, []);
 
-  return keys;
+  return (
+    <KeyboardContext.Provider value={{ keys }}>
+      {children}
+    </KeyboardContext.Provider>
+  );
+}
+
+function useKeyboard() {
+  const context = useContext(KeyboardContext);
+  if (!context) {
+    throw new Error("useKeyboard must be used within a KeyboardProvider");
+  }
+  return context.keys;
 }
 
 // Player _______________________________________________________________________________
