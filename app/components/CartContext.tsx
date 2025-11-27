@@ -26,7 +26,6 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const pendingAddRef = useRef<{ item: CartItem; id: string } | null>(null);
   const processedIdsRef = useRef<Set<string>>(new Set());
 
   // Load cart from localStorage on mount

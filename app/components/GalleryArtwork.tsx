@@ -1,6 +1,9 @@
 "use client";
 
 import { useTexture } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
+import * as THREE from "three";
 
 interface GalleryArtworkProps {
   art: string;
@@ -19,6 +22,10 @@ export default function GalleryArtwork({
   rotation = [0, 0, 0],
   onOpenOverlay
 }: GalleryArtworkProps) {
+  const { camera, gl } = useThree();
+  const artMeshRef = useRef<THREE.Mesh>(null);
+  const artistCardMeshRef = useRef<THREE.Mesh>(null);
+  const infoCardMeshRef = useRef<THREE.Mesh>(null);
 
     // Artwork size
     const ART_WIDTH = 1.5;
@@ -70,22 +77,67 @@ export default function GalleryArtwork({
         position[2]
       ];
 
+  // Setup raycasting for proper cursor-based click detection
+  useEffect(() => {
+    const handleCanvasClick = (event: MouseEvent) => {
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      // Get canvas position
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      // Normalize mouse coordinates to [-1, 1]
+      mouse.x = (x / rect.width) * 2 - 1;
+      mouse.y = -(y / rect.height) * 2 + 1;
+
+      // Update raycaster with camera and mouse position
+      raycaster.setFromCamera(mouse, camera);
+
+      // Check intersections with all three meshes
+      const meshes = [
+        { ref: artMeshRef, image: art },
+        { ref: artistCardMeshRef, image: artistCard },
+        { ref: infoCardMeshRef, image: infoCard }
+      ];
+
+      const objectsToCheck = meshes
+        .filter(m => m.ref.current !== null)
+        .map(m => m.ref.current as THREE.Mesh);
+
+      const intersects = raycaster.intersectObjects(objectsToCheck);
+
+      if (intersects.length > 0) {
+        const clickedObject = intersects[0].object;
+        const clickedItem = meshes.find(m => m.ref.current === clickedObject);
+        if (clickedItem) {
+          onOpenOverlay(clickedItem.image);
+        }
+      }
+    };
+
+    // Attach click listener to canvas element
+    gl.domElement.addEventListener("click", handleCanvasClick);
+    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
+  }, [camera, gl, art, artistCard, infoCard, onOpenOverlay]);
+
   return (
     <>
       {/* ARTWORK */}
-      <mesh position={position} rotation={rotation} onClick={() => onOpenOverlay(art)}>
+      <mesh ref={artMeshRef} position={position} rotation={rotation}>
         <planeGeometry args={[ART_WIDTH, ART_HEIGHT]} />
         <meshBasicMaterial map={artTex} />
       </mesh>
 
       {/* ARTIST CARD */}
-      <mesh position={artistCardPos} rotation={rotation} onClick={() => onOpenOverlay(artistCard)}>
+      <mesh ref={artistCardMeshRef} position={artistCardPos} rotation={rotation}>
         <planeGeometry args={[CARD_WIDTH, CARD_HEIGHT]} />
         <meshBasicMaterial map={artistTex} transparent />
       </mesh>
 
       {/* ART INFO CARD */}
-      <mesh position={infoCardPos} rotation={rotation} onClick={() => onOpenOverlay(infoCard)}>
+      <mesh ref={infoCardMeshRef} position={infoCardPos} rotation={rotation}>
         <planeGeometry args={[CARD_WIDTH, CARD_HEIGHT]} />
         <meshBasicMaterial map={infoTex} transparent />
       </mesh>

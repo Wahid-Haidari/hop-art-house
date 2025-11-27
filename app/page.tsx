@@ -6,7 +6,7 @@ import Crosshair from "./components/Crosshair";
 import Player, { KeyboardProvider } from "./components/Player";
 import GalleryArtwork from "./components/GalleryArtwork";
 import PurchasePanel from "./components/PurchasePanel";
-import { useState, useRef, useEffect, useCallback } from "react"; 
+import { useState, useRef, useEffect } from "react"; 
 import FullscreenOverlay from "./components/FullscreenOverlay";
 import Wall from "./components/Wall";
 import Floor from "./components/Floor";
@@ -65,7 +65,10 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       const anyKeyPressed = Object.values(keysRef.current).some(v => v);
-      if (!anyKeyPressed && document.pointerLockElement && controlsRef.current) {
+      const isLocked = !!document.pointerLockElement;
+      
+      if (!anyKeyPressed && isLocked && controlsRef.current) {
+        console.log("Releasing pointer lock - no keys pressed");
         document.exitPointerLock();
       }
     }, 100); // Check every 100ms
@@ -80,12 +83,6 @@ export default function Home() {
     }
   }, [showLanding]);
 
-  const handleLock = () => {
-    if (controlsRef.current) {
-      controlsRef.current.lock();
-    }
-  };
-
   return (
     <CartProvider>
       <PlayerProvider>
@@ -97,7 +94,17 @@ export default function Home() {
           <div className="h-[200vh]" />
         </>
       )}
-      <main className="w-full h-screen">
+      <main className="w-full h-screen" onClick={() => {
+        // Re-lock pointer immediately after click if movement keys are held
+        const anyKeyPressed = Object.values(keysRef.current).some(v => v);
+        if (anyKeyPressed && !document.pointerLockElement && controlsRef.current) {
+          setTimeout(() => {
+            if (controlsRef.current) {
+              controlsRef.current.lock();
+            }
+          }, 10);
+        }
+      }}>
         <div
           id="canvas-wrapper"
           className="w-full h-full"
@@ -106,6 +113,11 @@ export default function Home() {
               camera={{ position: [3, 2.6, 5], fov: 30 }}
               onCreated={({ camera }) => {
                 camera.lookAt(0, 2, -10);
+              }}
+              style={{ pointerEvents: 'auto', cursor: 'auto' }}
+              onClick={(event) => {
+                // Ensure clicks are processed with correct mouse coordinates
+                event.stopPropagation?.();
               }}
             >
               {/* Light */}
