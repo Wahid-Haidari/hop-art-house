@@ -12,9 +12,9 @@ export const artworks: ArtworkData[] = [
   {
     id: "artwork-1",
     title: "Artwork 1",
-    art: "/art1.jpeg",
-    artistCard: "/artist1.jpeg",
-    infoCard: "/art1info.jpeg",
+    art: "/Tigress.jpg",
+    artistCard: "/Artist Bio.jpg",
+    infoCard: "/Art Label.jpg",
     position: [0, 2.5, -9.95],
     rotation: [0, 0, 0],
   },
