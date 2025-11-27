@@ -1,7 +1,9 @@
 "use client";
 
 import { Text, useTexture } from "@react-three/drei";
-import { useRef, useState, useCallback } from "react";
+import { useThree } from "@react-three/fiber";
+import { useRef, useState, useEffect } from "react";
+import * as THREE from "three";
 
 interface AddToCartButtonProps {
   position: [number, number, number];
@@ -18,8 +20,10 @@ export default function AddToCartButton({
   height = 0.15,
   onAddToCart,
 }: AddToCartButtonProps) {
+  const { camera, gl } = useThree();
   const addTextRef = useRef<any>(null);
   const [addTextWidth, setAddTextWidth] = useState(0);
+  const buttonRef = useRef<THREE.Mesh>(null);
 
   const cartTex = useTexture("/Cart.svg");
 
@@ -34,19 +38,40 @@ export default function AddToCartButton({
   const iconX = -groupWidth / 2 + iconW / 2;
   const textX = groupWidth / 2 - textW / 2;
 
-  const handleClick = useCallback((e: any) => {
-    e.stopPropagation();
-    console.log("AddToCartButton clicked");
-    
-    if (onAddToCart) {
-      onAddToCart();
-    }
-  }, [onAddToCart]);
+  // Setup raycasting for add to cart button
+  useEffect(() => {
+    const handleCanvasClick = (event: MouseEvent) => {
+      if (!buttonRef.current) return;
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      mouse.x = (x / rect.width) * 2 - 1;
+      mouse.y = -(y / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(buttonRef.current);
+
+      if (intersects.length > 0) {
+        console.log("AddToCartButton clicked via raycasting");
+        if (onAddToCart) {
+          onAddToCart();
+        }
+      }
+    };
+
+    gl.domElement.addEventListener("click", handleCanvasClick);
+    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
+  }, [camera, gl, onAddToCart]);
 
   return (
-    <group position={position} rotation={rotation} onClick={handleClick}>
+    <group position={position} rotation={rotation}>
       {/* Background Box */}
-      <mesh>
+      <mesh ref={buttonRef}>
         <planeGeometry args={[width, height]} />
         <meshBasicMaterial color="#FFC72C" />
       </mesh>

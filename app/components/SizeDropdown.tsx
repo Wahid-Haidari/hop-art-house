@@ -1,8 +1,9 @@
 "use client";
 
 import { Text, useTexture } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { useRef, useState } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useRef, useState, useEffect } from "react";
+import * as THREE from "three";
 import { SIZES } from "../sizes";
 
 interface SizeDropdownProps {
@@ -20,12 +21,15 @@ export default function SizeDropdown({
   height = 0.15,
   onSizeChange,
 }: SizeDropdownProps) {
+  const { camera, gl } = useThree();
   const [sizeIndex, setSizeIndex] = useState(0);
   const [sizeOpen, setSizeOpen] = useState(false);
   const [slide, setSlide] = useState(0);
 
   const sizeTextRef = useRef<any>(null);
   const [sizeTextWidth, setSizeTextWidth] = useState(0);
+  const mainButtonRef = useRef<THREE.Mesh>(null);
+  const sizeItemsRef = useRef<(THREE.Mesh | null)[]>([]);
 
   const dropdownTex = useTexture("/dropdown.svg");
 
@@ -56,10 +60,67 @@ export default function SizeDropdown({
     }
   };
 
+  // Setup raycasting for main button
+  useEffect(() => {
+    const handleCanvasClick = (event: MouseEvent) => {
+      if (!mainButtonRef.current) return;
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      mouse.x = (x / rect.width) * 2 - 1;
+      mouse.y = -(y / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(mainButtonRef.current);
+
+      if (intersects.length > 0) {
+        setSizeOpen((o) => !o);
+      }
+    };
+
+    gl.domElement.addEventListener("click", handleCanvasClick);
+    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
+  }, [camera, gl]);
+
+  // Setup raycasting for size items
+  useEffect(() => {
+    const handleCanvasClick = (event: MouseEvent) => {
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      mouse.x = (x / rect.width) * 2 - 1;
+      mouse.y = -(y / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+
+      // Check all size items
+      sizeItemsRef.current.forEach((item, index) => {
+        if (item) {
+          const intersects = raycaster.intersectObject(item);
+          if (intersects.length > 0) {
+            handleSizeSelect(index);
+          }
+        }
+      });
+    };
+
+    gl.domElement.addEventListener("click", handleCanvasClick);
+    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
+  }, [camera, gl]);
+
   return (
     <group position={position} rotation={rotation}>
       {/* Main Size Button */}
-      <mesh onClick={() => setSizeOpen((o) => !o)}>
+      <mesh ref={mainButtonRef}>
         <planeGeometry args={[width, height]} />
         <meshBasicMaterial color="#FFC72C" />
 
@@ -97,6 +158,9 @@ export default function SizeDropdown({
         {SIZES.map((size, i) => (
           <Text
             key={i}
+            ref={(el) => {
+              if (el) sizeItemsRef.current[i] = el as unknown as THREE.Mesh;
+            }}
             position={[
               0,
               CLOSED_Y_TOP +
@@ -108,7 +172,6 @@ export default function SizeDropdown({
             color="black"
             anchorX="center"
             anchorY="middle"
-            onClick={() => handleSizeSelect(i)}
           >
             {`${size.label}: ${size.dimensions}`}
           </Text>

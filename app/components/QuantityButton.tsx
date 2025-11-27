@@ -1,7 +1,9 @@
 "use client";
 
 import { Text, useTexture } from "@react-three/drei";
-import { useRef, useState } from "react";
+import { useThree } from "@react-three/fiber";
+import { useRef, useState, useEffect } from "react";
+import * as THREE from "three";
 
 interface QuantityButtonProps {
   position: [number, number, number];
@@ -18,9 +20,12 @@ export default function QuantityButton({
   height = 0.15,
   onQuantityChange,
 }: QuantityButtonProps) {
+  const { camera, gl } = useThree();
   const [quantity, setQuantity] = useState(1);
   const quantityTextRef = useRef<any>(null);
   const [quantityTextWidth, setQuantityTextWidth] = useState(0);
+  const minusButtonRef = useRef<THREE.Mesh>(null);
+  const plusButtonRef = useRef<THREE.Mesh>(null);
 
   const plusTex = useTexture("/Plus.svg");
   const minusTex = useTexture("/Negative.svg");
@@ -44,6 +49,60 @@ export default function QuantityButton({
     }
   };
 
+  // Setup raycasting for minus button
+  useEffect(() => {
+    const handleCanvasClick = (event: MouseEvent) => {
+      if (!minusButtonRef.current) return;
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      mouse.x = (x / rect.width) * 2 - 1;
+      mouse.y = -(y / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(minusButtonRef.current);
+
+      if (intersects.length > 0) {
+        handleQuantityChange(Math.max(1, quantity - 1));
+      }
+    };
+
+    gl.domElement.addEventListener("click", handleCanvasClick);
+    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
+  }, [camera, gl, quantity]);
+
+  // Setup raycasting for plus button
+  useEffect(() => {
+    const handleCanvasClick = (event: MouseEvent) => {
+      if (!plusButtonRef.current) return;
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      mouse.x = (x / rect.width) * 2 - 1;
+      mouse.y = -(y / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(plusButtonRef.current);
+
+      if (intersects.length > 0) {
+        handleQuantityChange(quantity + 1);
+      }
+    };
+
+    gl.domElement.addEventListener("click", handleCanvasClick);
+    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
+  }, [camera, gl, quantity]);
+
   return (
     <group position={position} rotation={rotation}>
       {/* Background Box */}
@@ -54,8 +113,8 @@ export default function QuantityButton({
 
       {/* Minus Button */}
       <mesh
+        ref={minusButtonRef}
         position={[minusX, 0, 0.01]}
-        onClick={() => handleQuantityChange(Math.max(1, quantity - 1))}
       >
         <planeGeometry args={[0.15, 0.15]} />
         <meshBasicMaterial transparent opacity={0} />
@@ -85,8 +144,8 @@ export default function QuantityButton({
 
       {/* Plus Button */}
       <mesh
+        ref={plusButtonRef}
         position={[plusX, 0, 0.01]}
-        onClick={() => handleQuantityChange(quantity + 1)}
       >
         <planeGeometry args={[0.15, 0.15]} />
         <meshBasicMaterial transparent opacity={0} />
