@@ -2,8 +2,6 @@
 
 import { Canvas } from "@react-three/fiber";
 import { PointerLockControls } from "@react-three/drei";
-import Crosshair from "./components/Crosshair";
-import Player, { KeyboardProvider } from "./components/Player";
 import GalleryArtwork from "./components/GalleryArtwork";
 import PurchasePanel from "./components/PurchasePanel";
 import { useState, useRef, useEffect } from "react"; 
@@ -19,6 +17,8 @@ import LandingPage from "./components/LandingPage";
 import { CartProvider } from "./components/CartContext";
 import GalleryHeader from "./components/GalleryHeader";
 import AssistancePanel from "./components/AssistancePanel";
+import Player from "./components/Player";  // Changed from Player
+import MobileControls from "./components/MobileControls";  // New import
 
 export default function Home() {
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
@@ -87,7 +87,6 @@ export default function Home() {
   return (
     <CartProvider>
       <PlayerProvider>
-      <KeyboardProvider>
       {showLanding && (
         <>
           <LandingPage onEnter={() => setShowLanding(false)} />
@@ -165,6 +164,7 @@ export default function Home() {
               <Player />
               <PointerLockControls ref={controlsRef} enabled={!overlayImage} />
             </Canvas>
+            <MobileControls/>
           </div>
         <FullscreenOverlay
           image={overlayImage}
@@ -173,7 +173,7 @@ export default function Home() {
         {!showLanding && <GalleryHeader />}
         {!showLanding && <AssistancePanel visible={!showLanding} />}
       </main>
-      </KeyboardProvider>
+      
     </PlayerProvider>
     </CartProvider>
   );

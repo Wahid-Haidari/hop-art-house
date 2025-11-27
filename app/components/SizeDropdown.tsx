@@ -138,7 +138,7 @@ export default function SizeDropdown({
           color="black"
           anchorY="middle"
         >
-          {`${SIZES[sizeIndex].label}: ${SIZES[sizeIndex].dimensions}`}
+          {SIZES[sizeIndex].dimensions}
         </Text>
 
         {/* Dropdown Icon */}

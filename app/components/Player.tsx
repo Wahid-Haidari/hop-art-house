@@ -1,26 +1,24 @@
 "use client";
-import { useEffect, useRef, createContext, useContext } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { usePlayerPosition } from "./PlayerContext";
 
-// WASD movements __________________________________________________ 
-
-type MovementKeys = "w" | "a" | "s" | "d" | " " | "Shift";
-
-// Create a context to expose keyboard state
-const KeyboardContext = createContext<{ keys: React.MutableRefObject<Record<MovementKeys, boolean>> } | null>(null);
-
-export function useKeyboardState() {
-  const context = useContext(KeyboardContext);
-  if (!context) {
-    throw new Error("useKeyboardState must be used within a KeyboardProvider");
-  }
-  return context;
+// Mobile detection
+function isMobileDevice() {
+  if (typeof window === "undefined") return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  ) || window.innerWidth < 768;
 }
 
-export function KeyboardProvider({ children }: { children: React.ReactNode }) {
-  const keys = useRef<Record<MovementKeys, boolean>>({
+export default function MobilePlayer() {
+  const { camera } = useThree();
+  const { setPosition } = usePlayerPosition();
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Desktop keyboard state
+  const keysRef = useRef({
     w: false,
     a: false,
     s: false,
@@ -29,16 +27,53 @@ export function KeyboardProvider({ children }: { children: React.ReactNode }) {
     Shift: false,
   });
 
+  // Mobile movement state
+  const mobileMovementRef = useRef({ forward: 0, right: 0, up: 0 });
+  const mobileLookRef = useRef({ yaw: 0, pitch: 0 });
+  const touchLookRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Check if mobile on mount
   useEffect(() => {
+    setIsMobile(isMobileDevice());
+    
+    const handleResize = () => {
+      setIsMobile(isMobileDevice());
+    };
+    
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+
+
+
+
+
+
+  // Desktop keyboard controls
+  // Desktop keyboard controls
+  useEffect(() => {
+    if (isMobile) return;
+
     const downHandler = (e: KeyboardEvent) => {
-      if ((e.key as MovementKeys) in keys.current) {
-        keys.current[e.key as MovementKeys] = true;
+      const key = e.key.toLowerCase();
+      if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
+        keysRef.current[key] = true;
+      } else if (e.key === " ") {
+        keysRef.current[" "] = true;
+      } else if (e.key === "Shift") {
+        keysRef.current.Shift = true;
       }
     };
 
     const upHandler = (e: KeyboardEvent) => {
-      if ((e.key as MovementKeys) in keys.current) {
-        keys.current[e.key as MovementKeys] = false;
+      const key = e.key.toLowerCase();
+      if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
+        keysRef.current[key] = false;
+      } else if (e.key === " ") {
+        keysRef.current[" "] = false;
+      } else if (e.key === "Shift") {
+        keysRef.current.Shift = false;
       }
     };
 
@@ -49,84 +84,168 @@ export function KeyboardProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener("keydown", downHandler);
       window.removeEventListener("keyup", upHandler);
     };
-  }, []);
+  }, [isMobile]);
 
-  return (
-    <KeyboardContext.Provider value={{ keys }}>
-      {children}
-    </KeyboardContext.Provider>
-  );
-}
 
-function useKeyboard() {
-  const context = useContext(KeyboardContext);
-  if (!context) {
-    throw new Error("useKeyboard must be used within a KeyboardProvider");
-  }
-  return context.keys;
-}
 
-// Player _______________________________________________________________________________
-export default function Player() {
-  const { camera } = useThree();
-  const keys = useKeyboard();
-  const { setPosition } = usePlayerPosition();
 
+
+
+
+
+
+
+
+
+
+
+
+
+  // Mobile touch controls
+  useEffect(() => {
+    if (!isMobile) return;
+
+    // Joystick movement handler
+    const handleJoystickMove = (e: CustomEvent) => {
+      mobileMovementRef.current = {
+        forward: e.detail.forward,
+        right: e.detail.right,
+        up: 0,
+      };
+    };
+
+    // Look control handler
+    const handleLookMove = (e: CustomEvent) => {
+      mobileLookRef.current.yaw += e.detail.x;
+      mobileLookRef.current.pitch += e.detail.y;
+      mobileLookRef.current.pitch = Math.max(
+        -Math.PI / 2,
+        Math.min(Math.PI / 2, mobileLookRef.current.pitch)
+      );
+    };
+
+    // Up/Down button handlers
+    const handleUpButton = () => {
+      mobileMovementRef.current.up = 1;
+    };
+
+    const handleDownButton = () => {
+      mobileMovementRef.current.up = -1;
+    };
+
+    const handleButtonRelease = () => {
+      mobileMovementRef.current.up = 0;
+    };
+
+    window.addEventListener("joystick-move", handleJoystickMove as EventListener);
+    window.addEventListener("look-move", handleLookMove as EventListener);
+    window.addEventListener("up-button", handleUpButton);
+    window.addEventListener("down-button", handleDownButton);
+    window.addEventListener("button-release", handleButtonRelease);
+
+    return () => {
+      window.removeEventListener("joystick-move", handleJoystickMove as EventListener);
+      window.removeEventListener("look-move", handleLookMove as EventListener);
+      window.removeEventListener("up-button", handleUpButton);
+      window.removeEventListener("down-button", handleDownButton);
+      window.removeEventListener("button-release", handleButtonRelease);
+    };
+  }, [isMobile]);
+
+  // Movement and camera update
   useFrame(() => {
     const speed = 0.05;
 
-    // 1. Get the direction the camera is facing
-    const forward = new THREE.Vector3();
-    camera.getWorldDirection(forward);
-    forward.y = 0; 
-    forward.normalize();
+    if (isMobile) {
+      // Mobile controls
+      const { forward, right, up } = mobileMovementRef.current;
+      const { yaw, pitch } = mobileLookRef.current;
 
-    // 2. Right direction (perpendicular)
-    const right = new THREE.Vector3();
-    right.crossVectors(forward, camera.up).normalize();
+      // Update camera rotation
+      camera.rotation.order = "YXZ";
+      camera.rotation.y = yaw;
+      camera.rotation.x = pitch;
 
-    // 3. Proposed movement
-    let nextX = camera.position.x;
-    let nextZ = camera.position.z;
+      // Get forward and right vectors
+      const forwardDir = new THREE.Vector3();
+      camera.getWorldDirection(forwardDir);
+      forwardDir.y = 0;
+      forwardDir.normalize();
 
-    if (keys.current.w) {
-      nextX += forward.x * speed;
-      nextZ += forward.z * speed;
-    }
-    if (keys.current.s) {
-      nextX -= forward.x * speed;
-      nextZ -= forward.z * speed;
-    }
-    if (keys.current.a) {
-      nextX -= right.x * speed;
-      nextZ -= right.z * speed;
-    }
-    if (keys.current.d) {
-      nextX += right.x * speed;
-      nextZ += right.z * speed;
-    }
+      const rightDir = new THREE.Vector3();
+      rightDir.crossVectors(forwardDir, camera.up).normalize();
 
-    // 4. Collisions for horizontal boundaries
-    const limit = 9.5;
-    if (Math.abs(nextX) < limit) camera.position.x = nextX;
-    if (Math.abs(nextZ) < limit) camera.position.z = nextZ;
+      // Apply movement
+      let nextX = camera.position.x;
+      let nextY = camera.position.y;
+      let nextZ = camera.position.z;
 
-    // Vertical movement
-    let nextY = camera.position.y;
+      nextX += forwardDir.x * forward * speed;
+      nextZ += forwardDir.z * forward * speed;
+      nextX += rightDir.x * right * speed;
+      nextZ += rightDir.z * right * speed;
+      nextY += up * speed;
 
-    if (keys.current[" "]) {
-      nextY += speed;
-    }
-    if (keys.current.Shift) {
-      nextY -= speed;
-    }
+      // Collision detection
+      const limit = 9.5;
+      const minY = 1;
+      const maxY = 100;
 
-    // Collisions for vertical boundaries
-    const minY = 1;
-    const maxY = 100;
+      if (Math.abs(nextX) < limit) camera.position.x = nextX;
+      if (Math.abs(nextZ) < limit) camera.position.z = nextZ;
+      if (nextY > minY && nextY < maxY) camera.position.y = nextY;
+    } else {
+      // Desktop keyboard controls
+      const forward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      forward.y = 0;
+      forward.normalize();
 
-    if (nextY > minY && nextY < maxY) {
-      camera.position.y = nextY;
+      const right = new THREE.Vector3();
+      right.crossVectors(forward, camera.up).normalize();
+
+      let nextX = camera.position.x;
+      let nextZ = camera.position.z;
+
+      if (keysRef.current.w) {
+        nextX += forward.x * speed;
+        nextZ += forward.z * speed;
+      }
+      if (keysRef.current.s) {
+        nextX -= forward.x * speed;
+        nextZ -= forward.z * speed;
+      }
+      if (keysRef.current.a) {
+        nextX -= right.x * speed;
+        nextZ -= right.z * speed;
+      }
+      if (keysRef.current.d) {
+        nextX += right.x * speed;
+        nextZ += right.z * speed;
+      }
+
+      // Collision for horizontal
+      const limit = 9.5;
+      if (Math.abs(nextX) < limit) camera.position.x = nextX;
+      if (Math.abs(nextZ) < limit) camera.position.z = nextZ;
+
+      // Vertical movement
+      let nextY = camera.position.y;
+
+      if (keysRef.current[" "]) {
+        nextY += speed;
+      }
+      if (keysRef.current.Shift) {
+        nextY -= speed;
+      }
+
+      // Collision for vertical
+      const minY = 1;
+      const maxY = 100;
+
+      if (nextY > minY && nextY < maxY) {
+        camera.position.y = nextY;
+      }
     }
 
     // Update position in context
