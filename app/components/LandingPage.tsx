@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useCart } from "./CartContext";
 
 interface LandingPageProps {
   onEnter: () => void;
@@ -8,6 +9,7 @@ interface LandingPageProps {
 
 export default function LandingPage({ onEnter }: LandingPageProps) {
   const [scrollY, setScrollY] = useState(0);
+  const { getTotalItems } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,23 +33,30 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       className="fixed top-0 left-0 w-screen h-screen bg-[#FFC72C] flex flex-col justify-center items-center px-[10%] z-[1000]"
       style={{ opacity, pointerEvents }}
     >
-      {/* Header */}
-      <div className="absolute top-5 left-0 right-0 flex justify-between items-center px-[5%]">
-        <img src="/Frog Logo.svg" alt="Hop Art House" className="h-20" />
-        <div className="flex gap-8 text-base text-black">
-          <a href="#about" className="text-black no-underline">About</a>
-          <a href="#hi" className="text-black no-underline">Hi@HopArt.House</a>
-          <a href="#submit" className="text-black no-underline">Submit Your Work</a>
+      {/* Logo - Bottom Left */}
+      <div className="fixed bottom-8 left-8 z-50 pointer-events-auto">
+        <img
+          src="/Frog Logo.svg"
+          className="w-12 h-12"
+          alt="Hop Art House"
+        />
+      </div>
 
-            <div className="flex items-center gap-1 text-black">
-                <img
-                    src="/Cart.svg"   // ← put your cart SVG in /public/cart.svg
-                    className="w-5 h-5"
-                    alt="cart"
-                />
-                <span>0</span>
-            </div>
-
+      {/* Header - Bottom Right */}
+      <div className="fixed bottom-8 right-8 z-50 pointer-events-auto">
+        <div className="flex gap-6 items-center px-6 py-4 rounded-full">
+          <a href="#about" className="text-black no-underline hover:opacity-70 cursor-pointer text-sm font-medium">About</a>
+          <a href="#hi" className="text-black no-underline hover:opacity-70 cursor-pointer text-sm font-medium">Hi@HopArt.House</a>
+          <a href="#featured" className="text-black no-underline hover:opacity-70 cursor-pointer text-sm font-medium">Get Featured</a>
+          
+          <div className="flex items-center gap-2 text-black cursor-pointer hover:opacity-70 pl-4 border-l border-black/20">
+            <img
+              src="/Cart.svg"
+              className="w-6 h-6"
+              alt="cart"
+            />
+            <span className="font-semibold">{getTotalItems()}</span>
+          </div>
         </div>
       </div>
 

@@ -8,6 +8,7 @@ interface QuantityButtonProps {
   rotation?: [number, number, number];
   width?: number;
   height?: number;
+  onQuantityChange?: (quantity: number) => void;
 }
 
 export default function QuantityButton({
@@ -15,6 +16,7 @@ export default function QuantityButton({
   rotation = [0, 0, 0],
   width = 0.3,
   height = 0.15,
+  onQuantityChange,
 }: QuantityButtonProps) {
   const [quantity, setQuantity] = useState(1);
   const quantityTextRef = useRef<any>(null);
@@ -35,6 +37,13 @@ export default function QuantityButton({
   const textX = 0;
   const plusX = groupWidth / 2 - iconW / 2;
 
+  const handleQuantityChange = (newQuantity: number) => {
+    setQuantity(newQuantity);
+    if (onQuantityChange) {
+      onQuantityChange(newQuantity);
+    }
+  };
+
   return (
     <group position={position} rotation={rotation}>
       {/* Background Box */}
@@ -46,7 +55,7 @@ export default function QuantityButton({
       {/* Minus Button */}
       <mesh
         position={[minusX, 0, 0.01]}
-        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+        onClick={() => handleQuantityChange(Math.max(1, quantity - 1))}
       >
         <planeGeometry args={[0.15, 0.15]} />
         <meshBasicMaterial transparent opacity={0} />
@@ -77,7 +86,7 @@ export default function QuantityButton({
       {/* Plus Button */}
       <mesh
         position={[plusX, 0, 0.01]}
-        onClick={() => setQuantity((q) => q + 1)}
+        onClick={() => handleQuantityChange(quantity + 1)}
       >
         <planeGeometry args={[0.15, 0.15]} />
         <meshBasicMaterial transparent opacity={0} />

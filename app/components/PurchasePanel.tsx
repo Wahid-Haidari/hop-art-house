@@ -1,15 +1,29 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import QuantityButton from "./QuantityButton";
 import SizeDropdown from "./SizeDropdown";
 import AddToCartButton from "./AddToCartButton";
+import { useCart } from "./CartContext";
 
 interface PurchasePanelProps {
+    artworkId: string;
+    artworkTitle: string;
+    artworkImage: string;
     artPosition: [number, number, number];
     artRotation: [number, number, number];
 }
 
-export default function PurchasePanel({artPosition, artRotation}: PurchasePanelProps) {
+export default function PurchasePanel({
+    artworkId,
+    artworkTitle,
+    artworkImage,
+    artPosition,
+    artRotation
+}: PurchasePanelProps) {
+    const { addItem } = useCart();
+    const [selectedSize, setSelectedSize] = useState(0);
+    const [selectedQuantity, setSelectedQuantity] = useState(1);
 
     const [artX, artY, artZ] = artPosition;
     const ART_HEIGHT = 2.5;
@@ -31,9 +45,6 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
     // Determine which wall the artwork is on
     const rotY = artRotation[1];
     const horizontalOffset = 1.6;
-
-    // Determine if this is a side wall (left/right)
-    const isSideWall = Math.abs(rotY) > 0.1 && Math.abs(rotY) < Math.PI - 0.1;
 
     let quantityX, quantityZ, sizeX, sizeZ, addToCartX, addToCartZ;
 
@@ -72,10 +83,17 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
         addToCartZ = baseZ;
     }
 
-    const handleAddToCart = () => {
-        console.log("Added to cart!");
-        // Add your cart logic here
-    };
+    const handleAddToCart = useCallback(() => {
+        console.log("PurchasePanel.handleAddToCart called");
+        addItem({
+            artworkId,
+            artworkTitle,
+            artworkImage,
+            sizeIndex: selectedSize,
+            quantity: selectedQuantity,
+        });
+        console.log("Added to cart:", artworkTitle, "Size index:", selectedSize, "Qty:", selectedQuantity);
+    }, [artworkId, artworkTitle, artworkImage, selectedSize, selectedQuantity, addItem]);
 
     return (
         <>
@@ -85,6 +103,7 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
                 rotation={artRotation}
                 width={QUANTITY_WIDTH}
                 height={BUTTON_HEIGHT}
+                onQuantityChange={setSelectedQuantity}
             />
 
             {/* Size Dropdown */}
@@ -93,6 +112,7 @@ export default function PurchasePanel({artPosition, artRotation}: PurchasePanelP
                 rotation={artRotation}
                 width={SIZE_WIDTH}
                 height={BUTTON_HEIGHT}
+                onSizeChange={setSelectedSize}
             />
 
             {/* Add to Cart Button */}

@@ -3,13 +3,14 @@
 import { Text, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef, useState } from "react";
+import { SIZES } from "../sizes";
 
 interface SizeDropdownProps {
   position: [number, number, number];
   rotation?: [number, number, number];
   width?: number;
   height?: number;
-  sizes?: string[];
+  onSizeChange?: (sizeIndex: number) => void;
 }
 
 export default function SizeDropdown({
@@ -17,7 +18,7 @@ export default function SizeDropdown({
   rotation = [0, 0, 0],
   width = 0.5,
   height = 0.15,
-  sizes = ["8x10", "12x16", "16x20", "18x24", "24x36"],
+  onSizeChange,
 }: SizeDropdownProps) {
   const [sizeIndex, setSizeIndex] = useState(0);
   const [sizeOpen, setSizeOpen] = useState(false);
@@ -47,6 +48,14 @@ export default function SizeDropdown({
     setSlide((s) => s + (target - s) * 0.15);
   });
 
+  const handleSizeSelect = (index: number) => {
+    setSizeIndex(index);
+    setSizeOpen(false);
+    if (onSizeChange) {
+      onSizeChange(index);
+    }
+  };
+
   return (
     <group position={position} rotation={rotation}>
       {/* Main Size Button */}
@@ -67,7 +76,7 @@ export default function SizeDropdown({
           color="black"
           anchorY="middle"
         >
-          {sizes[sizeIndex]}
+          {`${SIZES[sizeIndex].label}: ${SIZES[sizeIndex].dimensions}`}
         </Text>
 
         {/* Dropdown Icon */}
@@ -85,7 +94,7 @@ export default function SizeDropdown({
         <planeGeometry args={[width, 0.7 * slide]} />
         <meshBasicMaterial color="#FFE999" opacity={0.95} transparent />
 
-        {sizes.map((s, i) => (
+        {SIZES.map((size, i) => (
           <Text
             key={i}
             position={[
@@ -95,16 +104,13 @@ export default function SizeDropdown({
                 -i * ITEM_SPACING * slide,
               0.01,
             ]}
-            fontSize={0.07}
+            fontSize={0.05}
             color="black"
             anchorX="center"
             anchorY="middle"
-            onClick={() => {
-              setSizeIndex(i);
-              setSizeOpen(false);
-            }}
+            onClick={() => handleSizeSelect(i)}
           >
-            {s}
+            {`${size.label}: ${size.dimensions}`}
           </Text>
         ))}
       </mesh>
