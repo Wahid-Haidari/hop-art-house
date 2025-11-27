@@ -20,7 +20,6 @@ export default function AddToCartButton({
 }: AddToCartButtonProps) {
   const addTextRef = useRef<any>(null);
   const [addTextWidth, setAddTextWidth] = useState(0);
-  const clickProcessedRef = useRef(false);
 
   const cartTex = useTexture("/Cart.svg");
 
