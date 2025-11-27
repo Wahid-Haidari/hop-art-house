@@ -3,7 +3,6 @@
 import { useCart } from "./CartContext";
 import { SIZES } from "../sizes";
 import { COLORS } from "../colors";
-import { useState } from "react";
 
 interface CartPageProps {
   onClose: () => void;
@@ -76,29 +75,31 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
               <div className="flex-grow">
                 <h3 className="text-lg font-semibold text-black mb-1">{item.artworkTitle}</h3>
                 <p className="text-sm text-gray-600 mb-2">
-                  Size: {SIZES[item.sizeIndex].label} ({SIZES[item.sizeIndex].dimensions})
+                    Size: {SIZES[item.sizeIndex].dimensions}
                 </p>
                 <p className="text-sm text-gray-600 mb-3">
                   Price: ${SIZES[item.sizeIndex].price} each
                 </p>
 
-                {/* Quantity Controls */}
+                {/* Quantity Controls - Matching 3D button design */}
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-sm text-gray-600">Quantity:</span>
-                  <div className="flex items-center gap-2 bg-gray-100 rounded px-3 py-1">
-                    <button
-                      onClick={() => updateQuantity(item.artworkId, item.sizeIndex, Math.max(1, item.quantity - 1))}
-                      className="text-lg font-bold text-gray-600 hover:text-black cursor-pointer"
-                    >
-                      −
-                    </button>
-                    <span className="w-8 text-center font-semibold text-black">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.artworkId, item.sizeIndex, item.quantity + 1)}
-                      className="text-lg font-bold text-gray-600 hover:text-black cursor-pointer"
-                    >
-                      +
-                    </button>
+                  <div className="flex items-center border-2 border-black bg-white" style={{ width: '120px', height: '40px' }}>
+                    <span className="flex-1 text-center font-semibold text-black text-lg">{item.quantity}</span>
+                    <div className="flex flex-col border-l-2 border-black bg-white" style={{ width: '36px', height: '100%' }}>
+                      <button
+                        onClick={() => updateQuantity(item.artworkId, item.sizeIndex, item.quantity + 1)}
+                        className="flex-1 flex items-center justify-center hover:bg-gray-100 cursor-pointer border-b border-black transition-colors"
+                      >
+                        <span className="text-black text-xs">▲</span>
+                      </button>
+                      <button
+                        onClick={() => updateQuantity(item.artworkId, item.sizeIndex, Math.max(1, item.quantity - 1))}
+                        className="flex-1 flex items-center justify-center hover:bg-gray-100 cursor-pointer transition-colors"
+                      >
+                        <span className="text-black text-xs">▼</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 

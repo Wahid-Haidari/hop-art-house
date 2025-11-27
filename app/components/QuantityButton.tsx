@@ -1,6 +1,6 @@
 "use client";
 
-import { Text, useTexture } from "@react-three/drei";
+import { Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
@@ -28,20 +28,16 @@ export default function QuantityButton({
   const minusButtonRef = useRef<THREE.Mesh>(null);
   const plusButtonRef = useRef<THREE.Mesh>(null);
 
-  const plusTex = useTexture("/Plus.svg");
-  const minusTex = useTexture("/Negative.svg");
-
-  const ICON_SIZE = 0.05;
   const FONT_SIZE = 0.06;
-
-  const iconW = ICON_SIZE;
-  const textW = quantityTextWidth;
-  const gap = 0.03;
-  const groupWidth = iconW + gap + textW + gap + iconW;
-
-  const minusX = -groupWidth / 2 + iconW / 2;
-  const textX = 0;
-  const plusX = groupWidth / 2 - iconW / 2;
+  const ARROW_WIDTH = 0.03;
+  const ARROW_HEIGHT = 0.02;
+  const ARROW_GROUP_WIDTH = 0.06;
+  
+  // Position number on left, arrows on right
+  const numberX = -width / 2 + 0.08;
+  const arrowGroupX = width / 2 - 0.08;
+  const upArrowY = 0.02;
+  const downArrowY = -0.02;
 
   const handleQuantityChange = (newQuantity: number) => {
     setQuantity(newQuantity);
@@ -104,27 +100,33 @@ export default function QuantityButton({
     return () => gl.domElement.removeEventListener("click", handleCanvasClick);
   }, [camera, gl, quantity]);
 
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
   return (
     <group position={position} rotation={rotation}>
-      {/* Background Box */}
+      {/* Background Box with border */}
       <mesh>
         <planeGeometry args={[width, height]} />
-        <meshBasicMaterial color={COLORS.primary} />
+        <meshBasicMaterial color={COLORS.white} toneMapped={false} />
       </mesh>
-
-      {/* Minus Button */}
-      <mesh
-        ref={minusButtonRef}
-        position={[minusX, 0, 0.01]}
-      >
-        <planeGeometry args={[0.15, 0.15]} />
-        <meshBasicMaterial transparent opacity={0} />
-
-        <mesh position={[0, 0, 0.005]}>
-          <planeGeometry args={[ICON_SIZE, 0.01]} />
-          <meshBasicMaterial map={minusTex} transparent />
-        </mesh>
-      </mesh>
+      
+      {/* Black border */}
+      <lineSegments>
+        <edgesGeometry attach="geometry" args={[new THREE.PlaneGeometry(width, height)]} />
+        <lineBasicMaterial attach="material" color={COLORS.black} linewidth={2} />
+      </lineSegments>
 
       {/* Quantity Number */}
       <Text
@@ -134,27 +136,48 @@ export default function QuantityButton({
           const width = bbox.max.x - bbox.min.x;
           setQuantityTextWidth(width);
         }}
-        position={[textX, 0, 0.015]}
+        position={[numberX, 0, 0.01]}
         fontSize={FONT_SIZE}
         color="black"
-        anchorX="center"
         anchorY="middle"
       >
         {quantity}
       </Text>
 
-      {/* Plus Button */}
+      {/* Arrow container background */}
+      <mesh position={[arrowGroupX, 0, 0.005]}>
+        <planeGeometry args={[ARROW_GROUP_WIDTH, height * 0.9]} />
+        <meshBasicMaterial color={COLORS.white} toneMapped={false} />
+      </mesh>
+
+      {/* Up Arrow (clickable area) */}
       <mesh
         ref={plusButtonRef}
-        position={[plusX, 0, 0.01]}
+        position={[arrowGroupX, upArrowY, 0.01]}
       >
-        <planeGeometry args={[0.15, 0.15]} />
+        <planeGeometry args={[ARROW_GROUP_WIDTH, height * 0.45]} />
         <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+      
+      {/* Up Arrow Triangle */}
+      <mesh position={[arrowGroupX, upArrowY, 0.015]}>
+        <coneGeometry args={[ARROW_WIDTH, ARROW_HEIGHT, 3]} />
+        <meshBasicMaterial color={COLORS.black} toneMapped={false} />
+      </mesh>
 
-        <mesh position={[0, 0, 0.005]}>
-          <planeGeometry args={[ICON_SIZE, ICON_SIZE]} />
-          <meshBasicMaterial map={plusTex} transparent />
-        </mesh>
+      {/* Down Arrow (clickable area) */}
+      <mesh
+        ref={minusButtonRef}
+        position={[arrowGroupX, downArrowY, 0.01]}
+      >
+        <planeGeometry args={[ARROW_GROUP_WIDTH, height * 0.45]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+      
+      {/* Down Arrow Triangle */}
+      <mesh position={[arrowGroupX, downArrowY, 0.015]} rotation={[0, 0, Math.PI]}>
+        <coneGeometry args={[ARROW_WIDTH, ARROW_HEIGHT, 3]} />
+        <meshBasicMaterial color={COLORS.black} toneMapped={false} />
       </mesh>
     </group>
   );
