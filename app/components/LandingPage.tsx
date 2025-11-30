@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useCart } from "./CartContext";
-import { COLORS } from "../colors";
+import GalleryFooter from "./GalleryFooter";
 
 interface LandingPageProps {
   onEnter: () => void;
@@ -10,7 +9,6 @@ interface LandingPageProps {
 
 export default function LandingPage({ onEnter }: LandingPageProps) {
   const [scrollY, setScrollY] = useState(0);
-  const { getTotalItems } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,12 +29,12 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
   return (
     <div
-      className="fixed top-0 left-0 w-screen h-screen bg-[#F7C41A] flex flex-col justify-start items-center px-[10%] z-[1000] pt-[100px]"
+      className="fixed top-0 left-0 w-screen h-screen bg-[#F7C41A] flex flex-col justify-center items-center px-[10%] z-[1000]"
       style={{ opacity, pointerEvents }}
     >
-      {/* Center Logo - At the top */}
+      {/* Center Logo */}
       <div 
-        className="pointer-events-auto mb-[60px]"
+        className="pointer-events-auto mb-[40px]"
         style={{
           width: "520.63px",
           height: "272px",
@@ -50,23 +48,59 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       </div>
 
       {/* Main Content - Centered */}
-      <div className="text-center max-w-[800px]">
-
-        <h2 className="text-[32px] font-semibold m-0 mb-8 text-black leading-relaxed">
+      <div className="flex flex-col items-center text-center">
+        <h2 
+          className="font-medium m-0 mb-6 text-black text-center"
+          style={{ 
+            fontSize: "31px", 
+            lineHeight: "100%", 
+            letterSpacing: "0%",
+            width: "902px",
+          }}
+        >
           Without Van Gogh, no AI could make an image in his style.
           <br />
           Only a human can create a truly unique work of art.
         </h2>
 
-        <p className="text-lg leading-relaxed text-black mb-8">
+        <p 
+          className="font-light text-black mb-8 text-center"
+          style={{ fontSize: "25px", lineHeight: "100%", letterSpacing: "0%", maxWidth: "600px" }}
+        >
           As AI floods the world with hollow imagery, we stand with human-made art. True art emerges from the dialogue between artist and work, expressing what words cannot, and carrying the unmistakable imprint of its creator.
         </p>
 
-        {/* Scroll Indicator */}
-        <div className="mt-[60px] text-base flex items-center justify-center gap-3 text-black">
-          <span className="text-2xl">↓</span>
+        {/* Scroll Indicator - Arrow */}
+        <div 
+          className="flex flex-col items-center"
+          style={{ marginTop: "40px" }}
+        >
+          {/* Line */}
+          <div 
+            style={{ 
+              width: "2px",
+              height: "34px",
+              backgroundColor: "black",
+              borderRadius: "1px",
+            }}
+          />
+          {/* V Arrow Head */}
+          <div 
+            style={{ 
+              width: "12px",
+              height: "12px",
+              borderRight: "2px solid black",
+              borderBottom: "2px solid black",
+              borderRadius: "0 0 2px 0",
+              transform: "rotate(45deg)",
+              marginTop: "-12px",
+            }}
+          />
         </div>
       </div>
+
+      {/* Footer - shared component */}
+      <GalleryFooter />
     </div>
   );
 }
