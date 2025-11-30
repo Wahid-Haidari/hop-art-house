@@ -13,7 +13,7 @@ function isMobileDevice() {
 }
 
 export default function MobilePlayer() {
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   const { setPosition } = usePlayerPosition();
   const [isMobile, setIsMobile] = useState(false);
   
@@ -26,6 +26,11 @@ export default function MobilePlayer() {
     " ": false,
     Shift: false,
   });
+
+  // Desktop drag-to-look state
+  const isDraggingRef = useRef(false);
+  const previousMouseRef = useRef({ x: 0, y: 0 });
+  const cameraRotationRef = useRef({ yaw: 0, pitch: 0 });
 
   // Mobile movement state
   const mobileMovementRef = useRef({ forward: 0, right: 0, up: 0 });
@@ -44,11 +49,79 @@ export default function MobilePlayer() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Desktop click-and-drag look controls
+  useEffect(() => {
+    if (isMobile) return;
 
+    const canvas = gl.domElement;
 
+    const handleMouseDown = (e: MouseEvent) => {
+      isDraggingRef.current = true;
+      previousMouseRef.current = { x: e.clientX, y: e.clientY };
+      canvas.style.cursor = "grabbing";
+    };
 
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
 
+      const deltaX = e.clientX - previousMouseRef.current.x;
+      const deltaY = e.clientY - previousMouseRef.current.y;
 
+      // Calculate exact sensitivity to make cursor stick to world point
+      // For a perspective camera, the relationship between pixels and radians is:
+      // radians = pixels * (FOV / screenHeight) for vertical
+      // For horizontal, we need to account for aspect ratio
+      const fovRad = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180);
+      const height = canvas.clientHeight;
+      const width = canvas.clientWidth;
+      
+      // Vertical: FOV covers the full height
+      const sensitivityY = fovRad / height;
+      
+      // Horizontal: Use the horizontal FOV
+      // horizontalFOV = 2 * atan(tan(verticalFOV/2) * aspectRatio)
+      const aspectRatio = width / height;
+      const hFovRad = 2 * Math.atan(Math.tan(fovRad / 2) * aspectRatio);
+      const sensitivityX = hFovRad / width;
+
+      // Update yaw (horizontal rotation) - inverted so dragging right moves scene right
+      cameraRotationRef.current.yaw += deltaX * sensitivityX;
+
+      // Update pitch (vertical rotation) - inverted so dragging down moves scene down
+      cameraRotationRef.current.pitch += deltaY * sensitivityY;
+      cameraRotationRef.current.pitch = Math.max(
+        -Math.PI / 2 + 0.1,
+        Math.min(Math.PI / 2 - 0.1, cameraRotationRef.current.pitch)
+      );
+
+      previousMouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+      canvas.style.cursor = "grab";
+    };
+
+    const handleMouseLeave = () => {
+      isDraggingRef.current = false;
+      canvas.style.cursor = "grab";
+    };
+
+    // Set initial cursor style
+    canvas.style.cursor = "grab";
+
+    canvas.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    canvas.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      canvas.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      canvas.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [isMobile, gl, camera]);
 
   // Desktop keyboard controls
   // Desktop keyboard controls
@@ -195,6 +268,11 @@ export default function MobilePlayer() {
       if (Math.abs(nextZ) < limit) camera.position.z = nextZ;
       if (nextY > minY && nextY < maxY) camera.position.y = nextY;
     } else {
+      // Desktop: Apply camera rotation from drag
+      camera.rotation.order = "YXZ";
+      camera.rotation.y = cameraRotationRef.current.yaw;
+      camera.rotation.x = cameraRotationRef.current.pitch;
+
       // Desktop keyboard controls
       const forward = new THREE.Vector3();
       camera.getWorldDirection(forward);
