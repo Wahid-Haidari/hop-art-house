@@ -80,7 +80,7 @@ export default function GalleryFooter() {
       <div 
         className="fixed z-50 pointer-events-auto flex items-center"
         style={{
-          bottom: "24px",
+          bottom: "20px",
           right: "30px",
           gap: "36px",
         }}
@@ -114,12 +114,20 @@ export default function GalleryFooter() {
         </a>
         <div 
           onClick={() => setShowCartPage(true)}
-          className="flex items-center cursor-pointer hover:opacity-70"
-          style={{ width: "32px", height: "27px" }}
+          className="flex flex-col items-center cursor-pointer hover:opacity-70"
+          style={{ gap: "0px", position: "relative", top: "-4px" }}
         >
+          {getTotalItems() > 0 && (
+            <span
+              className="text-black"
+              style={{ fontSize: "12px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
+            >
+              {getTotalItems()}
+            </span>
+          )}
           <img
             src="/Cart.svg"
-            className="w-full h-full"
+            style={{ width: "32px", height: "27px" }}
             alt="cart"
           />
         </div>
