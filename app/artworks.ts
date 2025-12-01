@@ -15,7 +15,7 @@ export const artworks: ArtworkData[] = [
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
-    position: [0, 2.5, -9.95],
+    position: [0, 3.2, -9.95],
     rotation: [0, 0, 0],
   },
   {
@@ -24,7 +24,7 @@ export const artworks: ArtworkData[] = [
     art: "/art2.jpg",
     artistCard: "/artist2.jpg",
     infoCard: "/art2info.jpg",
-    position: [-9.9, 2.5, 0],
+    position: [-9.9, 3.2, 0],
     rotation: [0, Math.PI / 2, 0],
   },
 ];

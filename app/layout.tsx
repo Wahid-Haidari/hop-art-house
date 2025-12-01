@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 
@@ -13,6 +14,17 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Load ITC Avant Garde Gothic Std fonts
+const avantGardeMedium = localFont({
+  src: "../public/font/ITC Avant Garde Gothic Std Medium.otf",
+  variable: "--font-avant-garde-medium",
+});
+
+const avantGardeBook = localFont({
+  src: "../public/font/ITC Avant Garde Gothic Std Book.otf",
+  variable: "--font-avant-garde-book",
 });
 
 
@@ -29,7 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${avantGardeMedium.variable} ${avantGardeBook.variable} antialiased`}>
         {children}
       </body>
     </html>
