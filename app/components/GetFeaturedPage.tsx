@@ -584,7 +584,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
         </span>
         <span 
           className="text-black no-underline cursor-default"
-          style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
+          style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-medium)" }}
         >
           Get Featured
         </span>
