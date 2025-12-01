@@ -47,6 +47,8 @@ export default function AddToCartButton({
   const addTextRef = useRef<any>(null);
   const [addTextWidth, setAddTextWidth] = useState(0);
   const buttonRef = useRef<THREE.Mesh>(null);
+  const [showAdded, setShowAdded] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
 
   const cartTex = useTexture("/Cart.svg");
 
@@ -83,6 +85,16 @@ export default function AddToCartButton({
         console.log("AddToCartButton clicked via raycasting");
         if (onAddToCart) {
           onAddToCart();
+          // Brief white flash on press
+          setIsPressed(true);
+          setTimeout(() => {
+            setIsPressed(false);
+          }, 150);
+          // Show "Added!" text for 2 seconds
+          setShowAdded(true);
+          setTimeout(() => {
+            setShowAdded(false);
+          }, 2000);
         }
       }
     };
@@ -113,9 +125,9 @@ export default function AddToCartButton({
         <meshBasicMaterial color="black" toneMapped={false} />
       </mesh>
 
-      {/* Yellow fill (flat, slightly in front) */}
+      {/* Yellow fill (flat, slightly in front) - flashes white when pressed */}
       <mesh ref={buttonRef} position={[0, 0, 0.011]} geometry={fillGeometry}>
-        <meshBasicMaterial color={COLORS.primary} toneMapped={false} />
+        <meshBasicMaterial color={isPressed ? "white" : COLORS.primary} toneMapped={false} />
       </mesh>
 
       {/* Cart Icon */}
@@ -137,7 +149,7 @@ export default function AddToCartButton({
         color="black"
         anchorY="middle"
       >
-        Add to Cart
+        {showAdded ? "Added!" : "Add to Cart"}
       </Text>
     </group>
   );

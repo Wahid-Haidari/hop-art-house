@@ -1,6 +1,7 @@
 "use client";
 
 import { COLORS } from "../colors";
+import { useCart } from "./CartContext";
 
 interface AboutPageProps {
   onClose: () => void;
@@ -9,6 +10,8 @@ interface AboutPageProps {
 }
 
 export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigateToCart }: AboutPageProps) {
+  const { getTotalItems } = useCart();
+  
   return (
     <div 
       className="fixed inset-0 z-[3000] overflow-y-auto"
@@ -376,7 +379,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
       <div 
         className="fixed z-[3010] pointer-events-auto flex items-center"
         style={{
-          bottom: "24px",
+          bottom: "20px",
           right: "30px",
           gap: "36px",
         }}
@@ -410,12 +413,20 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
         </a>
         <div 
           onClick={onNavigateToCart}
-          className="flex items-center cursor-pointer hover:opacity-70"
-          style={{ width: "32px", height: "27px" }}
+          className="flex flex-col items-center cursor-pointer hover:opacity-70"
+          style={{ gap: "0px", position: "relative", top: "-4px" }}
         >
+          {getTotalItems() > 0 && (
+            <span
+              className="text-black"
+              style={{ fontSize: "12px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
+            >
+              {getTotalItems()}
+            </span>
+          )}
           <img
             src="/Cart.svg"
-            className="w-full h-full"
+            style={{ width: "32px", height: "27px" }}
             alt="cart"
           />
         </div>

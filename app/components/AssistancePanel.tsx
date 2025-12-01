@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { COLORS } from "../colors";
 
 interface AssistancePanelProps {
   visible: boolean;
@@ -64,12 +63,16 @@ export default function AssistancePanel({ visible }: AssistancePanelProps) {
       ) : (
         // Assistance Text
         <div 
-          className="fixed bottom-8 left-28 z-50 pointer-events-auto animate-in fade-in duration-300"
+          className="fixed z-50 pointer-events-auto"
+          style={{ bottom: "23px", left: "100px" }}
           onMouseEnter={() => setHoverShowInstructions(true)}
         >
-          <div className="text-black font-bold text-lg hover:opacity-70 cursor-pointer transition-opacity">
+          <span 
+            className="text-black no-underline hover:opacity-70 cursor-pointer"
+            style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
+          >
             Assistance
-          </div>
+          </span>
         </div>
       )}
     </>
