@@ -32,21 +32,35 @@ export default function ProximityMessage({
 
   if (!isNear) return null;
 
-  // Position message above the artwork
-  const messageY = artY + 1.5;
+  // Card layout constants (same as GalleryArtwork)
+  const ART_WIDTH = 1.5;
+  const ART_HEIGHT = 2.5;
+  const CARD_WIDTH = 0.5;
+  const CARD_HEIGHT = 0.7;
+  const GAP = 0.1;
+
+  const artSideOffset = (ART_WIDTH / 2) + (CARD_WIDTH / 2) + GAP;
+  const verticalUp = -((ART_HEIGHT / 2) - (CARD_HEIGHT / 2)) + CARD_HEIGHT + GAP;
+
+  // Check if side wall
+  const isSideWall = artRotation[1] !== 0;
+
+  // Position message above the artist card
+  const messageX = isSideWall ? artX : artX + artSideOffset;
+  const messageY = artY + verticalUp + (CARD_HEIGHT / 2) + 0.1; // Above artist card
+  const messageZ = isSideWall ? artZ - artSideOffset : artZ;
 
   return (
     <Text
-      position={[artX, messageY, artZ]}
+      position={[messageX, messageY, messageZ]}
       rotation={artRotation}
-      fontSize={0.2}
-      color="red"
+      fontSize={0.06}
+      color="black"
       anchorX="center"
       anchorY="middle"
-      outlineWidth={0.02}
-      outlineColor="white"
+      textAlign="center"
     >
-      Click on displays to view full screen.
+      {"Click on displays\nto view full screen."}
     </Text>
   );
 }

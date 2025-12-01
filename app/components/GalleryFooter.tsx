@@ -87,7 +87,7 @@ export default function GalleryFooter() {
       >
         <span 
           className="text-black no-underline cursor-default"
-          style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
+          style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-medium)" }}
         >
           Art House
         </span>

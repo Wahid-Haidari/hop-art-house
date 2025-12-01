@@ -390,7 +390,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
         </span>
         <span 
           className="text-black no-underline cursor-default"
-          style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
+          style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-medium)" }}
         >
           About
         </span>
