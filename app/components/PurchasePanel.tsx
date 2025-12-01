@@ -31,7 +31,7 @@ export default function PurchasePanel({
     const ART_WIDTH = 1.5;
     const artRightEdge = artX + ART_WIDTH / 2;
     const CARD_WIDTH = 0.5;
-    const SIZE_WIDTH = 0.5;
+    const SIZE_WIDTH = 0.65;
     const QUANTITY_WIDTH = 0.3;
     const ADD_TO_CART_WIDTH = CARD_WIDTH;
 
@@ -53,26 +53,30 @@ export default function PurchasePanel({
         baseX = artX + horizontalOffset;
         baseZ = artZ;
         
-        const sizeXPos = artRightEdge - (SIZE_WIDTH / 2);
-        quantityX = sizeXPos - (SIZE_WIDTH / 2) - GAP - (QUANTITY_WIDTH / 2);
-        quantityZ = baseZ;
-        sizeX = sizeXPos;
-        sizeZ = baseZ;
+        // Add to cart button (aligned with info card above art)
         const infoCardCenterX = artRightEdge + CARD_WIDTH / 2 + GAP;
         addToCartX = infoCardCenterX;
         addToCartZ = baseZ;
+        // Quantity button to the left of add to cart
+        quantityX = addToCartX - ADD_TO_CART_WIDTH / 2 - GAP - QUANTITY_WIDTH / 2;
+        quantityZ = baseZ;
+        // Size button to the left of quantity
+        sizeX = quantityX - QUANTITY_WIDTH / 2 - GAP - SIZE_WIDTH / 2;
+        sizeZ = baseZ;
     } else if (Math.abs(rotY - Math.PI / 2) < 0.1) {
         // Left wall - buttons forward (toward room center)
         baseX = artX;
         baseZ = artZ + horizontalOffset;
         
-        const sizeZPos = artZ - ART_WIDTH / 2 - (SIZE_WIDTH / 2);
-        quantityX = baseX;
-        quantityZ = sizeZPos - (SIZE_WIDTH / 2) - GAP - (QUANTITY_WIDTH / 2);
-        sizeX = baseX;
-        sizeZ = sizeZPos;
-        addToCartX = baseX;
+        // Add to cart button (aligned with info card)
         addToCartZ = artZ - ART_WIDTH / 2 - CARD_WIDTH / 2 - GAP;
+        addToCartX = baseX;
+        // Quantity button next to add to cart
+        quantityZ = addToCartZ + ADD_TO_CART_WIDTH / 2 + GAP + QUANTITY_WIDTH / 2;
+        quantityX = baseX;
+        // Size button next to quantity
+        sizeZ = quantityZ + QUANTITY_WIDTH / 2 + GAP + SIZE_WIDTH / 2;
+        sizeX = baseX;
     } else {
         // Default fallback
         quantityX = baseX;

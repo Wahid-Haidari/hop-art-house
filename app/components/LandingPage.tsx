@@ -34,7 +34,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
     >
       {/* Center Logo */}
       <div 
-        className="pointer-events-auto mb-[40px]"
+        className="pointer-events-auto mb-[60px]"
         style={{
           width: "520.63px",
           height: "272px",
@@ -50,12 +50,13 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       {/* Main Content - Centered */}
       <div className="flex flex-col items-center text-center">
         <h2 
-          className="font-medium m-0 mb-6 text-black text-center"
+          className="m-0 mb-12 text-black text-center"
           style={{ 
             fontSize: "31px", 
             lineHeight: "100%", 
             letterSpacing: "0%",
             width: "902px",
+            fontFamily: "var(--font-avant-garde-medium)",
           }}
         >
           Without Van Gogh, no AI could make an image in his style.
@@ -64,8 +65,14 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
         </h2>
 
         <p 
-          className="font-light text-black mb-8 text-center"
-          style={{ fontSize: "25px", lineHeight: "100%", letterSpacing: "0%", maxWidth: "600px" }}
+          className="text-black mb-8 text-center"
+          style={{ 
+            fontSize: "25px", 
+            lineHeight: "140%", 
+            letterSpacing: "0%", 
+            maxWidth: "750px",
+            fontFamily: "var(--font-avant-garde-book)",
+          }}
         >
           As AI floods the world with hollow imagery, we stand with human-made art. True art emerges from the dialogue between artist and work, expressing what words cannot, and carrying the unmistakable imprint of its creator.
         </p>

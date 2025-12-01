@@ -2,10 +2,32 @@
 
 import { Text, useTexture } from "@react-three/drei";
 import { useThree, useFrame } from "@react-three/fiber";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { SIZES } from "../sizes";
 import { COLORS } from "../colors";
+
+// Create a rounded rectangle shape
+function createRoundedRectShape(width: number, height: number, radius: number) {
+  const shape = new THREE.Shape();
+  const x = -width / 2;
+  const y = -height / 2;
+  
+  shape.moveTo(x + radius, y);
+  shape.lineTo(x + width - radius, y);
+  shape.quadraticCurveTo(x + width, y, x + width, y + radius);
+  shape.lineTo(x + width, y + height - radius);
+  shape.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  shape.lineTo(x + radius, y + height);
+  shape.quadraticCurveTo(x, y + height, x, y + height - radius);
+  shape.lineTo(x, y + radius);
+  shape.quadraticCurveTo(x, y, x + radius, y);
+  
+  return shape;
+}
+
+const BORDER_RADIUS = 0.025;
+const BORDER_WIDTH = 0.005;
 
 interface SizeDropdownProps {
   position: [number, number, number];
@@ -18,7 +40,7 @@ interface SizeDropdownProps {
 export default function SizeDropdown({
   position,
   rotation = [0, 0, 0],
-  width = 0.5,
+  width = 0.65,
   height = 0.15,
   onSizeChange,
 }: SizeDropdownProps) {
@@ -35,18 +57,14 @@ export default function SizeDropdown({
   const dropdownTex = useTexture("/dropdown.svg");
 
   const ICON_SIZE = 0.05;
-  const FONT_SIZE = 0.06;
+  const FONT_SIZE = 0.055;
   const OPEN_Y_TOP = 0.3;
   const CLOSED_Y_TOP = 0.05;
   const ITEM_SPACING = 0.12;
 
-  const iconW = ICON_SIZE;
-  const textW = sizeTextWidth;
-  const gap = 0.03;
-  const groupWidth = textW + iconW + gap;
-
-  const textX = -groupWidth / 2 + textW / 2;
-  const iconX = groupWidth / 2 - iconW / 2;
+  // Separate price and dimensions
+  const priceText = `$${SIZES[sizeIndex].price}`;
+  const dimensionsText = SIZES[sizeIndex].dimensions;
 
   useFrame(() => {
     const target = sizeOpen ? 1 : 0;
@@ -118,39 +136,76 @@ export default function SizeDropdown({
     return () => gl.domElement.removeEventListener("click", handleCanvasClick);
   }, [camera, gl]);
 
+  // Create geometries for rounded rectangles
+  const borderGeometry = useMemo(() => {
+    const shape = createRoundedRectShape(width, height, BORDER_RADIUS);
+    return new THREE.ShapeGeometry(shape);
+  }, [width, height]);
+
+  const fillGeometry = useMemo(() => {
+    const shape = createRoundedRectShape(
+      width - BORDER_WIDTH * 2,
+      height - BORDER_WIDTH * 2,
+      BORDER_RADIUS - BORDER_WIDTH
+    );
+    return new THREE.ShapeGeometry(shape);
+  }, [width, height]);
+
   return (
     <group position={position} rotation={rotation}>
-      {/* Main Size Button */}
-      <mesh ref={mainButtonRef}>
-        <planeGeometry args={[width, height]} />
-        <meshBasicMaterial color={COLORS.primary} />
+      {/* Black border (flat) */}
+      <mesh position={[0, 0, 0.01]} geometry={borderGeometry}>
+        <meshBasicMaterial color="black" toneMapped={false} />
+      </mesh>
 
-        {/* Size Text */}
-        <Text
-          ref={sizeTextRef}
-          onSync={(text) => {
-            const bbox = text.geometry.boundingBox;
-            const width = bbox.max.x - bbox.min.x;
-            setSizeTextWidth(width);
-          }}
-          position={[textX, 0, 0.01]}
-          fontSize={FONT_SIZE}
-          color="black"
-          anchorY="middle"
-        >
-          {SIZES[sizeIndex].dimensions}
-        </Text>
+      {/* White fill (flat, slightly in front) */}
+      <mesh ref={mainButtonRef} position={[0, 0, 0.011]} geometry={fillGeometry}>
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
+      </mesh>
 
-        {/* Dropdown Icon */}
-        <mesh position={[iconX, 0, 0.01]}>
-          <planeGeometry args={[ICON_SIZE, 0.03]} />
-          <meshBasicMaterial map={dropdownTex} transparent />
-        </mesh>
+      {/* Price Text */}
+      <Text
+        position={[-0.18, 0, 0.012]}
+        fontSize={FONT_SIZE}
+        color="black"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {priceText}
+      </Text>
+
+      {/* Vertical Separator Line */}
+      <mesh position={[-0.13, 0, 0.012]}>
+        <planeGeometry args={[0.003, 0.15]} />
+        <meshBasicMaterial color="black" />
+      </mesh>
+
+      {/* Dimensions Text */}
+      <Text
+        ref={sizeTextRef}
+        onSync={(text) => {
+          const bbox = text.geometry.boundingBox;
+          const width = bbox.max.x - bbox.min.x;
+          setSizeTextWidth(width);
+        }}
+        position={[0.08, 0, 0.012]}
+        fontSize={FONT_SIZE}
+        color="black"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {dimensionsText}
+      </Text>
+
+      {/* Dropdown Icon */}
+      <mesh position={[0.27, 0, 0.012]}>
+        <planeGeometry args={[ICON_SIZE, 0.03]} />
+        <meshBasicMaterial map={dropdownTex} transparent />
       </mesh>
 
       {/* Dropdown Panel */}
       <mesh
-        position={[0, -height - (0.7 * slide) / 2, 0]}
+        position={[0, -height - (0.7 * slide) / 2, 0.01]}
         visible={slide > 0.01}
       >
         <planeGeometry args={[width, 0.7 * slide]} />

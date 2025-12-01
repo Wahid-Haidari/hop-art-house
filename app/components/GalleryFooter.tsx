@@ -49,22 +49,22 @@ export default function GalleryFooter() {
       >
         <a 
           href="#about" 
-          className="text-black no-underline hover:opacity-70 cursor-pointer font-medium"
-          style={{ fontSize: "18px", lineHeight: "100%" }}
+          className="text-black no-underline hover:opacity-70 cursor-pointer"
+          style={{ fontSize: "18px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
         >
           About
         </a>
         <a 
           href="mailto:Hi@HopArt.House" 
-          className="text-black no-underline hover:opacity-70 cursor-pointer font-medium"
-          style={{ fontSize: "18px", lineHeight: "100%" }}
+          className="text-black no-underline hover:opacity-70 cursor-pointer"
+          style={{ fontSize: "18px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
         >
           Hi@HopArt.House
         </a>
         <a 
           href="#featured" 
-          className="text-black no-underline hover:opacity-70 cursor-pointer font-medium"
-          style={{ fontSize: "18px", lineHeight: "100%" }}
+          className="text-black no-underline hover:opacity-70 cursor-pointer"
+          style={{ fontSize: "18px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
         >
           Get Featured
         </a>
