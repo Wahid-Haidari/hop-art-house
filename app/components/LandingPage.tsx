@@ -34,10 +34,10 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
     >
       {/* Center Logo */}
       <div 
-        className="pointer-events-auto mb-[60px]"
+        className="pointer-events-auto mb-[110px]"
         style={{
-          width: "520.63px",
-          height: "272px",
+          width: "416px",
+          height: "218px",
         }}
       >
         <img
@@ -50,9 +50,9 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       {/* Main Content - Centered */}
       <div className="flex flex-col items-center text-center">
         <h2 
-          className="m-0 mb-12 text-black text-center"
+          className="m-0 mb-6 text-black text-center"
           style={{ 
-            fontSize: "31px", 
+            fontSize: "25px", 
             lineHeight: "100%", 
             letterSpacing: "0%",
             width: "902px",
@@ -67,43 +67,49 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
         <p 
           className="text-black mb-8 text-center"
           style={{ 
-            fontSize: "25px", 
+            fontSize: "22px", 
             lineHeight: "140%", 
             letterSpacing: "0%", 
-            maxWidth: "750px",
+            maxWidth: "700px",
             fontFamily: "var(--font-avant-garde-book)",
           }}
         >
-          As AI floods the world with hollow imagery, we stand with human-made art. True art emerges from the dialogue between artist and work, expressing what words cannot, and carrying the unmistakable imprint of its creator.
+          As AI floods the world with hollow imagery, we stand 
+          <br />
+          with human-made art. True art emerges from the dialogue
+          <br />
+          between artist and work,expressing what words cannot,
+          <br />
+          and carrying the unmistakable imprint of its creator.
         </p>
+      </div>
 
-        {/* Scroll Indicator - Arrow */}
+      {/* Scroll Indicator - Arrow - Positioned between text and bottom */}
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
+        style={{ bottom: "100px" }}
+      >
+        {/* Line */}
         <div 
-          className="flex flex-col items-center"
-          style={{ marginTop: "40px" }}
-        >
-          {/* Line */}
-          <div 
-            style={{ 
-              width: "2px",
-              height: "34px",
-              backgroundColor: "black",
-              borderRadius: "1px",
-            }}
-          />
-          {/* V Arrow Head */}
-          <div 
-            style={{ 
-              width: "12px",
-              height: "12px",
-              borderRight: "2px solid black",
-              borderBottom: "2px solid black",
-              borderRadius: "0 0 2px 0",
-              transform: "rotate(45deg)",
-              marginTop: "-12px",
-            }}
-          />
-        </div>
+          style={{ 
+            width: "2px",
+            height: "34px",
+            backgroundColor: "black",
+            borderRadius: "1px",
+          }}
+        />
+        {/* V Arrow Head */}
+        <div 
+          style={{ 
+            width: "12px",
+            height: "12px",
+            borderRight: "2px solid black",
+            borderBottom: "2px solid black",
+            borderRadius: "0 0 2px 0",
+            transform: "rotate(45deg)",
+            marginTop: "-12px",
+          }}
+        />
       </div>
 
       {/* Footer - shared component */}
