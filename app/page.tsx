@@ -6,8 +6,6 @@ import PurchasePanel from "./components/PurchasePanel";
 import { useState } from "react"; 
 import FullscreenOverlay from "./components/FullscreenOverlay";
 import Wall from "./components/Wall";
-import Door from "./components/Door";
-import Window from "./components/Window";
 import Floor from "./components/Floor";
 import Ceiling from "./components/Ceiling";
 import { PlayerProvider } from "./components/PlayerContext";
@@ -62,20 +60,7 @@ export default function Home() {
               <Wall position={[0, 3.75, -10]} />
               <Wall position={[-10, 3.75, 0]} rotation={[0, Math.PI / 2, 0]} />
               <Wall position={[10, 3.75, 0]} rotation={[0, -Math.PI / 2, 0]} />
-              
-              {/* Window on back wall */}
-              <Window position={[0, 6.5, -9.95]} width={6} height={1.2} />
-              
-              {/* Front wall with door opening */}
-              {/* Left section of front wall */}
-              <Wall position={[-5.5, 3.75, 10]} rotation={[0, Math.PI, 0]} width={9} />
-              {/* Right section of front wall */}
-              <Wall position={[5.5, 3.75, 10]} rotation={[0, Math.PI, 0]} width={9} />
-              {/* Top section above door */}
-              <Wall position={[0, 5.75, 10]} rotation={[0, Math.PI, 0]} width={2} height={3.5} />
-              
-              {/* Door */}
-              <Door position={[0, 2, 10]} rotation={[0, Math.PI, 0]} />
+              <Wall position={[0, 3.75, 10]} rotation={[0, Math.PI, 0]} />
 
               {/* Artworks - Loop through all artworks */}
               {artworks.map((artwork) => (
