@@ -9,7 +9,7 @@ export interface ArtworkData {
 }
 
 export const artworks: ArtworkData[] = [
-  // Back wall - 5 artworks (facing forward, rotation [0, 0, 0])
+  // Back wall - 4 artworks (facing forward, rotation [0, 0, 0])
   {
     id: "back-1",
     title: "Artwork 1",
@@ -25,7 +25,7 @@ export const artworks: ArtworkData[] = [
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
-    position: [-3, 3.2, -9.95],
+    position: [-2, 3.2, -9.95],
     rotation: [0, 0, 0],
   },
   {
@@ -34,7 +34,7 @@ export const artworks: ArtworkData[] = [
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
-    position: [0, 3.2, -9.95],
+    position: [2, 3.2, -9.95],
     rotation: [0, 0, 0],
   },
   {
@@ -43,22 +43,13 @@ export const artworks: ArtworkData[] = [
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
-    position: [3, 3.2, -9.95],
-    rotation: [0, 0, 0],
-  },
-  {
-    id: "back-5",
-    title: "Artwork 5",
-    art: "/Tigress.jpg",
-    artistCard: "/Artist Bio.jpg",
-    infoCard: "/Art Label.jpg",
     position: [6, 3.2, -9.95],
     rotation: [0, 0, 0],
   },
-  // Left wall - 5 artworks (facing right, rotation [0, Math.PI / 2, 0])
+  // Left wall - 4 artworks (facing right, rotation [0, Math.PI / 2, 0])
   {
     id: "left-1",
-    title: "Artwork 6",
+    title: "Artwork 5",
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
@@ -67,44 +58,35 @@ export const artworks: ArtworkData[] = [
   },
   {
     id: "left-2",
-    title: "Artwork 7",
+    title: "Artwork 6",
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
-    position: [-9.95, 3.2, -3],
+    position: [-9.95, 3.2, -2],
     rotation: [0, Math.PI / 2, 0],
   },
   {
     id: "left-3",
-    title: "Artwork 8",
+    title: "Artwork 7",
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
-    position: [-9.95, 3.2, 0],
+    position: [-9.95, 3.2, 2],
     rotation: [0, Math.PI / 2, 0],
   },
   {
     id: "left-4",
-    title: "Artwork 9",
-    art: "/Tigress.jpg",
-    artistCard: "/Artist Bio.jpg",
-    infoCard: "/Art Label.jpg",
-    position: [-9.95, 3.2, 3],
-    rotation: [0, Math.PI / 2, 0],
-  },
-  {
-    id: "left-5",
-    title: "Artwork 10",
+    title: "Artwork 8",
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
     position: [-9.95, 3.2, 6],
     rotation: [0, Math.PI / 2, 0],
   },
-  // Right wall - 5 artworks (facing left, rotation [0, -Math.PI / 2, 0])
+  // Right wall - 4 artworks (facing left, rotation [0, -Math.PI / 2, 0])
   {
     id: "right-1",
-    title: "Artwork 11",
+    title: "Artwork 9",
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
@@ -113,34 +95,25 @@ export const artworks: ArtworkData[] = [
   },
   {
     id: "right-2",
-    title: "Artwork 12",
+    title: "Artwork 10",
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
-    position: [9.95, 3.2, -3],
+    position: [9.95, 3.2, -2],
     rotation: [0, -Math.PI / 2, 0],
   },
   {
     id: "right-3",
-    title: "Artwork 13",
+    title: "Artwork 11",
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
-    position: [9.95, 3.2, 0],
+    position: [9.95, 3.2, 2],
     rotation: [0, -Math.PI / 2, 0],
   },
   {
     id: "right-4",
-    title: "Artwork 14",
-    art: "/Tigress.jpg",
-    artistCard: "/Artist Bio.jpg",
-    infoCard: "/Art Label.jpg",
-    position: [9.95, 3.2, 3],
-    rotation: [0, -Math.PI / 2, 0],
-  },
-  {
-    id: "right-5",
-    title: "Artwork 15",
+    title: "Artwork 12",
     art: "/Tigress.jpg",
     artistCard: "/Artist Bio.jpg",
     infoCard: "/Art Label.jpg",
