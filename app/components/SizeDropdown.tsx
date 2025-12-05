@@ -40,7 +40,7 @@ interface SizeDropdownProps {
 export default function SizeDropdown({
   position,
   rotation = [0, 0, 0],
-  width = 0.65,
+  width = 0.75,
   height = 0.15,
   onSizeChange,
 }: SizeDropdownProps) {
@@ -163,10 +163,11 @@ export default function SizeDropdown({
         <meshBasicMaterial color="#ffffff" toneMapped={false} />
       </mesh>
 
-      {/* Price Text */}
+      {/* Price Text - centered between left edge (-0.375) and separator (-0.15) */}
       <Text
-        position={[-0.18, 0, 0.012]}
+        position={[-0.2625, 0, 0.012]}
         fontSize={FONT_SIZE}
+        font="/font/ITC Avant Garde Gothic Std Book.otf"
         color="black"
         anchorX="center"
         anchorY="middle"
@@ -175,12 +176,12 @@ export default function SizeDropdown({
       </Text>
 
       {/* Vertical Separator Line */}
-      <mesh position={[-0.13, 0, 0.012]}>
+      <mesh position={[-0.15, 0, 0.012]}>
         <planeGeometry args={[0.003, 0.15]} />
         <meshBasicMaterial color="black" />
       </mesh>
 
-      {/* Dimensions Text */}
+      {/* Dimensions Text - centered between separator (-0.15) and dropdown (0.32) */}
       <Text
         ref={sizeTextRef}
         onSync={(text) => {
@@ -188,8 +189,9 @@ export default function SizeDropdown({
           const width = bbox.max.x - bbox.min.x;
           setSizeTextWidth(width);
         }}
-        position={[0.08, 0, 0.012]}
+        position={[0.085, 0, 0.012]}
         fontSize={FONT_SIZE}
+        font="/font/ITC Avant Garde Gothic Std Book.otf"
         color="black"
         anchorX="center"
         anchorY="middle"
@@ -198,7 +200,7 @@ export default function SizeDropdown({
       </Text>
 
       {/* Dropdown Icon */}
-      <mesh position={[0.27, 0, 0.012]}>
+      <mesh position={[0.32, 0, 0.012]}>
         <planeGeometry args={[ICON_SIZE, 0.03]} />
         <meshBasicMaterial map={dropdownTex} transparent />
       </mesh>
@@ -225,6 +227,7 @@ export default function SizeDropdown({
               0.01,
             ]}
             fontSize={0.05}
+            font="/font/ITC Avant Garde Gothic Std Book.otf"
             color="black"
             anchorX="center"
             anchorY="middle"

@@ -42,19 +42,34 @@ export default function ProximityMessage({
   const artSideOffset = (ART_WIDTH / 2) + (CARD_WIDTH / 2) + GAP;
   const verticalUp = -((ART_HEIGHT / 2) - (CARD_HEIGHT / 2)) + CARD_HEIGHT + GAP;
 
-  // Check if side wall
-  const isSideWall = artRotation[1] !== 0;
+  // Check wall type
+  const isLeftWall = artRotation[1] > 0;
+  const isRightWall = artRotation[1] < 0;
 
   // Position message above the artist card
-  const messageX = isSideWall ? artX : artX + artSideOffset;
+  let messageX: number;
+  let messageZ: number;
+  
+  if (isLeftWall) {
+    messageX = artX;
+    messageZ = artZ - artSideOffset;
+  } else if (isRightWall) {
+    messageX = artX;
+    messageZ = artZ + artSideOffset;
+  } else {
+    // Back wall
+    messageX = artX + artSideOffset;
+    messageZ = artZ;
+  }
+  
   const messageY = artY + verticalUp + (CARD_HEIGHT / 2) + 0.1; // Above artist card
-  const messageZ = isSideWall ? artZ - artSideOffset : artZ;
 
   return (
     <Text
       position={[messageX, messageY, messageZ]}
       rotation={artRotation}
       fontSize={0.06}
+      font="/font/ITC Avant Garde Gothic Std Book.otf"
       color="black"
       anchorX="center"
       anchorY="middle"

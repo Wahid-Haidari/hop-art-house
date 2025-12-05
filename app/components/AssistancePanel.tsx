@@ -37,25 +37,25 @@ export default function AssistancePanel({ visible }: AssistancePanelProps) {
             className="bg-[#F7C41A] border-4 border-black rounded-lg p-6 shadow-lg"
             style={{ width: "240px" }}
           >
-            <div className="text-black text-sm font-medium leading-loose space-y-2">
+            <div className="text-black text-sm leading-loose space-y-2" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
               <div>
-                <span className="font-bold">W:</span> Move forward
+                <span style={{ fontFamily: "var(--font-avant-garde-medium)" }}>W:</span> Move forward
               </div>
               <div>
-                <span className="font-bold">S:</span> Move backward
+                <span style={{ fontFamily: "var(--font-avant-garde-medium)" }}>S:</span> Move backward
               </div>
               <div>
-                <span className="font-bold">D:</span> Move right
+                <span style={{ fontFamily: "var(--font-avant-garde-medium)" }}>D:</span> Move right
               </div>
               <div>
-                <span className="font-bold">A:</span> Move left
+                <span style={{ fontFamily: "var(--font-avant-garde-medium)" }}>A:</span> Move left
               </div>
               <div className="my-3 border-t-2 border-black"></div>
               <div>
-                <span className="font-bold">Space:</span> Up
+                <span style={{ fontFamily: "var(--font-avant-garde-medium)" }}>Space:</span> Up
               </div>
               <div>
-                <span className="font-bold">Shift:</span> Down
+                <span style={{ fontFamily: "var(--font-avant-garde-medium)" }}>Shift:</span> Down
               </div>
             </div>
           </div>

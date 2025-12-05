@@ -48,38 +48,75 @@ export default function GalleryArtwork({
     const verticalUp = verticalDown + CARD_HEIGHT + GAP // This is the distance the artist card sits above the artwork’s center.
 
     // If rotation.y = 0 → artwork faces user (back wall)
-    // If rotation.y != 0 → artwork is on left/right walls
-    const isSideWall = rotation[1] !== 0;
+    // If rotation.y > 0 → artwork is on left wall
+    // If rotation.y < 0 → artwork is on right wall
+    const isLeftWall = rotation[1] > 0;
+    const isRightWall = rotation[1] < 0;
+    const isSideWall = isLeftWall || isRightWall;
 
 
   // Calculate card positions
-  const artistCardPos: [number, number, number] = isSideWall
-    ? [
-        position[0],                        // X same
-        position[1] + verticalUp,           // Y up
-        position[2] - artSideOffset           // Z right relative to rotation
-      ]
-    : [
-        position[0] + artSideOffset,           // X right
-        position[1] + verticalUp,           // Y up
-        position[2]         // Z forward
-      ];
+  let artistCardPos: [number, number, number];
+  let infoCardPos: [number, number, number];
 
-  const infoCardPos: [number, number, number] = isSideWall
-    ? [
-        position[0],
-        position[1] + verticalDown,
-        position[2] - artSideOffset
-      ]
-    : [
-        position[0] + artSideOffset,
-        position[1] + verticalDown,
-        position[2]
-      ];
+  if (isLeftWall) {
+    // Left wall - cards toward negative Z
+    artistCardPos = [
+      position[0],
+      position[1] + verticalUp,
+      position[2] - artSideOffset
+    ];
+    infoCardPos = [
+      position[0],
+      position[1] + verticalDown,
+      position[2] - artSideOffset
+    ];
+  } else if (isRightWall) {
+    // Right wall - cards toward positive Z
+    artistCardPos = [
+      position[0],
+      position[1] + verticalUp,
+      position[2] + artSideOffset
+    ];
+    infoCardPos = [
+      position[0],
+      position[1] + verticalDown,
+      position[2] + artSideOffset
+    ];
+  } else {
+    // Back wall - cards to the right (positive X)
+    artistCardPos = [
+      position[0] + artSideOffset,
+      position[1] + verticalUp,
+      position[2]
+    ];
+    infoCardPos = [
+      position[0] + artSideOffset,
+      position[1] + verticalDown,
+      position[2]
+    ];
+  }
 
   // Setup raycasting for proper cursor-based click detection
   useEffect(() => {
+    let mouseDownPos = { x: 0, y: 0 };
+    const DRAG_THRESHOLD = 5; // pixels - if mouse moves more than this, it's a drag
+
+    const handleMouseDown = (event: MouseEvent) => {
+      mouseDownPos = { x: event.clientX, y: event.clientY };
+    };
+
     const handleCanvasClick = (event: MouseEvent) => {
+      // Check if this was a drag (mouse moved significantly)
+      const dx = event.clientX - mouseDownPos.x;
+      const dy = event.clientY - mouseDownPos.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance > DRAG_THRESHOLD) {
+        // This was a drag, not a click - don't open overlay
+        return;
+      }
+
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
 
@@ -117,9 +154,13 @@ export default function GalleryArtwork({
       }
     };
 
-    // Attach click listener to canvas element
+    // Attach listeners to canvas element
+    gl.domElement.addEventListener("mousedown", handleMouseDown);
     gl.domElement.addEventListener("click", handleCanvasClick);
-    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
+    return () => {
+      gl.domElement.removeEventListener("mousedown", handleMouseDown);
+      gl.domElement.removeEventListener("click", handleCanvasClick);
+    };
   }, [camera, gl, art, artistCard, infoCard, onOpenOverlay]);
 
   return (

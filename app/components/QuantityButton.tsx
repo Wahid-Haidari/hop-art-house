@@ -51,7 +51,7 @@ export default function QuantityButton({
   const plusButtonRef = useRef<THREE.Mesh>(null);
 
   const FONT_SIZE = 0.06;
-  const ARROW_WIDTH = 0.03;
+  const ARROW_WIDTH = 0.018;
   const ARROW_HEIGHT = 0.02;
   const ARROW_GROUP_WIDTH = 0.06;
   
@@ -163,6 +163,7 @@ export default function QuantityButton({
         }}
         position={[numberX, 0, 0.012]}
         fontSize={FONT_SIZE}
+        font="/font/ITC Avant Garde Gothic Std Book.otf"
         color="black"
         anchorY="middle"
       >
@@ -178,9 +179,16 @@ export default function QuantityButton({
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
       
-      {/* Up Arrow Triangle */}
+      {/* Up Arrow Triangle (flat) */}
       <mesh position={[arrowGroupX, upArrowY, 0.013]}>
-        <coneGeometry args={[ARROW_WIDTH, ARROW_HEIGHT, 3]} />
+        <shapeGeometry args={[(() => {
+          const shape = new THREE.Shape();
+          shape.moveTo(0, ARROW_HEIGHT / 2);
+          shape.lineTo(-ARROW_WIDTH, -ARROW_HEIGHT / 2);
+          shape.lineTo(ARROW_WIDTH, -ARROW_HEIGHT / 2);
+          shape.closePath();
+          return shape;
+        })()]} />
         <meshBasicMaterial color={COLORS.black} toneMapped={false} />
       </mesh>
 
@@ -193,9 +201,16 @@ export default function QuantityButton({
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
       
-      {/* Down Arrow Triangle */}
-      <mesh position={[arrowGroupX, downArrowY, 0.013]} rotation={[0, 0, Math.PI]}>
-        <coneGeometry args={[ARROW_WIDTH, ARROW_HEIGHT, 3]} />
+      {/* Down Arrow Triangle (flat) */}
+      <mesh position={[arrowGroupX, downArrowY, 0.013]}>
+        <shapeGeometry args={[(() => {
+          const shape = new THREE.Shape();
+          shape.moveTo(0, -ARROW_HEIGHT / 2);
+          shape.lineTo(-ARROW_WIDTH, ARROW_HEIGHT / 2);
+          shape.lineTo(ARROW_WIDTH, ARROW_HEIGHT / 2);
+          shape.closePath();
+          return shape;
+        })()]} />
         <meshBasicMaterial color={COLORS.black} toneMapped={false} />
       </mesh>
     </group>
