@@ -32,12 +32,13 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       className="fixed top-0 left-0 w-screen h-screen bg-[#F7C41A] flex flex-col justify-center items-center px-[10%] z-[1000]"
       style={{ opacity, pointerEvents }}
     >
-      {/* Center Logo */}
+      {/* Center Logo - gap to next: 2x */}
       <div 
-        className="pointer-events-auto mb-[110px]"
+        className="pointer-events-auto"
         style={{
           width: "416px",
           height: "218px",
+          marginBottom: "58px", // 2x
         }}
       >
         <img
@@ -47,48 +48,58 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
         />
       </div>
 
-      {/* Main Content - Centered */}
-      <div className="flex flex-col items-center text-center">
-        <h2 
-          className="m-0 mb-6 text-black text-center"
-          style={{ 
-            fontSize: "25px", 
-            lineHeight: "100%", 
-            letterSpacing: "0%",
-            width: "902px",
-            fontFamily: "var(--font-avant-garde-medium)",
-          }}
-        >
-          Without Van Gogh, no AI could make an image in his style.
-          <br />
-          Only a human can create a truly unique work of art.
-        </h2>
-
-        <p 
-          className="text-black mb-8 text-center"
-          style={{ 
-            fontSize: "22px", 
-            lineHeight: "140%", 
-            letterSpacing: "0%", 
-            maxWidth: "700px",
-            fontFamily: "var(--font-avant-garde-book)",
-          }}
-        >
-          As AI floods the world with hollow imagery, we stand 
-          <br />
-          with human-made art. True art emerges from the dialogue
-          <br />
-          between artist and work,expressing what words cannot,
-          <br />
-          and carrying the unmistakable imprint of its creator.
-        </p>
-      </div>
-
-      {/* Scroll Indicator - Arrow - Positioned between text and bottom */}
-      <div 
-        className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
-        style={{ bottom: "100px" }}
+      {/* "Without Van Gogh" - gap to next: 1x */}
+      <h2 
+        className="m-0 text-black text-center"
+        style={{ 
+          fontSize: "25px", 
+          lineHeight: "100%", 
+          letterSpacing: "0%",
+          width: "902px",
+          fontFamily: "var(--font-avant-garde-medium)",
+          marginBottom: "29px", // 1x
+        }}
       >
+        Without Van Gogh, no AI could make an image in his style.
+        <br />
+        Only a human can create a truly unique work of art.
+      </h2>
+
+      {/* "We stand" - gap to next: 1x */}
+      <p 
+        className="text-black text-center"
+        style={{ 
+          fontSize: "22px", 
+          lineHeight: "140%", 
+          letterSpacing: "0%", 
+          maxWidth: "700px",
+          fontFamily: "var(--font-avant-garde-book)",
+          marginBottom: "29px", // 1x
+        }}
+      >
+        We stand with human-made art. True art emerges from the
+        <br />
+        dialogue between artist and work,expressing what words
+        <br />
+        cannot, and carrying the unmistakable imprint of its creator.
+      </p>
+
+      {/* "Let's democratize art" - gap to next: 2x */}
+      <p 
+        className="text-black text-center"
+        style={{ 
+          fontSize: "22px", 
+          lineHeight: "140%", 
+          letterSpacing: "0%",
+          fontFamily: "var(--font-avant-garde-book)",
+          marginBottom: "58px", // 2x
+        }}
+      >
+        Let&apos;s democratize art
+      </p>
+
+      {/* Arrow */}
+      <div className="flex flex-col items-center">
         {/* Line */}
         <div 
           style={{ 
