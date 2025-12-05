@@ -1,6 +1,6 @@
 "use client";
 
-import { Text, useTexture } from "@react-three/drei";
+import { Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useRef, useState, useEffect, useMemo } from "react";
 import * as THREE from "three";
@@ -44,24 +44,11 @@ export default function AddToCartButton({
   onAddToCart,
 }: AddToCartButtonProps) {
   const { camera, gl } = useThree();
-  const addTextRef = useRef<any>(null);
-  const [addTextWidth, setAddTextWidth] = useState(0);
   const buttonRef = useRef<THREE.Mesh>(null);
   const [showAdded, setShowAdded] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
-  const cartTex = useTexture("/Cart.svg");
-
-  const ICON_SIZE = 0.05;
   const FONT_SIZE = 0.06;
-
-  const iconW = ICON_SIZE;
-  const textW = addTextWidth;
-  const gap = 0.04;
-  const groupWidth = iconW + gap + textW;
-
-  const iconX = -groupWidth / 2 + iconW / 2;
-  const textX = groupWidth / 2 - textW / 2;
 
   // Setup raycasting for add to cart button
   useEffect(() => {
@@ -130,23 +117,13 @@ export default function AddToCartButton({
         <meshBasicMaterial color={isPressed ? "white" : COLORS.primary} toneMapped={false} />
       </mesh>
 
-      {/* Cart Icon */}
-      <mesh position={[iconX, 0, 0.012]}>
-        <planeGeometry args={[ICON_SIZE, ICON_SIZE]} />
-        <meshBasicMaterial map={cartTex} transparent />
-      </mesh>
-
       {/* Add to Cart Text */}
       <Text
-        ref={addTextRef}
-        onSync={(text) => {
-          const bbox = text.geometry.boundingBox;
-          const width = bbox.max.x - bbox.min.x;
-          setAddTextWidth(width);
-        }}
-        position={[textX, 0, 0.012]}
+        position={[0, 0, 0.012]}
         fontSize={FONT_SIZE}
+        font="/font/ITC Avant Garde Gothic Std Book.otf"
         color="black"
+        anchorX="center"
         anchorY="middle"
       >
         {showAdded ? "Added!" : "Add to Cart"}

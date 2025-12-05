@@ -31,7 +31,7 @@ export default function PurchasePanel({
     const ART_WIDTH = 1.5;
     const artRightEdge = artX + ART_WIDTH / 2;
     const CARD_WIDTH = 0.5;
-    const SIZE_WIDTH = 0.65;
+    const SIZE_WIDTH = 0.75;
     const QUANTITY_WIDTH = 0.3;
     const ADD_TO_CART_WIDTH = CARD_WIDTH;
 
@@ -76,6 +76,20 @@ export default function PurchasePanel({
         quantityX = baseX;
         // Size button next to quantity
         sizeZ = quantityZ + QUANTITY_WIDTH / 2 + GAP + SIZE_WIDTH / 2;
+        sizeX = baseX;
+    } else if (Math.abs(rotY + Math.PI / 2) < 0.1) {
+        // Right wall - buttons backward (toward room center)
+        baseX = artX;
+        baseZ = artZ - horizontalOffset;
+        
+        // Add to cart button (aligned with info card)
+        addToCartZ = artZ + ART_WIDTH / 2 + CARD_WIDTH / 2 + GAP;
+        addToCartX = baseX;
+        // Quantity button next to add to cart
+        quantityZ = addToCartZ - ADD_TO_CART_WIDTH / 2 - GAP - QUANTITY_WIDTH / 2;
+        quantityX = baseX;
+        // Size button next to quantity
+        sizeZ = quantityZ - QUANTITY_WIDTH / 2 - GAP - SIZE_WIDTH / 2;
         sizeX = baseX;
     } else {
         // Default fallback
