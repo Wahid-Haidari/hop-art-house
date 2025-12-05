@@ -142,13 +142,14 @@ export default function MobileControls() {
         onTouchStart={handleJoystickStart}
         onTouchMove={handleJoystickMove}
         onTouchEnd={handleJoystickEnd}
-        className="fixed bottom-24 left-8 z-50 w-32 h-32 bg-white/30 border-4 border-white/50 rounded-full flex items-center justify-center"
-        style={{ touchAction: "none" }}
+        className="fixed bottom-24 left-8 z-50 w-32 h-32 rounded-full flex items-center justify-center"
+        style={{ touchAction: "none", backgroundColor: "rgba(0, 0, 0, 0.4)", border: "4px solid rgba(0, 0, 0, 0.4)" }}
       >
         <div
-          className="w-12 h-12 bg-white/70 rounded-full transition-transform"
+          className="w-12 h-12 rounded-full transition-transform"
           style={{
             transform: `translate(${joystickPosition.x}px, ${joystickPosition.y}px)`,
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
           }}
         />
       </div>
@@ -161,7 +162,10 @@ export default function MobileControls() {
         className="fixed right-0 top-0 w-1/2 h-full z-40"
         style={{ touchAction: "none" }}
       >
-        <div className="absolute top-4 right-4 text-white text-sm bg-black/50 px-3 py-2 rounded pointer-events-none">
+        <div 
+          className="absolute top-4 right-4 text-white text-sm px-3 py-2 rounded pointer-events-none"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}
+        >
           Drag to look
         </div>
       </div>
@@ -171,27 +175,34 @@ export default function MobileControls() {
         <button
           onTouchStart={handleUpStart}
           onTouchEnd={handleUpEnd}
-          className={`w-16 h-16 border-4 border-white/50 rounded-full flex items-center justify-center text-white text-2xl font-bold ${
-            upPressed ? "bg-white/50" : "bg-white/30"
-          }`}
-          style={{ touchAction: "none" }}
+          className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+          style={{ 
+            touchAction: "none",
+            backgroundColor: upPressed ? "rgba(0, 0, 0, 0.5)" : "rgba(0, 0, 0, 0.4)",
+            border: "4px solid rgba(0, 0, 0, 0.4)"
+          }}
         >
           ↑
         </button>
         <button
           onTouchStart={handleDownStart}
           onTouchEnd={handleDownEnd}
-          className={`w-16 h-16 border-4 border-white/50 rounded-full flex items-center justify-center text-white text-2xl font-bold ${
-            downPressed ? "bg-white/50" : "bg-white/30"
-          }`}
-          style={{ touchAction: "none" }}
+          className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+          style={{ 
+            touchAction: "none",
+            backgroundColor: downPressed ? "rgba(0, 0, 0, 0.5)" : "rgba(0, 0, 0, 0.4)",
+            border: "4px solid rgba(0, 0, 0, 0.4)"
+          }}
         >
           ↓
         </button>
       </div>
 
       {/* Instructions */}
-      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-black/70 text-white px-4 py-2 rounded text-sm text-center pointer-events-none">
+      <div 
+        className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 text-white px-4 py-2 rounded text-sm text-center pointer-events-none"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}
+      >
         Left: Move • Right: Look • Tap artwork to view
       </div>
     </>
