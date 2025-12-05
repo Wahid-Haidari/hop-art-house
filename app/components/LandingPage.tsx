@@ -77,11 +77,11 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
           marginBottom: "29px", // 1x
         }}
       >
-        We stand with human-made art. True art emerges from the
+        True art emerges from the dialogue between artist
         <br />
-        dialogue between artist and work,expressing what words
+        and work, expressing what words cannot, and
         <br />
-        cannot, and carrying the unmistakable imprint of its creator.
+        carrying the unmistakable imprint of its creator.
       </p>
 
       {/* "Let's democratize art" - gap to next: 2x */}
