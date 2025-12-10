@@ -142,14 +142,36 @@ export default function MobileControls() {
         onTouchStart={handleJoystickStart}
         onTouchMove={handleJoystickMove}
         onTouchEnd={handleJoystickEnd}
-        className="fixed bottom-24 left-8 z-50 w-32 h-32 rounded-full flex items-center justify-center"
-        style={{ touchAction: "none", backgroundColor: "rgba(0, 0, 0, 0.4)", border: "4px solid rgba(0, 0, 0, 0.4)" }}
+        className="fixed z-50 rounded-full flex items-center justify-center"
+        style={{ 
+          touchAction: "none", 
+          backgroundColor: "rgba(200, 200, 200, 0.8)", 
+          border: "3px solid #1a1a2e",
+          width: "100px",
+          height: "100px",
+          bottom: "26px",
+          left: "26px",
+        }}
       >
+        {/* Arrows - centered between outer edge and yellow center */}
+        {/* Up arrow */}
+        <div style={{ position: "absolute", top: "2px", left: "50%", transform: "translateX(-50%)", fontSize: "14px", color: "#1a1a2e" }}>↑</div>
+        {/* Down arrow */}
+        <div style={{ position: "absolute", bottom: "5px", left: "50%", transform: "translateX(-50%)", fontSize: "14px", color: "#1a1a2e" }}>↓</div>
+        {/* Left arrow */}
+        <div style={{ position: "absolute", left: "5px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: "#1a1a2e" }}>←</div>
+        {/* Right arrow */}
+        <div style={{ position: "absolute", right: "5px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: "#1a1a2e" }}>→</div>
+        
+        {/* Center knob */}
         <div
-          className="w-12 h-12 rounded-full transition-transform"
+          className="rounded-full transition-transform"
           style={{
+            width: "40px",
+            height: "40px",
             transform: `translate(${joystickPosition.x}px, ${joystickPosition.y}px)`,
-            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            backgroundColor: "#F7C41A",
+            border: "2px solid #1a1a2e",
           }}
         />
       </div>
@@ -161,25 +183,25 @@ export default function MobileControls() {
         onTouchEnd={handleLookEnd}
         className="fixed right-0 top-0 w-1/2 h-full z-40"
         style={{ touchAction: "none" }}
-      >
-        <div 
-          className="absolute top-4 right-4 text-white text-sm px-3 py-2 rounded pointer-events-none"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}
-        >
-          Drag to look
-        </div>
-      </div>
+      />
 
       {/* Up/Down Buttons - Bottom Right */}
-      <div className="fixed bottom-24 right-8 z-50 flex flex-col gap-2">
+      <div 
+        className="fixed z-50 flex flex-col"
+        style={{ bottom: "26px", right: "26px", gap: "8px" }}
+      >
         <button
           onTouchStart={handleUpStart}
           onTouchEnd={handleUpEnd}
-          className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+          className="rounded-full flex items-center justify-center font-bold"
           style={{ 
             touchAction: "none",
-            backgroundColor: upPressed ? "rgba(0, 0, 0, 0.5)" : "rgba(0, 0, 0, 0.4)",
-            border: "4px solid rgba(0, 0, 0, 0.4)"
+            backgroundColor: upPressed ? "rgba(180, 180, 180, 0.9)" : "rgba(200, 200, 200, 0.8)",
+            border: "3px solid #1a1a2e",
+            width: "48px",
+            height: "48px",
+            fontSize: "18px",
+            color: "#1a1a2e",
           }}
         >
           ↑
@@ -187,23 +209,19 @@ export default function MobileControls() {
         <button
           onTouchStart={handleDownStart}
           onTouchEnd={handleDownEnd}
-          className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+          className="rounded-full flex items-center justify-center font-bold"
           style={{ 
             touchAction: "none",
-            backgroundColor: downPressed ? "rgba(0, 0, 0, 0.5)" : "rgba(0, 0, 0, 0.4)",
-            border: "4px solid rgba(0, 0, 0, 0.4)"
+            backgroundColor: downPressed ? "rgba(180, 180, 180, 0.9)" : "rgba(200, 200, 200, 0.8)",
+            border: "3px solid #1a1a2e",
+            width: "48px",
+            height: "48px",
+            fontSize: "18px",
+            color: "#1a1a2e",
           }}
         >
           ↓
         </button>
-      </div>
-
-      {/* Instructions */}
-      <div 
-        className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 text-white px-4 py-2 rounded text-sm text-center pointer-events-none"
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}
-      >
-        Left: Move • Right: Look • Tap artwork to view
       </div>
     </>
   );

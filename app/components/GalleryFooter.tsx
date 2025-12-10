@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "./CartContext";
 import CartPage from "./CartPage";
 import GetFeaturedPage from "./GetFeaturedPage";
@@ -11,6 +11,19 @@ export default function GalleryFooter() {
   const [showCartPage, setShowCartPage] = useState(false);
   const [showGetFeatured, setShowGetFeatured] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleNavigateToAbout = () => {
     setShowGetFeatured(false);
@@ -59,13 +72,14 @@ export default function GalleryFooter() {
         />
       )}
 
-      {/* Footer - Bottom Left: Frog Logo */}
+      {/* Footer - Bottom Left (Desktop) / Top Left (Mobile): Frog Logo */}
       <div 
         className="fixed z-50 pointer-events-auto"
         style={{
           width: "45px",
           height: "43px",
-          bottom: "20px",
+          bottom: isMobile ? "auto" : "20px",
+          top: isMobile ? "20px" : "auto",
           left: "28px",
         }}
       >
@@ -76,11 +90,12 @@ export default function GalleryFooter() {
         />
       </div>
 
-      {/* Footer - Bottom Right: Navigation */}
+      {/* Footer - Bottom Right (Desktop) / Top Right (Mobile): Navigation */}
       <div 
         className="fixed z-50 pointer-events-auto flex items-center"
         style={{
-          bottom: "20px",
+          bottom: isMobile ? "auto" : "20px",
+          top: isMobile ? "20px" : "auto",
           right: "30px",
           gap: "36px",
         }}
