@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import GalleryArtwork from "./components/GalleryArtwork";
 import PurchasePanel from "./components/PurchasePanel";
-import { useState } from "react"; 
+import { useState, useEffect, useCallback } from "react"; 
 import FullscreenOverlay from "./components/FullscreenOverlay";
 import Wall from "./components/Wall";
 import Floor from "./components/Floor";
@@ -18,20 +18,54 @@ import GalleryFooter from "./components/GalleryFooter";
 import AssistancePanel from "./components/AssistancePanel";
 import Player from "./components/Player";
 import MobileControls from "./components/MobileControls";
+import RotatePhone from "./components/RotatePhone";
 
 export default function Home() {
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [showLanding, setShowLanding] = useState(true);
+  const [showRotatePhone, setShowRotatePhone] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    checkMobile();
+  }, []);
+
+  const handleEnterFromLanding = () => {
+    // Re-check mobile at the moment of entry
+    const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    ) || window.innerWidth < 768;
+    
+    setShowLanding(false);
+    // On mobile in portrait mode, show rotate phone screen
+    if (mobile && window.innerHeight > window.innerWidth) {
+      setShowRotatePhone(true);
+    }
+  };
+
+  const handleLandscape = useCallback(() => {
+    console.log("handleLandscape called - hiding rotate phone screen");
+    setShowRotatePhone(false);
+  }, []);
 
   return (
     <CartProvider>
       <PlayerProvider>
       {showLanding && (
         <>
-          <LandingPage onEnter={() => setShowLanding(false)} />
+          <LandingPage onEnter={handleEnterFromLanding} />
           {/* Spacer to enable scrolling */}
           <div className="h-[200vh]" />
         </>
+      )}
+      {showRotatePhone && (
+        <RotatePhone onLandscape={handleLandscape} />
       )}
       <main className="w-full h-screen">
         <div
