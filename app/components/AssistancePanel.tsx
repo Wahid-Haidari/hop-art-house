@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useMobile } from "../hooks/useMobile";
 
 interface AssistancePanelProps {
   visible: boolean;
@@ -9,19 +10,7 @@ interface AssistancePanelProps {
 export default function AssistancePanel({ visible }: AssistancePanelProps) {
   const [showInstructions, setShowInstructions] = useState(true);
   const [hoverShowInstructions, setHoverShowInstructions] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      ) || window.innerWidth < 768;
-      setIsMobile(mobile);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  const isMobile = useMobile();
 
   useEffect(() => {
     if (visible) {

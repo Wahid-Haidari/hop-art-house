@@ -102,7 +102,6 @@ export default function PurchasePanel({
     }
 
     const handleAddToCart = useCallback(() => {
-        console.log("PurchasePanel.handleAddToCart called");
         addItem({
             artworkId,
             artworkTitle,
@@ -110,7 +109,6 @@ export default function PurchasePanel({
             sizeIndex: selectedSize,
             quantity: selectedQuantity,
         });
-        console.log("Added to cart:", artworkTitle, "Size index:", selectedSize, "Qty:", selectedQuantity);
     }, [artworkId, artworkTitle, artworkImage, selectedSize, selectedQuantity, addItem]);
 
     return (

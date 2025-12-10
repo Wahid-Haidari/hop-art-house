@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import GalleryArtwork from "./components/GalleryArtwork";
 import PurchasePanel from "./components/PurchasePanel";
-import { useState, useEffect, useCallback } from "react"; 
+import { useState, useCallback } from "react"; 
 import FullscreenOverlay from "./components/FullscreenOverlay";
 import Wall from "./components/Wall";
 import Floor from "./components/Floor";
@@ -19,22 +19,13 @@ import AssistancePanel from "./components/AssistancePanel";
 import Player from "./components/Player";
 import MobileControls from "./components/MobileControls";
 import RotatePhone from "./components/RotatePhone";
+import { useMobile } from "./hooks/useMobile";
 
 export default function Home() {
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [showLanding, setShowLanding] = useState(true);
   const [showRotatePhone, setShowRotatePhone] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      ) || window.innerWidth < 768;
-      setIsMobile(mobile);
-    };
-    checkMobile();
-  }, []);
+  const isMobile = useMobile();
 
   const handleEnterFromLanding = () => {
     // Re-check mobile at the moment of entry
@@ -50,7 +41,6 @@ export default function Home() {
   };
 
   const handleLandscape = useCallback(() => {
-    console.log("handleLandscape called - hiding rotate phone screen");
     setShowRotatePhone(false);
   }, []);
 

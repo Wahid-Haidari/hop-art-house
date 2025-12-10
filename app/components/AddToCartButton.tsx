@@ -69,7 +69,6 @@ export default function AddToCartButton({
       const intersects = raycaster.intersectObject(buttonRef.current);
 
       if (intersects.length > 0) {
-        console.log("AddToCartButton clicked via raycasting");
         if (onAddToCart) {
           onAddToCart();
           // Brief white flash on press

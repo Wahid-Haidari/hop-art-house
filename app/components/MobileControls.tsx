@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useMobile } from "../hooks/useMobile";
 
 export default function MobileControls() {
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useMobile();
   const joystickRef = useRef<HTMLDivElement>(null);
   const [joystickActive, setJoystickActive] = useState(false);
   const [joystickPosition, setJoystickPosition] = useState({ x: 0, y: 0 });
@@ -11,19 +12,6 @@ export default function MobileControls() {
   const lookTouchRef = useRef<{ x: number; y: number } | null>(null);
   const [upPressed, setUpPressed] = useState(false);
   const [downPressed, setDownPressed] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      ) || window.innerWidth < 768;
-      setIsMobile(mobile);
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // Joystick movement
   const handleJoystickStart = (e: React.TouchEvent) => {
