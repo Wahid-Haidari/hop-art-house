@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import GalleryFooter from "./GalleryFooter";
+import { useMobile } from "../hooks/useMobile";
 
 interface LandingPageProps {
   onEnter: () => void;
@@ -9,6 +10,7 @@ interface LandingPageProps {
 
 export default function LandingPage({ onEnter }: LandingPageProps) {
   const [scrollY, setScrollY] = useState(0);
+  const isMobile = useMobile();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,15 +31,15 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
   return (
     <div
-      className="fixed top-0 left-0 w-screen h-screen bg-[#F7C41A] flex flex-col justify-center items-center px-[10%] z-[1000]"
+      className="fixed top-0 left-0 w-screen h-screen bg-[#F7C41A] flex flex-col justify-center items-center px-10 md:px-[10%] z-[1000]"
       style={{ opacity, pointerEvents }}
     >
       {/* Center Logo - gap to next: 2x */}
       <div 
         className="pointer-events-auto"
         style={{
-          width: "416px",
-          height: "218px",
+          width: isMobile ? "280px" : "416px",
+          height: isMobile ? "auto" : "218px",
           marginBottom: "58px", // 2x
         }}
       >
@@ -50,52 +52,62 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
       {/* "Without Van Gogh" - gap to next: 1x */}
       <h2 
-        className="m-0 text-black text-center"
+        className="m-0 text-black text-center w-full max-w-[902px]"
         style={{ 
-          fontSize: "25px", 
-          lineHeight: "100%", 
+          fontSize: isMobile ? "18px" : "25px", 
+          lineHeight: isMobile ? "130%" : "100%", 
           letterSpacing: "0%",
-          width: "902px",
           fontFamily: "var(--font-avant-garde-medium)",
           marginBottom: "29px", // 1x
         }}
       >
-        Without Van Gogh, no AI could make an image in his style.
-        <br />
-        Only a human can create a truly unique work of art.
+        {isMobile ? (
+          "Without Van Gogh, no AI could make an image in his style. Only a human can create a truly unique work of art."
+        ) : (
+          <>
+            Without Van Gogh, no AI could make an image in his style.
+            <br />
+            Only a human can create a truly unique work of art.
+          </>
+        )}
       </h2>
 
       {/* "We stand" - gap to next: 1x */}
       <p 
-        className="text-black text-center"
+        className="text-black text-center w-full max-w-[700px]"
         style={{ 
-          fontSize: "22px", 
+          fontSize: isMobile ? "16px" : "22px", 
           lineHeight: "140%", 
           letterSpacing: "0%", 
-          maxWidth: "700px",
           fontFamily: "var(--font-avant-garde-book)",
           marginBottom: "29px", // 1x
         }}
       >
-        True art emerges from the dialogue between artist
-        <br />
-        and work, expressing what words cannot, and
-        <br />
-        carrying the unmistakable imprint of its creator.
+        {isMobile ? (
+          "True art emerges from the dialogue between artist and work, expressing what words cannot, and carrying the unmistakable imprint of its creator."
+        ) : (
+          <>
+            True art emerges from the dialogue between artist
+            <br />
+            and work, expressing what words cannot, and
+            <br />
+            carrying the unmistakable imprint of its creator.
+          </>
+        )}
       </p>
 
       {/* "Let's democratize art" - gap to next: 2x */}
       <p 
         className="text-black text-center"
         style={{ 
-          fontSize: "22px", 
+          fontSize: isMobile ? "16px" : "22px", 
           lineHeight: "140%", 
           letterSpacing: "0%",
           fontFamily: "var(--font-avant-garde-book)",
           marginBottom: "58px", // 2x
         }}
       >
-        Let&apos;s democratize art
+        Let&apos;s democratize art{isMobile ? "!" : ""}
       </p>
 
       {/* Arrow */}
