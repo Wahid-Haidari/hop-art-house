@@ -49,17 +49,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, isLoaded]);
 
   const addItem = useCallback((newItem: CartItem) => {
-    console.log("addItem called with:", newItem);
-    
     // Create a unique ID for this add operation
     const operationId = `${newItem.artworkId}-${newItem.sizeIndex}-${Date.now()}-${Math.random()}`;
     
     setItems((current) => {
-      console.log("setItems callback - current items:", current.length);
-      
       // Skip if we've already processed this operation
       if (processedIdsRef.current.has(operationId)) {
-        console.log("Duplicate operation detected, skipping");
         return current;
       }
       
@@ -81,11 +76,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         // Update quantity of existing item
         const updated = [...current];
         updated[existingIndex].quantity += newItem.quantity;
-        console.log("Updated existing item, new quantity:", updated[existingIndex].quantity);
         return updated;
       } else {
         // Add new item
-        console.log("Adding new item to cart");
         return [...current, newItem];
       }
     });
