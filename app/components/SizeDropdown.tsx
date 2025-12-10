@@ -5,7 +5,6 @@ import { useThree, useFrame } from "@react-three/fiber";
 import { useRef, useState, useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { SIZES } from "../sizes";
-import { COLORS } from "../colors";
 
 // Create a rounded rectangle shape
 function createRoundedRectShape(width: number, height: number, radius: number) {
@@ -46,44 +45,45 @@ export default function SizeDropdown({
 }: SizeDropdownProps) {
   const { camera, gl } = useThree();
   const [sizeIndex, setSizeIndex] = useState(0);
-  const [sizeOpen, setSizeOpen] = useState(false);
-  const [slide, setSlide] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+  const [animProgress, setAnimProgress] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const sizeTextRef = useRef<any>(null);
-  const [sizeTextWidth, setSizeTextWidth] = useState(0);
   const mainButtonRef = useRef<THREE.Mesh>(null);
-  const sizeItemsRef = useRef<(THREE.Mesh | null)[]>([]);
+  const itemRefs = useRef<(THREE.Mesh | null)[]>([]);
+  const isOpenRef = useRef(isOpen);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
   const dropdownTex = useTexture("/dropdown.svg");
 
-  const ICON_SIZE = 0.05;
   const FONT_SIZE = 0.055;
-  const OPEN_Y_TOP = 0.3;
-  const CLOSED_Y_TOP = 0.05;
-  const ITEM_SPACING = 0.12;
+  const ITEM_HEIGHT = height;
+  const ICON_SIZE = 0.05;
 
-  // Separate price and dimensions
-  const priceText = `$${SIZES[sizeIndex].price}`;
-  const dimensionsText = SIZES[sizeIndex].dimensions;
+  // Calculate expanded height (all items)
+  const expandedHeight = ITEM_HEIGHT * SIZES.length;
+  
+  // Current height based on animation
+  const currentHeight = height + (expandedHeight - height) * animProgress;
 
+  // Animate open (smooth), close instantly
   useFrame(() => {
-    const target = sizeOpen ? 1 : 0;
-    setSlide((s) => s + (target - s) * 0.15);
+    if (isOpen) {
+      // Smooth open
+      setAnimProgress((p) => p + (1 - p) * 0.15);
+    } else if (animProgress > 0) {
+      // Instant close
+      setAnimProgress(0);
+    }
   });
 
-  const handleSizeSelect = (index: number) => {
-    setSizeIndex(index);
-    setSizeOpen(false);
-    if (onSizeChange) {
-      onSizeChange(index);
-    }
-  };
-
-  // Setup raycasting for main button
+  // Setup raycasting for clicks
   useEffect(() => {
     const handleCanvasClick = (event: MouseEvent) => {
-      if (!mainButtonRef.current) return;
-
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
 
@@ -95,20 +95,51 @@ export default function SizeDropdown({
       mouse.y = -(y / rect.height) * 2 + 1;
 
       raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObject(mainButtonRef.current);
 
-      if (intersects.length > 0) {
-        setSizeOpen((o) => !o);
+      // When open, check item buttons FIRST
+      if (isOpenRef.current) {
+        for (let i = 0; i < itemRefs.current.length; i++) {
+          const item = itemRefs.current[i];
+          if (item) {
+            // Force update world matrix
+            item.updateMatrixWorld(true);
+            const intersects = raycaster.intersectObject(item, false);
+            if (intersects.length > 0) {
+              // Select this size and close
+              setSizeIndex(i);
+              setIsOpen(false);
+              if (onSizeChange) {
+                onSizeChange(i);
+              }
+              return;
+            }
+          }
+        }
+      }
+
+      // Check main button (only opens when closed)
+      if (!isOpenRef.current && mainButtonRef.current) {
+        mainButtonRef.current.updateMatrixWorld(true);
+        const intersects = raycaster.intersectObject(mainButtonRef.current, false);
+        if (intersects.length > 0) {
+          setIsOpen(true);
+          return;
+        }
       }
     };
 
     gl.domElement.addEventListener("click", handleCanvasClick);
     return () => gl.domElement.removeEventListener("click", handleCanvasClick);
-  }, [camera, gl]);
+  }, [camera, gl, onSizeChange]);
 
-  // Setup raycasting for size items
+  // Setup hover detection
   useEffect(() => {
-    const handleCanvasClick = (event: MouseEvent) => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!isOpenRef.current) {
+        setHoveredIndex(null);
+        return;
+      }
+
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
 
@@ -121,121 +152,192 @@ export default function SizeDropdown({
 
       raycaster.setFromCamera(mouse, camera);
 
-      // Check all size items
-      sizeItemsRef.current.forEach((item, index) => {
+      // Check which item is being hovered
+      for (let i = 0; i < itemRefs.current.length; i++) {
+        const item = itemRefs.current[i];
         if (item) {
-          const intersects = raycaster.intersectObject(item);
+          item.updateMatrixWorld(true);
+          const intersects = raycaster.intersectObject(item, false);
           if (intersects.length > 0) {
-            handleSizeSelect(index);
+            setHoveredIndex(i);
+            gl.domElement.style.cursor = 'pointer';
+            return;
           }
         }
-      });
+      }
+      
+      setHoveredIndex(null);
+      gl.domElement.style.cursor = 'auto';
     };
 
-    gl.domElement.addEventListener("click", handleCanvasClick);
-    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
+    gl.domElement.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      gl.domElement.removeEventListener("mousemove", handleMouseMove);
+      gl.domElement.style.cursor = 'auto';
+    };
   }, [camera, gl]);
 
   // Create geometries for rounded rectangles
   const borderGeometry = useMemo(() => {
-    const shape = createRoundedRectShape(width, height, BORDER_RADIUS);
+    const shape = createRoundedRectShape(width, currentHeight, BORDER_RADIUS);
     return new THREE.ShapeGeometry(shape);
-  }, [width, height]);
+  }, [width, currentHeight]);
 
   const fillGeometry = useMemo(() => {
     const shape = createRoundedRectShape(
       width - BORDER_WIDTH * 2,
-      height - BORDER_WIDTH * 2,
+      currentHeight - BORDER_WIDTH * 2,
       BORDER_RADIUS - BORDER_WIDTH
     );
     return new THREE.ShapeGeometry(shape);
-  }, [width, height]);
+  }, [width, currentHeight]);
+
+  // Item highlight geometry (for selected item)
+  const itemHighlightGeometry = useMemo(() => {
+    const shape = createRoundedRectShape(
+      width - BORDER_WIDTH * 2,
+      ITEM_HEIGHT - BORDER_WIDTH * 2,
+      BORDER_RADIUS - BORDER_WIDTH
+    );
+    return new THREE.ShapeGeometry(shape);
+  }, [width]);
+
+  // Calculate Y offset to keep top aligned
+  const yOffset = -(currentHeight - height) / 2;
+
+  // Separator X position (between price and dimensions)
+  const separatorX = -0.15;
+  const priceX = -0.2625;
+  const dimensionsX = 0.085;
 
   return (
     <group position={position} rotation={rotation}>
-      {/* Black border (flat) */}
-      <mesh position={[0, 0, 0.01]} geometry={borderGeometry}>
-        <meshBasicMaterial color="black" toneMapped={false} />
-      </mesh>
+      <group position={[0, yOffset, 0]}>
+        {/* Black border */}
+        <mesh position={[0, 0, 0.01]} geometry={borderGeometry}>
+          <meshBasicMaterial color="black" toneMapped={false} />
+        </mesh>
 
-      {/* White fill (flat, slightly in front) */}
-      <mesh ref={mainButtonRef} position={[0, 0, 0.011]} geometry={fillGeometry}>
-        <meshBasicMaterial color="#ffffff" toneMapped={false} />
-      </mesh>
+        {/* White fill */}
+        <mesh ref={mainButtonRef} position={[0, 0, 0.011]} geometry={fillGeometry}>
+          <meshBasicMaterial color="#ffffff" toneMapped={false} />
+        </mesh>
 
-      {/* Price Text - centered between left edge (-0.375) and separator (-0.15) */}
-      <Text
-        position={[-0.2625, 0, 0.012]}
-        fontSize={FONT_SIZE}
-        font="/font/ITC Avant Garde Gothic Std Book.otf"
-        color="black"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {priceText}
-      </Text>
+        {/* When collapsed, show only selected item at top */}
+        {animProgress < 0.01 && (
+          <group position={[0, 0, 0]}>
+            {/* Clickable area */}
+            <mesh
+              ref={(el) => { itemRefs.current[sizeIndex] = el; }}
+              position={[0, 0, 0.02]}
+            >
+              <planeGeometry args={[width, ITEM_HEIGHT]} />
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+            </mesh>
 
-      {/* Vertical Separator Line */}
-      <mesh position={[-0.15, 0, 0.012]}>
-        <planeGeometry args={[0.003, 0.15]} />
-        <meshBasicMaterial color="black" />
-      </mesh>
+            {/* Price */}
+            <Text
+              position={[priceX, 0, 0.014]}
+              fontSize={FONT_SIZE}
+              font="/font/ITC Avant Garde Gothic Std Book.otf"
+              color="black"
+              anchorX="center"
+              anchorY="middle"
+            >
+              {`$${SIZES[sizeIndex].price}`}
+            </Text>
 
-      {/* Dimensions Text - centered between separator (-0.15) and dropdown (0.32) */}
-      <Text
-        ref={sizeTextRef}
-        onSync={(text) => {
-          const bbox = text.geometry.boundingBox;
-          const width = bbox.max.x - bbox.min.x;
-          setSizeTextWidth(width);
-        }}
-        position={[0.085, 0, 0.012]}
-        fontSize={FONT_SIZE}
-        font="/font/ITC Avant Garde Gothic Std Book.otf"
-        color="black"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {dimensionsText}
-      </Text>
+            {/* Separator line */}
+            <mesh position={[separatorX, 0, 0.014]}>
+              <planeGeometry args={[0.003, ITEM_HEIGHT]} />
+              <meshBasicMaterial color="black" />
+            </mesh>
 
-      {/* Dropdown Icon */}
-      <mesh position={[0.32, 0, 0.012]}>
-        <planeGeometry args={[ICON_SIZE, 0.03]} />
-        <meshBasicMaterial map={dropdownTex} transparent />
-      </mesh>
+            {/* Dimensions */}
+            <Text
+              position={[dimensionsX, 0, 0.014]}
+              fontSize={FONT_SIZE}
+              font="/font/ITC Avant Garde Gothic Std Book.otf"
+              color="black"
+              anchorX="center"
+              anchorY="middle"
+            >
+              {SIZES[sizeIndex].dimensions}
+            </Text>
 
-      {/* Dropdown Panel */}
-      <mesh
-        position={[0, -height - (0.7 * slide) / 2, 0.01]}
-        visible={slide > 0.01}
-      >
-        <planeGeometry args={[width, 0.7 * slide]} />
-        <meshBasicMaterial color="#FFE999" opacity={0.95} transparent />
+            {/* Dropdown icon */}
+            <mesh position={[0.32, 0, 0.014]}>
+              <planeGeometry args={[ICON_SIZE, 0.03]} />
+              <meshBasicMaterial map={dropdownTex} transparent />
+            </mesh>
+          </group>
+        )}
 
-        {SIZES.map((size, i) => (
-          <Text
-            key={i}
-            ref={(el) => {
-              if (el) sizeItemsRef.current[i] = el as unknown as THREE.Mesh;
-            }}
-            position={[
-              0,
-              CLOSED_Y_TOP +
-                (OPEN_Y_TOP - CLOSED_Y_TOP) * slide +
-                -i * ITEM_SPACING * slide,
-              0.01,
-            ]}
-            fontSize={0.05}
-            font="/font/ITC Avant Garde Gothic Std Book.otf"
-            color="black"
-            anchorX="center"
-            anchorY="middle"
-          >
-            {`${size.label}: ${size.dimensions}`}
-          </Text>
-        ))}
-      </mesh>
+        {/* When open/animating, show all items */}
+        {animProgress >= 0.01 && SIZES.map((size, i) => {
+          const isSelected = i === sizeIndex;
+          const isHovered = i === hoveredIndex;
+          const itemY = (currentHeight / 2) - (ITEM_HEIGHT / 2) - (i * ITEM_HEIGHT);
+
+          return (
+            <group key={i} position={[0, itemY, 0]}>
+              {/* Yellow highlight for selected or hovered item */}
+              {(isSelected || isHovered) && (
+                <mesh position={[0, 0, 0.012]} geometry={itemHighlightGeometry}>
+                  <meshBasicMaterial color="#F7C41A" toneMapped={false} />
+                </mesh>
+              )}
+
+              {/* Clickable area for this item */}
+              <mesh
+                ref={(el) => { itemRefs.current[i] = el; }}
+                position={[0, 0, 0.02]}
+              >
+                <planeGeometry args={[width, ITEM_HEIGHT]} />
+                <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+              </mesh>
+
+              {/* Price */}
+              <Text
+                position={[priceX, 0, 0.014]}
+                fontSize={FONT_SIZE}
+                font="/font/ITC Avant Garde Gothic Std Book.otf"
+                color="black"
+                anchorX="center"
+                anchorY="middle"
+              >
+                {`$${size.price}`}
+              </Text>
+
+              {/* Separator line */}
+              <mesh position={[separatorX, 0, 0.014]}>
+                <planeGeometry args={[0.003, ITEM_HEIGHT]} />
+                <meshBasicMaterial color="black" />
+              </mesh>
+
+              {/* Dimensions */}
+              <Text
+                position={[dimensionsX, 0, 0.014]}
+                fontSize={FONT_SIZE}
+                font="/font/ITC Avant Garde Gothic Std Book.otf"
+                color="black"
+                anchorX="center"
+                anchorY="middle"
+              >
+                {size.dimensions}
+              </Text>
+
+              {/* Dropdown icon - only on first row */}
+              {i === 0 && (
+                <mesh position={[0.32, 0, 0.014]}>
+                  <planeGeometry args={[ICON_SIZE, 0.03]} />
+                  <meshBasicMaterial map={dropdownTex} transparent />
+                </mesh>
+              )}
+            </group>
+          );
+        })}
+      </group>
     </group>
   );
 }
