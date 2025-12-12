@@ -57,7 +57,7 @@ export default function Home() {
       {showRotatePhone && (
         <RotatePhone onLandscape={handleLandscape} />
       )}
-      <main className="w-full h-screen">
+      <main className="w-full h-screen" style={{ touchAction: "none" }}>
         <div
           id="canvas-wrapper"
           className="w-full h-full"
