@@ -93,22 +93,30 @@ export default function GalleryFooter() {
           {/* Cart */}
           <div 
             onClick={() => setShowCartPage(true)}
-            className="flex flex-col items-center cursor-pointer hover:opacity-70"
-            style={{ gap: "0px", position: "relative", top: "-4px" }}
+            className="cursor-pointer hover:opacity-70"
+            style={{ position: "relative" }}
           >
-            {getTotalItems() > 0 && (
-              <span
-                className="text-black"
-                style={{ fontSize: "12px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
-              >
-                {getTotalItems()}
-              </span>
-            )}
             <img
               src="/Cart.svg"
               style={{ width: "32px", height: "27px" }}
               alt="cart"
             />
+            {getTotalItems() > 0 && (
+              <span
+                className="absolute flex items-center justify-center"
+                style={{ 
+                  top: "calc(50% - 1px)",
+                  left: "calc(50% + 5px)",
+                  transform: "translate(-50%, -50%)",
+                  fontSize: "12px", 
+                  lineHeight: "100%", 
+                  fontFamily: "var(--font-avant-garde-book)",
+                  color: "white",
+                }}
+              >
+                {getTotalItems()}
+              </span>
+            )}
           </div>
 
           {/* Hamburger Menu Button */}

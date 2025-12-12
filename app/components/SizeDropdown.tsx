@@ -81,15 +81,15 @@ export default function SizeDropdown({
     }
   });
 
-  // Setup raycasting for clicks
+  // Setup raycasting for clicks and touches
   useEffect(() => {
-    const handleCanvasClick = (event: MouseEvent) => {
+    const handleInteraction = (clientX: number, clientY: number) => {
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
 
       const rect = gl.domElement.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
 
       mouse.x = (x / rect.width) * 2 - 1;
       mouse.y = -(y / rect.height) * 2 + 1;
@@ -128,8 +128,28 @@ export default function SizeDropdown({
       }
     };
 
-    gl.domElement.addEventListener("click", handleCanvasClick);
-    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
+    let lastTouchTime = 0;
+
+    const handleClick = (event: MouseEvent) => {
+      // Ignore click if it came shortly after a touch (prevents double-firing on mobile)
+      if (Date.now() - lastTouchTime < 500) return;
+      handleInteraction(event.clientX, event.clientY);
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      lastTouchTime = Date.now();
+      if (event.changedTouches.length > 0) {
+        const touch = event.changedTouches[0];
+        handleInteraction(touch.clientX, touch.clientY);
+      }
+    };
+
+    gl.domElement.addEventListener("click", handleClick);
+    gl.domElement.addEventListener("touchend", handleTouchEnd);
+    return () => {
+      gl.domElement.removeEventListener("click", handleClick);
+      gl.domElement.removeEventListener("touchend", handleTouchEnd);
+    };
   }, [camera, gl, onSizeChange]);
 
   // Setup hover detection

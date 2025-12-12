@@ -3,6 +3,7 @@
 import { Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useRef, useState, useEffect, useMemo } from "react";
+import { useMobile } from "../hooks/useMobile";
 import * as THREE from "three";
 import { COLORS } from "../colors";
 
@@ -47,12 +48,56 @@ export default function AddToCartButton({
   const buttonRef = useRef<THREE.Mesh>(null);
   const [showAdded, setShowAdded] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
+  const isMobile = useMobile();
 
   const FONT_SIZE = 0.06;
 
-  // Setup raycasting for add to cart button
+  // Setup raycasting for add to cart button (click/touch)
   useEffect(() => {
-    const handleCanvasClick = (event: MouseEvent) => {
+    let lastTouchTime = 0;
+    const handleInteraction = (clientX: number, clientY: number) => {
+      if (!buttonRef.current) return;
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      mouse.x = (x / rect.width) * 2 - 1;
+      mouse.y = -(y / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(buttonRef.current);
+      if (intersects.length > 0) {
+        if (onAddToCart) {
+          onAddToCart();
+          setIsPressed(true);
+          setTimeout(() => setIsPressed(false), 150);
+          setShowAdded(true);
+          setTimeout(() => setShowAdded(false), 2000);
+        }
+      }
+    };
+    const handleClick = (event: MouseEvent) => {
+      if (Date.now() - lastTouchTime < 500) return;
+      handleInteraction(event.clientX, event.clientY);
+    };
+    const handleTouchEnd = (event: TouchEvent) => {
+      lastTouchTime = Date.now();
+      if (event.changedTouches.length > 0) {
+        const touch = event.changedTouches[0];
+        handleInteraction(touch.clientX, touch.clientY);
+      }
+    };
+    gl.domElement.addEventListener("click", handleClick);
+    gl.domElement.addEventListener("touchend", handleTouchEnd);
+    return () => {
+      gl.domElement.removeEventListener("click", handleClick);
+      gl.domElement.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [camera, gl, onAddToCart]);
+
+  // Setup hover detection for cursor change
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
       if (!buttonRef.current) return;
 
       const raycaster = new THREE.Raycaster();
@@ -69,25 +114,13 @@ export default function AddToCartButton({
       const intersects = raycaster.intersectObject(buttonRef.current);
 
       if (intersects.length > 0) {
-        if (onAddToCart) {
-          onAddToCart();
-          // Brief white flash on press
-          setIsPressed(true);
-          setTimeout(() => {
-            setIsPressed(false);
-          }, 150);
-          // Show "Added!" text for 2 seconds
-          setShowAdded(true);
-          setTimeout(() => {
-            setShowAdded(false);
-          }, 2000);
-        }
+        gl.domElement.style.cursor = "default";
       }
     };
 
-    gl.domElement.addEventListener("click", handleCanvasClick);
-    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
-  }, [camera, gl, onAddToCart]);
+    gl.domElement.addEventListener("mousemove", handleMouseMove);
+    return () => gl.domElement.removeEventListener("mousemove", handleMouseMove);
+  }, [camera, gl]);
 
   // Create geometries for rounded rectangles
   const borderGeometry = useMemo(() => {
@@ -107,23 +140,24 @@ export default function AddToCartButton({
   return (
     <group position={position} rotation={rotation}>
       {/* Black border (flat) */}
-      <mesh position={[0, 0, 0.01]} geometry={borderGeometry}>
-        <meshBasicMaterial color="black" toneMapped={false} />
+      <mesh position={[0, 0, 0]} geometry={borderGeometry}>
+        <meshBasicMaterial color="black" toneMapped={false} depthWrite={false} />
       </mesh>
 
-      {/* Yellow fill (flat, slightly in front) - flashes white when pressed */}
-      <mesh ref={buttonRef} position={[0, 0, 0.011]} geometry={fillGeometry}>
-        <meshBasicMaterial color={isPressed ? "white" : COLORS.primary} toneMapped={false} />
+      {/* Yellow fill - flashes white when pressed */}
+      <mesh ref={buttonRef} position={[0, 0, 0.001]} geometry={fillGeometry}>
+        <meshBasicMaterial color={isPressed ? "white" : COLORS.primary} toneMapped={false} depthWrite={false} />
       </mesh>
 
       {/* Add to Cart Text */}
       <Text
-        position={[0, 0, 0.012]}
+        position={[0, 0, 0.002]}
         fontSize={FONT_SIZE}
         font="/font/ITC Avant Garde Gothic Std Book.otf"
         color="black"
         anchorX="center"
         anchorY="middle"
+        depthOffset={-1}
       >
         {showAdded ? "Added!" : "Add to Cart"}
       </Text>
