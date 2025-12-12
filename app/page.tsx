@@ -117,7 +117,7 @@ export default function Home() {
               <Player />
               {/* PointerLockControls disabled - using click-and-drag instead */}
             </Canvas>
-            <MobileControls/>
+            {!showLanding && !showRotatePhone && <MobileControls/>}
           </div>
         <FullscreenOverlay
           image={overlayImage}

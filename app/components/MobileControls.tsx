@@ -134,22 +134,41 @@ export default function MobileControls() {
         style={{ 
           touchAction: "none", 
           backgroundColor: "rgba(200, 200, 200, 0.8)", 
-          border: "3px solid #1a1a2e",
           width: "100px",
           height: "100px",
           bottom: "26px",
           left: "26px",
         }}
       >
-        {/* Arrows - centered between outer edge and yellow center */}
+        {/* Arrows - using SVG with line body + arrowhead */}
         {/* Up arrow */}
-        <div style={{ position: "absolute", top: "2px", left: "50%", transform: "translateX(-50%)", fontSize: "14px", color: "#1a1a2e" }}>↑</div>
+        <div style={{ position: "absolute", top: "8px", left: "50%", transform: "translateX(-50%)" }}>
+          <svg width="14" height="18" viewBox="0 0 14 18" fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="7" y1="16" x2="7" y2="4" />
+            <polyline points="2 8 7 3 12 8" />
+          </svg>
+        </div>
         {/* Down arrow */}
-        <div style={{ position: "absolute", bottom: "5px", left: "50%", transform: "translateX(-50%)", fontSize: "14px", color: "#1a1a2e" }}>↓</div>
+        <div style={{ position: "absolute", bottom: "8px", left: "50%", transform: "translateX(-50%)" }}>
+          <svg width="14" height="18" viewBox="0 0 14 18" fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="7" y1="2" x2="7" y2="14" />
+            <polyline points="2 10 7 15 12 10" />
+          </svg>
+        </div>
         {/* Left arrow */}
-        <div style={{ position: "absolute", left: "5px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: "#1a1a2e" }}>←</div>
+        <div style={{ position: "absolute", left: "8px", top: "50%", transform: "translateY(-50%)" }}>
+          <svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="16" y1="7" x2="4" y2="7" />
+            <polyline points="8 2 3 7 8 12" />
+          </svg>
+        </div>
         {/* Right arrow */}
-        <div style={{ position: "absolute", right: "5px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: "#1a1a2e" }}>→</div>
+        <div style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)" }}>
+          <svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="2" y1="7" x2="14" y2="7" />
+            <polyline points="10 2 15 7 10 12" />
+          </svg>
+        </div>
         
         {/* Center knob */}
         <div
@@ -181,34 +200,34 @@ export default function MobileControls() {
         <button
           onTouchStart={handleUpStart}
           onTouchEnd={handleUpEnd}
-          className="rounded-full flex items-center justify-center font-bold"
+          className="rounded-full flex items-center justify-center"
           style={{ 
             touchAction: "none",
             backgroundColor: upPressed ? "rgba(180, 180, 180, 0.9)" : "rgba(200, 200, 200, 0.8)",
-            border: "3px solid #1a1a2e",
             width: "48px",
             height: "48px",
-            fontSize: "18px",
-            color: "#1a1a2e",
           }}
         >
-          ↑
+          <svg width="14" height="18" viewBox="0 0 14 18" fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="7" y1="16" x2="7" y2="4" />
+            <polyline points="2 8 7 3 12 8" />
+          </svg>
         </button>
         <button
           onTouchStart={handleDownStart}
           onTouchEnd={handleDownEnd}
-          className="rounded-full flex items-center justify-center font-bold"
+          className="rounded-full flex items-center justify-center"
           style={{ 
             touchAction: "none",
             backgroundColor: downPressed ? "rgba(180, 180, 180, 0.9)" : "rgba(200, 200, 200, 0.8)",
-            border: "3px solid #1a1a2e",
             width: "48px",
             height: "48px",
-            fontSize: "18px",
-            color: "#1a1a2e",
           }}
         >
-          ↓
+          <svg width="14" height="18" viewBox="0 0 14 18" fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="7" y1="2" x2="7" y2="14" />
+            <polyline points="2 10 7 15 12 10" />
+          </svg>
         </button>
       </div>
     </>

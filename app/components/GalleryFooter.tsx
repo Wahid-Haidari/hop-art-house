@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "./CartContext";
 import CartPage from "./CartPage";
 import GetFeaturedPage from "./GetFeaturedPage";
@@ -14,6 +14,17 @@ export default function GalleryFooter() {
   const [showAbout, setShowAbout] = useState(false);
   const isMobile = useMobile();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(false);
+
+  // Delay mobile header appearance by 2 seconds
+  useEffect(() => {
+    if (isMobile) {
+      const timer = setTimeout(() => {
+        setHeaderVisible(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile]);
 
   const handleNavigateToAbout = () => {
     setShowGetFeatured(false);
@@ -85,9 +96,10 @@ export default function GalleryFooter() {
         <div 
           className="fixed z-50 pointer-events-auto flex items-center"
           style={{
-            top: "20px",
+            top: headerVisible ? "20px" : "-60px",
             right: "20px",
             gap: "16px",
+            transition: "top 0.3s ease-in-out",
           }}
         >
           {/* Cart */}
