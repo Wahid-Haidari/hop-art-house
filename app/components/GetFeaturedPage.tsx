@@ -566,35 +566,37 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
               </div>
 
               {/* Submit Button */}
-              <button
-                type="submit"
-                className="cursor-pointer hover:opacity-80 flex items-center gap-2"
-                style={{
-                  backgroundColor: COLORS.primary,
-                  color: "black",
-                  border: "none",
-                  padding: "12px 48px",
-                  fontSize: "18px",
-                  fontFamily: "var(--font-avant-garde-medium)",
-                  borderRadius: "8px",
-                  marginTop: "16px",
-                }}
-              >
-                Submit
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              <div style={{ display: "flex", justifyContent: isMobile ? "flex-end" : "flex-start", width: "100%" }}>
+                <button
+                  type="submit"
+                  className="cursor-pointer hover:opacity-80 flex items-center gap-2"
+                  style={{
+                    backgroundColor: COLORS.primary,
+                    color: "black",
+                    border: "none",
+                    padding: "12px 48px",
+                    fontSize: "18px",
+                    fontFamily: "var(--font-avant-garde-medium)",
+                    borderRadius: "8px",
+                    marginTop: "16px",
+                  }}
                 >
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </button>
+                  Submit
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </button>
+              </div>
             </form>
           </>
         )}
