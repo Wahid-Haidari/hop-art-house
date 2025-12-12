@@ -53,8 +53,9 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
       <div 
         className="py-16" 
         style={{ 
-          paddingLeft: isMobile ? "8%" : "15%", 
-          paddingRight: isMobile ? "8%" : "10%" 
+          paddingLeft: isMobile ? "34px" : "15%", 
+          paddingRight: isMobile ? "34px" : "10%",
+          paddingTop: isMobile ? "121px" : "64px",
         }}
       >
         {/* First Section - Hop Art House */}
@@ -71,7 +72,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
                 fontFamily: "var(--font-avant-garde-medium)",
                 lineHeight: "100%",
                 color: "black",
-                marginBottom: "24px",
+                marginBottom: isMobile ? "16px" : "24px",
                 letterSpacing: "2px",
               }}
             >
@@ -85,7 +86,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
                 fontFamily: "var(--font-avant-garde-medium)",
                 lineHeight: "130%",
                 color: "black",
-                marginBottom: "32px",
+                marginBottom: isMobile ? "10px" : "32px",
               }}
             >
               It's not the paint, the brush, or the code, it's the human pulse behind them.
@@ -141,7 +142,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             /* Mobile Layout - Full width photo with name overlay, then text below */
             <>
               {/* Photo with name overlay - full width edge to edge */}
-              <div style={{ position: "relative", marginLeft: "calc(-8vw)", width: "100vw" }}>
+              <div style={{ position: "relative", marginLeft: "-34px", width: "100vw" }}>
                 <img
                   src="/founders/Hamid.png"
                   alt="Hamid Mubariz"
@@ -286,7 +287,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             /* Mobile Layout - Full width photo with name overlay, then text below */
             <>
               {/* Photo with name overlay - full width edge to edge */}
-              <div style={{ position: "relative", marginLeft: "calc(-8vw)", width: "100vw" }}>
+              <div style={{ position: "relative", marginLeft: "-34px", width: "100vw" }}>
                 <img
                   src="/founders/Grace.png"
                   alt="Grace Sun"
@@ -431,7 +432,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             /* Mobile Layout - Full width photo with name overlay, then text below */
             <>
               {/* Photo with name overlay - full width edge to edge */}
-              <div style={{ position: "relative", marginLeft: "calc(-8vw)", width: "100vw" }}>
+              <div style={{ position: "relative", marginLeft: "-34px", width: "100vw" }}>
                 <img
                   src="/founders/Wahid.png"
                   alt="Wahid Haidari"
