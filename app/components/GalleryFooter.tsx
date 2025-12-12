@@ -94,28 +94,31 @@ export default function GalleryFooter() {
       {/* Mobile: Cart + Hamburger Menu */}
       {isMobile && (
         <div 
-          className="fixed z-50 pointer-events-auto flex items-center"
+          className="fixed z-50 pointer-events-auto flex items-center select-none"
           style={{
             top: headerVisible ? "20px" : "-60px",
             right: "20px",
             gap: "16px",
             transition: "top 0.3s ease-in-out",
+            userSelect: "none",
+            WebkitUserSelect: "none",
           }}
         >
           {/* Cart */}
           <div 
             onClick={() => setShowCartPage(true)}
-            className="cursor-pointer hover:opacity-70"
+            className="cursor-pointer hover:opacity-70 select-none"
             style={{ position: "relative" }}
           >
             <img
               src="/Cart.svg"
-              style={{ width: "32px", height: "27px" }}
+              style={{ width: "32px", height: "27px", pointerEvents: "none" }}
               alt="cart"
+              draggable={false}
             />
             {getTotalItems() > 0 && (
               <span
-                className="absolute flex items-center justify-center"
+                className="absolute flex items-center justify-center select-none"
                 style={{ 
                   top: "calc(50% - 1px)",
                   left: "calc(50% + 5px)",
@@ -134,8 +137,14 @@ export default function GalleryFooter() {
           {/* Hamburger Menu Button */}
           <div 
             onClick={() => setMenuOpen(!menuOpen)}
-            className="cursor-pointer flex flex-col justify-center items-center"
-            style={{ width: "30px", height: "30px", gap: "5px" }}
+            className="cursor-pointer flex flex-col justify-center items-center select-none"
+            style={{ 
+              width: "30px", 
+              height: "30px", 
+              gap: "5px",
+              userSelect: "none",
+              WebkitUserSelect: "none",
+            }}
           >
             <div style={{ width: "24px", height: "2px", backgroundColor: "black" }} />
             <div style={{ width: "24px", height: "2px", backgroundColor: "black" }} />

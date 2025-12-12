@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -31,12 +31,13 @@ const avantGardeBook = localFont({
 export const metadata: Metadata = {
   title: "Hop Art House",
   description: "Where human creativity lives and the people who value it come together.",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 //Destructure children from props, and the props must match the type Readonly<{ children: React.ReactNode }>.

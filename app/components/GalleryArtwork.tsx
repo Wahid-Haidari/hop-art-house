@@ -106,10 +106,15 @@ export default function GalleryArtwork({
       mouseDownPos = { x: event.clientX, y: event.clientY };
     };
 
-    const handleCanvasClick = (event: MouseEvent) => {
-      // Check if this was a drag (mouse moved significantly)
-      const dx = event.clientX - mouseDownPos.x;
-      const dy = event.clientY - mouseDownPos.y;
+    const handleTouchStart = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      mouseDownPos = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const performRaycast = (clientX: number, clientY: number) => {
+      // Check if this was a drag (moved significantly)
+      const dx = clientX - mouseDownPos.x;
+      const dy = clientY - mouseDownPos.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       
       if (distance > DRAG_THRESHOLD) {
@@ -122,8 +127,8 @@ export default function GalleryArtwork({
 
       // Get canvas position
       const rect = gl.domElement.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
 
       // Normalize mouse coordinates to [-1, 1]
       mouse.x = (x / rect.width) * 2 - 1;
@@ -154,12 +159,28 @@ export default function GalleryArtwork({
       }
     };
 
+    const handleCanvasClick = (event: MouseEvent) => {
+      performRaycast(event.clientX, event.clientY);
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      // Use changedTouches for the touch that ended
+      const touch = event.changedTouches[0];
+      if (touch) {
+        performRaycast(touch.clientX, touch.clientY);
+      }
+    };
+
     // Attach listeners to canvas element
     gl.domElement.addEventListener("mousedown", handleMouseDown);
     gl.domElement.addEventListener("click", handleCanvasClick);
+    gl.domElement.addEventListener("touchstart", handleTouchStart, { passive: true });
+    gl.domElement.addEventListener("touchend", handleTouchEnd);
     return () => {
       gl.domElement.removeEventListener("mousedown", handleMouseDown);
       gl.domElement.removeEventListener("click", handleCanvasClick);
+      gl.domElement.removeEventListener("touchstart", handleTouchStart);
+      gl.domElement.removeEventListener("touchend", handleTouchEnd);
     };
   }, [camera, gl, art, artistCard, infoCard, onOpenOverlay]);
 

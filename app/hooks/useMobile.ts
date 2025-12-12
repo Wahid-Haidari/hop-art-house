@@ -1,28 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 
 /**
  * Custom hook to detect if the user is on a mobile device.
- * Checks both user agent and screen width.
+ * Uses useSyncExternalStore for proper SSR hydration.
  * @returns {boolean} Whether the device is mobile
  */
 export function useMobile(): boolean {
-  const [isMobile, setIsMobile] = useState(false);
+  const subscribe = (callback: () => void) => {
+    window.addEventListener("resize", callback);
+    return () => window.removeEventListener("resize", callback);
+  };
 
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent
-        ) || window.innerWidth < 768;
-      setIsMobile(mobile);
-    };
+  const getSnapshot = () => {
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth < 768
+    );
+  };
 
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  const getServerSnapshot = () => false;
 
-  return isMobile;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

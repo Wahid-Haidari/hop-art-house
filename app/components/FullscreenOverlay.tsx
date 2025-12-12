@@ -10,13 +10,17 @@ interface FullscreenOverlayProps {
 export default function FullscreenOverlay({ image, onClose }: FullscreenOverlayProps) {
   useEffect(() => {
     if (image) {
-      // Force exit pointer lock
-      document.exitPointerLock();
-      
-      // Retry after a small delay to ensure it takes effect
-      setTimeout(() => {
+      // Force exit pointer lock (only if supported)
+      if (document.exitPointerLock) {
         document.exitPointerLock();
-      }, 50);
+        
+        // Retry after a small delay to ensure it takes effect
+        setTimeout(() => {
+          if (document.exitPointerLock) {
+            document.exitPointerLock();
+          }
+        }, 50);
+      }
       
       document.body.style.cursor = "auto";
     }
