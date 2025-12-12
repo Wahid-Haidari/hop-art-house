@@ -183,7 +183,22 @@ export default function MobileControls() {
         />
       </div>
 
-      {/* Look Control Area - Top portion of screen (leaving bottom for 3D UI buttons) */}
+      {/* Look Control Area - Bottom center between joystick and up/down buttons */}
+      <div
+        onTouchStart={handleLookStart}
+        onTouchMove={handleLookMove}
+        onTouchEnd={handleLookEnd}
+        className="fixed z-40"
+        style={{ 
+          touchAction: "none", 
+          bottom: "0",
+          left: "140px",
+          right: "90px",
+          height: "160px",
+        }}
+      />
+
+      {/* Look Control Area - Top portion of screen */}
       <div
         onTouchStart={handleLookStart}
         onTouchMove={handleLookMove}

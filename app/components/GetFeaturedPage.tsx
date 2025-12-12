@@ -78,10 +78,11 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
       style={{ backgroundColor: "white" }}
     >
       <div 
-        className="min-h-screen flex flex-col py-16 pb-32" 
+        className="min-h-screen flex flex-col pb-32" 
         style={{ 
-          paddingLeft: isMobile ? "8%" : "25%", 
-          paddingRight: isMobile ? "8%" : "10%",
+          paddingLeft: isMobile ? "34px" : "25%", 
+          paddingRight: isMobile ? "34px" : "10%",
+          paddingTop: isMobile ? "121px" : "64px",
           alignItems: "flex-start",
         }}
       >
