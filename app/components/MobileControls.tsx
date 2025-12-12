@@ -164,13 +164,13 @@ export default function MobileControls() {
         />
       </div>
 
-      {/* Look Control Area - Right Side */}
+      {/* Look Control Area - Top portion of screen (leaving bottom for 3D UI buttons) */}
       <div
         onTouchStart={handleLookStart}
         onTouchMove={handleLookMove}
         onTouchEnd={handleLookEnd}
-        className="fixed right-0 top-0 w-1/2 h-full z-40"
-        style={{ touchAction: "none" }}
+        className="fixed left-0 top-0 w-full z-40"
+        style={{ touchAction: "none", height: "40%" }}
       />
 
       {/* Up/Down Buttons - Bottom Right */}

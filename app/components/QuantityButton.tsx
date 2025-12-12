@@ -2,11 +2,10 @@
 
 import { Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import * as THREE from "three";
 import { COLORS } from "../colors";
 
-// Create a rounded rectangle shape
 function createRoundedRectShape(width: number, height: number, radius: number) {
   const shape = new THREE.Shape();
   const x = -width / 2;
@@ -27,6 +26,10 @@ function createRoundedRectShape(width: number, height: number, radius: number) {
 
 const BORDER_RADIUS = 0.025;
 const BORDER_WIDTH = 0.005;
+const FONT_SIZE = 0.06;
+const ARROW_WIDTH = 0.018;
+const ARROW_HEIGHT = 0.02;
+const ARROW_GROUP_WIDTH = 0.06;
 
 interface QuantityButtonProps {
   position: [number, number, number];
@@ -45,122 +48,124 @@ export default function QuantityButton({
 }: QuantityButtonProps) {
   const { camera, gl } = useThree();
   const [quantity, setQuantity] = useState(1);
-  const quantityTextRef = useRef<any>(null);
-  const [quantityTextWidth, setQuantityTextWidth] = useState(0);
-  const minusButtonRef = useRef<THREE.Mesh>(null);
   const plusButtonRef = useRef<THREE.Mesh>(null);
+  const minusButtonRef = useRef<THREE.Mesh>(null);
+  const quantityRef = useRef(quantity);
 
-  const FONT_SIZE = 0.06;
-  const ARROW_WIDTH = 0.018;
-  const ARROW_HEIGHT = 0.02;
-  const ARROW_GROUP_WIDTH = 0.06;
-  
-  // Position number on left, arrows on right
+  // Keep ref in sync with state for use in event handlers
+  useEffect(() => {
+    quantityRef.current = quantity;
+  }, [quantity]);
+
   const numberX = -width / 2 + 0.08;
   const arrowGroupX = width / 2 - 0.08;
   const upArrowY = 0.02;
   const downArrowY = -0.02;
 
-  const handleQuantityChange = (newQuantity: number) => {
-    setQuantity(newQuantity);
-    if (onQuantityChange) {
-      onQuantityChange(newQuantity);
-    }
-  };
-
-  // Setup raycasting for minus button
+  // Setup raycasting for button clicks/touches
   useEffect(() => {
-    const handleCanvasClick = (event: MouseEvent) => {
-      if (!minusButtonRef.current) return;
+    let lastTouchTime = 0;
 
+    const handleInteraction = (clientX: number, clientY: number) => {
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
-
       const rect = gl.domElement.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
 
-      mouse.x = (x / rect.width) * 2 - 1;
-      mouse.y = -(y / rect.height) * 2 + 1;
-
+      mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObject(minusButtonRef.current);
 
-      if (intersects.length > 0) {
-        handleQuantityChange(Math.max(1, quantity - 1));
+      // Check plus button
+      if (plusButtonRef.current) {
+        plusButtonRef.current.updateMatrixWorld(true);
+        if (raycaster.intersectObject(plusButtonRef.current, true).length > 0) {
+          const newQuantity = quantityRef.current + 1;
+          setQuantity(newQuantity);
+          onQuantityChange?.(newQuantity);
+          return;
+        }
+      }
+
+      // Check minus button
+      if (minusButtonRef.current) {
+        minusButtonRef.current.updateMatrixWorld(true);
+        if (raycaster.intersectObject(minusButtonRef.current, true).length > 0) {
+          const newQuantity = Math.max(1, quantityRef.current - 1);
+          setQuantity(newQuantity);
+          onQuantityChange?.(newQuantity);
+          return;
+        }
       }
     };
 
-    gl.domElement.addEventListener("click", handleCanvasClick);
-    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
-  }, [camera, gl, quantity]);
+    const handleClick = (event: MouseEvent) => {
+      if (Date.now() - lastTouchTime < 500) return;
+      handleInteraction(event.clientX, event.clientY);
+    };
 
-  // Setup raycasting for plus button
-  useEffect(() => {
-    const handleCanvasClick = (event: MouseEvent) => {
-      if (!plusButtonRef.current) return;
-
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-
-      const rect = gl.domElement.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-
-      mouse.x = (x / rect.width) * 2 - 1;
-      mouse.y = -(y / rect.height) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObject(plusButtonRef.current);
-
-      if (intersects.length > 0) {
-        handleQuantityChange(quantity + 1);
+    const handleTouchEnd = (event: TouchEvent) => {
+      lastTouchTime = Date.now();
+      if (event.changedTouches.length > 0) {
+        const touch = event.changedTouches[0];
+        handleInteraction(touch.clientX, touch.clientY);
       }
     };
 
-    gl.domElement.addEventListener("click", handleCanvasClick);
-    return () => gl.domElement.removeEventListener("click", handleCanvasClick);
-  }, [camera, gl, quantity]);
+    gl.domElement.addEventListener("click", handleClick);
+    gl.domElement.addEventListener("touchend", handleTouchEnd);
+    return () => {
+      gl.domElement.removeEventListener("click", handleClick);
+      gl.domElement.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [camera, gl, onQuantityChange]);
 
-  
+  // Memoized geometries
+  const borderGeometry = useMemo(() => 
+    new THREE.ShapeGeometry(createRoundedRectShape(width, height, BORDER_RADIUS)), 
+    [width, height]
+  );
 
-
-
-  // Create geometries for rounded rectangles
-  const borderGeometry = useMemo(() => {
-    const shape = createRoundedRectShape(width, height, BORDER_RADIUS);
-    return new THREE.ShapeGeometry(shape);
-  }, [width, height]);
-
-  const fillGeometry = useMemo(() => {
-    const shape = createRoundedRectShape(
+  const fillGeometry = useMemo(() => 
+    new THREE.ShapeGeometry(createRoundedRectShape(
       width - BORDER_WIDTH * 2,
       height - BORDER_WIDTH * 2,
       BORDER_RADIUS - BORDER_WIDTH
-    );
-    return new THREE.ShapeGeometry(shape);
-  }, [width, height]);
+    )), 
+    [width, height]
+  );
+
+  const upArrowShape = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, ARROW_HEIGHT / 2);
+    shape.lineTo(-ARROW_WIDTH, -ARROW_HEIGHT / 2);
+    shape.lineTo(ARROW_WIDTH, -ARROW_HEIGHT / 2);
+    shape.closePath();
+    return shape;
+  }, []);
+
+  const downArrowShape = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, -ARROW_HEIGHT / 2);
+    shape.lineTo(-ARROW_WIDTH, ARROW_HEIGHT / 2);
+    shape.lineTo(ARROW_WIDTH, ARROW_HEIGHT / 2);
+    shape.closePath();
+    return shape;
+  }, []);
 
   return (
     <group position={position} rotation={rotation}>
-      {/* Black border (flat) */}
+      {/* Border */}
       <mesh position={[0, 0, 0.01]} geometry={borderGeometry}>
         <meshBasicMaterial color="black" toneMapped={false} />
       </mesh>
 
-      {/* White fill (flat, slightly in front) */}
+      {/* Background */}
       <mesh position={[0, 0, 0.011]} geometry={fillGeometry}>
         <meshBasicMaterial color={COLORS.white} toneMapped={false} />
       </mesh>
 
       {/* Quantity Number */}
       <Text
-        ref={quantityTextRef}
-        onSync={(text) => {
-          const bbox = text.geometry.boundingBox;
-          const width = bbox.max.x - bbox.min.x;
-          setQuantityTextWidth(width);
-        }}
         position={[numberX, 0, 0.012]}
         fontSize={FONT_SIZE}
         font="/font/ITC Avant Garde Gothic Std Book.otf"
@@ -170,47 +175,27 @@ export default function QuantityButton({
         {quantity}
       </Text>
 
-      {/* Up Arrow (clickable area) */}
-      <mesh
-        ref={plusButtonRef}
-        position={[arrowGroupX, upArrowY, 0.012]}
-      >
+      {/* Up Arrow - clickable area */}
+      <mesh ref={plusButtonRef} position={[arrowGroupX, upArrowY, 0.012]}>
         <planeGeometry args={[ARROW_GROUP_WIDTH, height * 0.45]} />
-        <meshBasicMaterial transparent opacity={0} />
+        <meshBasicMaterial color={COLORS.white} toneMapped={false} />
       </mesh>
       
-      {/* Up Arrow Triangle (flat) */}
+      {/* Up Arrow - triangle */}
       <mesh position={[arrowGroupX, upArrowY, 0.013]}>
-        <shapeGeometry args={[(() => {
-          const shape = new THREE.Shape();
-          shape.moveTo(0, ARROW_HEIGHT / 2);
-          shape.lineTo(-ARROW_WIDTH, -ARROW_HEIGHT / 2);
-          shape.lineTo(ARROW_WIDTH, -ARROW_HEIGHT / 2);
-          shape.closePath();
-          return shape;
-        })()]} />
+        <shapeGeometry args={[upArrowShape]} />
         <meshBasicMaterial color={COLORS.black} toneMapped={false} />
       </mesh>
 
-      {/* Down Arrow (clickable area) */}
-      <mesh
-        ref={minusButtonRef}
-        position={[arrowGroupX, downArrowY, 0.012]}
-      >
+      {/* Down Arrow - clickable area */}
+      <mesh ref={minusButtonRef} position={[arrowGroupX, downArrowY, 0.012]}>
         <planeGeometry args={[ARROW_GROUP_WIDTH, height * 0.45]} />
-        <meshBasicMaterial transparent opacity={0} />
+        <meshBasicMaterial color={COLORS.white} toneMapped={false} />
       </mesh>
       
-      {/* Down Arrow Triangle (flat) */}
+      {/* Down Arrow - triangle */}
       <mesh position={[arrowGroupX, downArrowY, 0.013]}>
-        <shapeGeometry args={[(() => {
-          const shape = new THREE.Shape();
-          shape.moveTo(0, -ARROW_HEIGHT / 2);
-          shape.lineTo(-ARROW_WIDTH, ARROW_HEIGHT / 2);
-          shape.lineTo(ARROW_WIDTH, ARROW_HEIGHT / 2);
-          shape.closePath();
-          return shape;
-        })()]} />
+        <shapeGeometry args={[downArrowShape]} />
         <meshBasicMaterial color={COLORS.black} toneMapped={false} />
       </mesh>
     </group>

@@ -3,6 +3,7 @@
 import { useCart } from "./CartContext";
 import { SIZES } from "../sizes";
 import { COLORS } from "../colors";
+import { useMobile } from "../hooks/useMobile";
 
 interface CartPageProps {
   onClose: () => void;
@@ -11,23 +12,26 @@ interface CartPageProps {
 
 export default function CartPage({ onClose, onCheckout }: CartPageProps) {
   const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems } = useCart();
-
+  const isMobile = useMobile();
   const totalPrice = getTotalPrice();
 
   return (
-    <div className="fixed inset-0 z-[9999] flex justify-end">
+    <div className="fixed inset-0 z-[9999] flex" style={{ justifyContent: isMobile ? 'center' : 'flex-end' }}>
       {/* Backdrop - click to close */}
       <div 
         className="absolute inset-0" 
         onClick={onClose}
       />
-      
-      {/* Side Panel */}
+
+      {/* Cart Panel */}
       <div 
         className="relative bg-white h-full flex flex-col shadow-2xl"
         style={{ 
-          width: "400px",
+          width: isMobile ? '100vw' : '400px',
+          maxWidth: '100vw',
+          height: '100vh',
           fontFamily: "var(--font-avant-garde-medium)",
+          borderRadius: isMobile ? 0 : undefined,
         }}
       >
         {/* Header */}
