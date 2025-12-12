@@ -173,7 +173,10 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
         </div>
 
         {/* Footer with Subtotal and Checkout */}
-        <div className="px-6 py-5">
+        <div 
+          className="px-6 py-5"
+          style={{ paddingBottom: isMobile ? "env(safe-area-inset-bottom, 24px)" : "20px" }}
+        >
           <div className="flex justify-between items-center mb-4">
             <span 
               className="text-black"
@@ -203,6 +206,7 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
               fontSize: "18px",
               fontFamily: "var(--font-avant-garde-medium)",
               color: "black",
+              marginBottom: isMobile ? "16px" : "0",
             }}
           >
             Check Out

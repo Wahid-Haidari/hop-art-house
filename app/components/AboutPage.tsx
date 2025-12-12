@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { COLORS } from "../colors";
 import { useCart } from "./CartContext";
 import { useMobile } from "../hooks/useMobile";
@@ -15,24 +15,59 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
   const { getTotalItems } = useCart();
   const isMobile = useMobile();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handle scroll to show/hide mobile header
+  useEffect(() => {
+    if (!isMobile) return;
+    
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const currentScrollY = container.scrollTop;
+      
+      if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+        // Scrolling down
+        setHeaderVisible(false);
+      } else {
+        // Scrolling up
+        setHeaderVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [isMobile]);
   
   return (
     <div 
+      ref={scrollContainerRef}
       className="fixed inset-0 z-[3000] overflow-y-auto"
       style={{ backgroundColor: COLORS.primary }}
     >
-      <div className="py-16" style={{ paddingLeft: "15%", paddingRight: "10%" }}>
+      <div 
+        className="py-16" 
+        style={{ 
+          paddingLeft: isMobile ? "8%" : "15%", 
+          paddingRight: isMobile ? "8%" : "10%" 
+        }}
+      >
         {/* First Section - Hop Art House */}
         <div 
-          className="flex items-start gap-16 mb-24"
+          className={`flex ${isMobile ? 'flex-col' : 'items-start gap-16'} mb-24`}
           style={{ maxWidth: "1200px" }}
         >
           {/* Left Content */}
-          <div style={{ maxWidth: "600px" }}>
+          <div style={{ maxWidth: isMobile ? "100%" : "600px" }}>
             {/* Title */}
             <h1
               style={{
-                fontSize: "48px",
+                fontSize: isMobile ? "36px" : "48px",
                 fontFamily: "var(--font-avant-garde-medium)",
                 lineHeight: "100%",
                 color: "black",
@@ -46,7 +81,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             {/* Subtitle */}
             <h2
               style={{
-                fontSize: "24px",
+                fontSize: isMobile ? "20px" : "24px",
                 fontFamily: "var(--font-avant-garde-medium)",
                 lineHeight: "130%",
                 color: "black",
@@ -82,270 +117,586 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             </p>
           </div>
 
-          {/* Right Image - Frog Illustration */}
-          <div 
-            className="flex-shrink-0"
-            style={{ width: "350px", height: "350px" }}
-          >
-            {/* Add Frog Illustration.svg to public folder */}
-            <img
-              src="/Frog Logo.svg"
-              alt="Hop Art House Frog"
-              className="w-full h-full object-contain"
-            />
-          </div>
+          {/* Right Image - Frog Illustration (Desktop only) */}
+          {!isMobile && (
+            <div 
+              className="flex-shrink-0"
+              style={{ width: "350px", height: "350px" }}
+            >
+              <img
+                src="/Frog Logo.svg"
+                alt="Hop Art House Frog"
+                className="w-full h-full object-contain"
+              />
+            </div>
+          )}
         </div>
 
         {/* Second Section - Hamid Mubariz */}
         <div 
-          className="flex items-start gap-16 mb-24"
+          className={`flex ${isMobile ? 'flex-col' : 'items-start gap-16'} mb-24`}
           style={{ maxWidth: "1200px" }}
         >
-          {/* Left Content */}
-          <div style={{ maxWidth: "600px" }}>
-            {/* Title */}
-            <h1
-              style={{
-                fontSize: "48px",
-                fontFamily: "var(--font-avant-garde-medium)",
-                lineHeight: "100%",
-                color: "black",
-                marginBottom: "24px",
-                letterSpacing: "2px",
-              }}
-            >
-              HAMID MUBARIZ
-            </h1>
+          {isMobile ? (
+            /* Mobile Layout - Full width photo with name overlay, then text below */
+            <>
+              {/* Photo with name overlay - full width edge to edge */}
+              <div style={{ position: "relative", marginLeft: "calc(-8vw)", width: "100vw" }}>
+                <img
+                  src="/founders/Hamid.png"
+                  alt="Hamid Mubariz"
+                  className="w-full"
+                  style={{ display: "block" }}
+                />
+                {/* Name and Title overlay at bottom of image */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "24px",
+                    left: "24px",
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontSize: "28px",
+                      fontFamily: "var(--font-avant-garde-medium)",
+                      lineHeight: "110%",
+                      color: "white",
+                      letterSpacing: "1px",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    HAMID MUBARIZ
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: "18px",
+                      fontFamily: "var(--font-avant-garde-book)",
+                      color: "white",
+                    }}
+                  >
+                    Creative Director
+                  </p>
+                </div>
+              </div>
+              
+              {/* Text content below */}
+              <div style={{ marginTop: "24px" }}>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
+                    color: "black",
+                    marginBottom: "24px",
+                  }}
+                >
+                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+                </p>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
+                    color: "black",
+                  }}
+                >
+                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
+                </p>
+              </div>
+            </>
+          ) : (
+            /* Desktop Layout - Text on left, photo on right */
+            <>
+              {/* Left Content */}
+              <div style={{ maxWidth: "600px" }}>
+                {/* Title */}
+                <h1
+                  style={{
+                    fontSize: "48px",
+                    fontFamily: "var(--font-avant-garde-medium)",
+                    lineHeight: "100%",
+                    color: "black",
+                    marginBottom: "8px",
+                    letterSpacing: "2px",
+                  }}
+                >
+                  HAMID MUBARIZ
+                </h1>
+                {/* Role */}
+                <p
+                  style={{
+                    fontSize: "18px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    color: "black",
+                    marginBottom: "24px",
+                  }}
+                >
+                  Creative Director
+                </p>
 
-            {/* First Paragraph */}
-            <p
-              style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-avant-garde-book)",
-                lineHeight: "170%",
-                color: "black",
-                marginBottom: "24px",
-              }}
-            >
-              I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
-            </p>
+                {/* First Paragraph */}
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
+                    color: "black",
+                    marginBottom: "24px",
+                  }}
+                >
+                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+                </p>
 
-            {/* Second Paragraph */}
-            <p
-              style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-avant-garde-book)",
-                lineHeight: "170%",
-                color: "black",
-              }}
-            >
-              Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
-            </p>
-          </div>
+                {/* Second Paragraph */}
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
+                    color: "black",
+                  }}
+                >
+                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
+                </p>
+              </div>
 
-          {/* Right Image - Hamid Photo */}
-          <div 
-            className="flex-shrink-0"
-            style={{ width: "300px", height: "380px" }}
-          >
-            <img
-              src="/hamid.jpg"
-              alt="Hamid Mubariz"
-              className="w-full h-full object-cover"
-              style={{ border: "4px solid black" }}
-            />
-          </div>
+              {/* Right Image - Hamid Photo */}
+              <div 
+                className="flex-shrink-0"
+                style={{ width: "300px", height: "380px", overflow: "hidden" }}
+              >
+                <img
+                  src="/founders/Hamid.png"
+                  alt="Hamid Mubariz"
+                  className="w-full h-full object-cover"
+                  style={{ border: "4px solid black", objectPosition: "right" }}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* Third Section - Grace Sun */}
         <div 
-          className="flex items-start gap-16 mb-16"
+          className={`flex ${isMobile ? 'flex-col' : 'items-start gap-16'} mb-16`}
           style={{ maxWidth: "1200px" }}
         >
-          {/* Left Content */}
-          <div style={{ maxWidth: "600px" }}>
-            {/* Title */}
-            <h1
-              style={{
-                fontSize: "48px",
-                fontFamily: "var(--font-avant-garde-medium)",
-                lineHeight: "100%",
-                color: "black",
-                marginBottom: "24px",
-                letterSpacing: "2px",
-              }}
-            >
-              GRACE SUN
-            </h1>
-
-            {/* First Paragraph */}
-            <p
-              style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-avant-garde-book)",
-                lineHeight: "170%",
-                color: "black",
-                marginBottom: "24px",
-              }}
-            >
-              I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
-            </p>
-
-            {/* Second Paragraph */}
-            <p
-              style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-avant-garde-book)",
-                lineHeight: "170%",
-                color: "black",
-              }}
-            >
-              Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
-            </p>
-          </div>
-
-          {/* Right Image - Grace Photo */}
-          <div 
-            className="flex-shrink-0"
-            style={{ width: "300px", height: "380px" }}
-          >
-            <img
-              src="/grace.jpg"
-              alt="Grace Sun"
-              className="w-full h-full object-cover"
-              style={{ border: "4px solid black" }}
-            />
-          </div>
-        </div>
-
-        {/* Footer Section */}
-        <div className="mt-24">
-          {/* Black Horizontal Line */}
-          <div 
-            style={{ 
-              width: "100vw", 
-              height: "2px", 
-              backgroundColor: "black",
-              marginBottom: "60px",
-              marginLeft: "-15vw",
-            }} 
-          />
-
-          {/* Footer Content */}
-          <div 
-            className="flex items-center justify-center gap-32"
-            style={{ paddingBottom: "60px" }}
-          >
-            {/* Logo Section */}
-            <div className="flex items-center gap-6">
-              {/* Frog Logo */}
-              <div style={{ width: "120px", height: "120px" }}>
+          {isMobile ? (
+            /* Mobile Layout - Full width photo with name overlay, then text below */
+            <>
+              {/* Photo with name overlay - full width edge to edge */}
+              <div style={{ position: "relative", marginLeft: "calc(-8vw)", width: "100vw" }}>
                 <img
-                  src="/Frog Logo.svg"
-                  alt="Hop Art House Frog"
-                  className="w-full h-full object-contain"
+                  src="/founders/Grace.png"
+                  alt="Grace Sun"
+                  className="w-full"
+                  style={{ display: "block" }}
                 />
+                {/* Name and Title overlay at bottom of image */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "24px",
+                    left: "24px",
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontSize: "28px",
+                      fontFamily: "var(--font-avant-garde-medium)",
+                      lineHeight: "110%",
+                      color: "white",
+                      letterSpacing: "1px",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    GRACE SUN
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: "18px",
+                      fontFamily: "var(--font-avant-garde-book)",
+                      color: "white",
+                    }}
+                  >
+                    Co-Founder
+                  </p>
+                </div>
               </div>
-              {/* Text Logo */}
-              <div>
-                <h3
-                  style={{
-                    fontSize: "28px",
-                    fontFamily: "var(--font-avant-garde-medium)",
-                    lineHeight: "100%",
-                    color: "black",
-                    marginBottom: "4px",
-                  }}
-                >
-                  HOP
-                </h3>
-                <h3
-                  style={{
-                    fontSize: "28px",
-                    fontFamily: "var(--font-avant-garde-medium)",
-                    lineHeight: "100%",
-                    color: "black",
-                    marginBottom: "4px",
-                  }}
-                >
-                  ART
-                </h3>
-                <h3
-                  style={{
-                    fontSize: "28px",
-                    fontFamily: "var(--font-avant-garde-medium)",
-                    lineHeight: "100%",
-                    color: "black",
-                    marginBottom: "4px",
-                  }}
-                >
-                  HOUSE
-                </h3>
+              
+              {/* Text content below */}
+              <div style={{ marginTop: "24px" }}>
                 <p
                   style={{
-                    fontSize: "10px",
+                    fontSize: "16px",
                     fontFamily: "var(--font-avant-garde-book)",
-                    letterSpacing: "2px",
+                    lineHeight: "170%",
+                    color: "black",
+                    marginBottom: "24px",
+                  }}
+                >
+                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+                </p>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
                     color: "black",
                   }}
                 >
-                  EXPRESS & INSPIRE
+                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
                 </p>
               </div>
-            </div>
+            </>
+          ) : (
+            /* Desktop Layout - Text on left, photo on right */
+            <>
+              {/* Left Content */}
+              <div style={{ maxWidth: "600px" }}>
+                {/* Title */}
+                <h1
+                  style={{
+                    fontSize: "48px",
+                    fontFamily: "var(--font-avant-garde-medium)",
+                    lineHeight: "100%",
+                    color: "black",
+                    marginBottom: "8px",
+                    letterSpacing: "2px",
+                  }}
+                >
+                  GRACE SUN
+                </h1>
+                {/* Role */}
+                <p
+                  style={{
+                    fontSize: "18px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    color: "black",
+                    marginBottom: "24px",
+                  }}
+                >
+                  Co-Founder
+                </p>
 
-            {/* Navigation Links */}
-            <div className="flex flex-col items-center gap-4">
-              <span
-                onClick={onClose}
-                className="cursor-pointer hover:opacity-70"
-                style={{
-                  fontSize: "16px",
-                  fontFamily: "var(--font-avant-garde-book)",
-                  color: "black",
-                }}
+                {/* First Paragraph */}
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
+                    color: "black",
+                    marginBottom: "24px",
+                  }}
+                >
+                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+                </p>
+
+                {/* Second Paragraph */}
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
+                    color: "black",
+                  }}
+                >
+                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
+                </p>
+              </div>
+
+              {/* Right Image - Grace Photo */}
+              <div 
+                className="flex-shrink-0"
+                style={{ width: "300px", height: "380px", overflow: "hidden" }}
               >
-                Home
-              </span>
-              <a
-                href="#order"
-                className="hover:opacity-70"
-                style={{
-                  fontSize: "16px",
-                  fontFamily: "var(--font-avant-garde-book)",
-                  color: "black",
-                  textDecoration: "none",
-                }}
+                <img
+                  src="/founders/Grace.png"
+                  alt="Grace Sun"
+                  className="w-full h-full object-cover"
+                  style={{ border: "4px solid black", objectPosition: "right" }}
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Fourth Section - Wahid Haidari */}
+        <div 
+          className={`flex ${isMobile ? 'flex-col' : 'items-start gap-16'} mb-16`}
+          style={{ maxWidth: "1200px" }}
+        >
+          {isMobile ? (
+            /* Mobile Layout - Full width photo with name overlay, then text below */
+            <>
+              {/* Photo with name overlay - full width edge to edge */}
+              <div style={{ position: "relative", marginLeft: "calc(-8vw)", width: "100vw" }}>
+                <img
+                  src="/founders/Wahid.png"
+                  alt="Wahid Haidari"
+                  className="w-full"
+                  style={{ display: "block" }}
+                />
+                {/* Name and Title overlay at bottom of image */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "24px",
+                    left: "24px",
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontSize: "28px",
+                      fontFamily: "var(--font-avant-garde-medium)",
+                      lineHeight: "110%",
+                      color: "white",
+                      letterSpacing: "1px",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    WAHID HAIDARI
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: "18px",
+                      fontFamily: "var(--font-avant-garde-book)",
+                      color: "white",
+                    }}
+                  >
+                    Technology Director
+                  </p>
+                </div>
+              </div>
+              
+              {/* Text content below */}
+              <div style={{ marginTop: "24px" }}>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
+                    color: "black",
+                    marginBottom: "24px",
+                  }}
+                >
+                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+                </p>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
+                    color: "black",
+                  }}
+                >
+                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
+                </p>
+              </div>
+            </>
+          ) : (
+            /* Desktop Layout - Text on left, photo on right */
+            <>
+              {/* Left Content */}
+              <div style={{ maxWidth: "600px" }}>
+                {/* Title */}
+                <h1
+                  style={{
+                    fontSize: "48px",
+                    fontFamily: "var(--font-avant-garde-medium)",
+                    lineHeight: "100%",
+                    color: "black",
+                    marginBottom: "8px",
+                    letterSpacing: "2px",
+                  }}
+                >
+                  WAHID HAIDARI
+                </h1>
+                {/* Role */}
+                <p
+                  style={{
+                    fontSize: "18px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    color: "black",
+                    marginBottom: "24px",
+                  }}
+                >
+                  Technology Director
+                </p>
+
+                {/* First Paragraph */}
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
+                    color: "black",
+                    marginBottom: "24px",
+                  }}
+                >
+                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+                </p>
+
+                {/* Second Paragraph */}
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    lineHeight: "170%",
+                    color: "black",
+                  }}
+                >
+                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
+                </p>
+              </div>
+
+              {/* Right Image - Wahid Photo */}
+              <div 
+                className="flex-shrink-0"
+                style={{ width: "300px", height: "380px", overflow: "hidden" }}
               >
-                Order
-              </a>
-              <a
-                href="#faq"
-                className="hover:opacity-70"
-                style={{
-                  fontSize: "16px",
-                  fontFamily: "var(--font-avant-garde-book)",
-                  color: "black",
-                  textDecoration: "none",
-                }}
-              >
-                FAQ
-              </a>
-              <a
-                href="mailto:Hi@HopArt.House"
-                className="hover:opacity-70"
-                style={{
-                  fontSize: "16px",
-                  fontFamily: "var(--font-avant-garde-book)",
-                  color: "black",
-                  textDecoration: "none",
-                }}
-              >
-                Contact
-              </a>
+                <img
+                  src="/founders/Wahid.png"
+                  alt="Wahid Haidari"
+                  className="w-full h-full object-cover"
+                  style={{ border: "4px solid black", objectPosition: "right" }}
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer Section - Desktop only */}
+        {!isMobile && (
+          <div className="mt-24">
+            {/* Black Horizontal Line */}
+            <div 
+              style={{ 
+                width: "100vw", 
+                height: "2px", 
+                backgroundColor: "black",
+                marginBottom: "60px",
+                marginLeft: "-15vw",
+              }} 
+            />
+
+            {/* Footer Content */}
+            <div 
+              className="flex items-center justify-center gap-32"
+              style={{ paddingBottom: "60px" }}
+            >
+              {/* Logo Section */}
+              <div className="flex items-center gap-6">
+                {/* Frog Logo */}
+                <div style={{ width: "120px", height: "120px" }}>
+                  <img
+                    src="/Frog Logo.svg"
+                    alt="Hop Art House Frog"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                {/* Text Logo */}
+                <div>
+                  <h3
+                    style={{
+                      fontSize: "28px",
+                      fontFamily: "var(--font-avant-garde-medium)",
+                      lineHeight: "100%",
+                      color: "black",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    HOP
+                  </h3>
+                  <h3
+                    style={{
+                      fontSize: "28px",
+                      fontFamily: "var(--font-avant-garde-medium)",
+                      lineHeight: "100%",
+                      color: "black",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    ART
+                  </h3>
+                  <h3
+                    style={{
+                      fontSize: "28px",
+                      fontFamily: "var(--font-avant-garde-medium)",
+                      lineHeight: "100%",
+                      color: "black",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    HOUSE
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "10px",
+                      fontFamily: "var(--font-avant-garde-book)",
+                      letterSpacing: "2px",
+                      color: "black",
+                    }}
+                  >
+                    EXPRESS & INSPIRE
+                  </p>
+                </div>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="flex flex-col items-center gap-4">
+                <span
+                  onClick={onClose}
+                  className="cursor-pointer hover:opacity-70"
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    color: "black",
+                  }}
+                >
+                  Home
+                </span>
+                <a
+                  href="#order"
+                  className="hover:opacity-70"
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    color: "black",
+                    textDecoration: "none",
+                  }}
+                >
+                  Order
+                </a>
+                <a
+                  href="#faq"
+                  className="hover:opacity-70"
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    color: "black",
+                    textDecoration: "none",
+                  }}
+                >
+                  FAQ
+                </a>
+                <a
+                  href="mailto:Hi@HopArt.House"
+                  className="hover:opacity-70"
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "var(--font-avant-garde-book)",
+                    color: "black",
+                    textDecoration: "none",
+                  }}
+                >
+                  Contact
+                </a>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Footer - Bottom Left (Desktop only): Frog Logo */}
@@ -372,9 +723,10 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
         <div 
           className="fixed z-[3010] pointer-events-auto flex items-center"
           style={{
-            top: "20px",
+            top: headerVisible ? "20px" : "-60px",
             right: "20px",
             gap: "16px",
+            transition: "top 0.3s ease-in-out",
           }}
         >
           {/* Cart */}

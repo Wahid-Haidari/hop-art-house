@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { COLORS } from "../colors";
 import { useCart } from "./CartContext";
 import { useMobile } from "../hooks/useMobile";
@@ -15,6 +15,9 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
   const { getTotalItems } = useCart();
   const isMobile = useMobile();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,6 +28,31 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
   });
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
+
+  // Handle scroll to show/hide mobile header
+  useEffect(() => {
+    if (!isMobile) return;
+    
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const currentScrollY = container.scrollTop;
+      
+      if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+        // Scrolling down
+        setHeaderVisible(false);
+      } else {
+        // Scrolling up
+        setHeaderVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [isMobile]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -45,19 +73,31 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
 
   return (
     <div 
+      ref={scrollContainerRef}
       className="fixed inset-0 z-[2000] overflow-y-auto"
       style={{ backgroundColor: "white" }}
     >
-      <div className="min-h-screen flex flex-col items-start py-16 pb-32" style={{ paddingLeft: "25%", paddingRight: "10%" }}>
+      <div 
+        className="min-h-screen flex flex-col py-16 pb-32" 
+        style={{ 
+          paddingLeft: isMobile ? "8%" : "25%", 
+          paddingRight: isMobile ? "8%" : "10%",
+          alignItems: "flex-start",
+        }}
+      >
           {submitted ? (
             /* Success Message */
-            <div className="flex flex-col items-start">
+            <div 
+              className="flex flex-col"
+              style={{ alignItems: "flex-start" }}
+            >
               <h1
                 style={{
                   fontSize: "36px",
                   fontFamily: "var(--font-avant-garde-medium)",
                   marginBottom: "24px",
                   color: "black",
+                  textAlign: "left",
                 }}
               >
                 Thank You!
@@ -69,6 +109,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                   maxWidth: "500px",
                   lineHeight: "150%",
                   color: "black",
+                  textAlign: "left",
                 }}
               >
                 We've received your submission. We'll review your work and get back to you soon.
@@ -95,10 +136,13 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
             <h1
               className="mb-6"
               style={{
-                fontSize: "38px",
+                fontSize: isMobile ? "32px" : "38px",
                 fontFamily: "var(--font-avant-garde-medium)",
                 lineHeight: "100%",
                 color: "black",
+                textAlign: "left",
+                width: "100%",
+                maxWidth: "550px",
               }}
             >
               Hop Art Club
@@ -112,6 +156,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                 maxWidth: "550px",
                 lineHeight: "160%",
                 color: "black",
+                textAlign: "left",
               }}
             >
               We are a marketing and distribution agency for emerging artists. In a world overwhelmed by AI-generated content, we highlight the creativity that comes from lived experience, emotion, and imagination.
@@ -125,6 +170,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                 maxWidth: "550px",
                 lineHeight: "160%",
                 color: "black",
+                textAlign: "left",
               }}
             >
               You create the art, and we'll handle the rest. Artists receive a share of the profit from every sale.
@@ -136,6 +182,9 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                 fontSize: "16px",
                 fontFamily: "var(--font-avant-garde-book)",
                 color: "black",
+                textAlign: "left",
+                width: "100%",
+                maxWidth: "550px",
               }}
             >
               Join us in celebrating the human touch.
@@ -147,6 +196,9 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                 fontSize: "16px",
                 fontFamily: "var(--font-avant-garde-book)",
                 color: "black",
+                textAlign: "left",
+                width: "100%",
+                maxWidth: "550px",
               }}
             >
               Follow us on instagram:{" "}
@@ -167,6 +219,9 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                 fontSize: "16px",
                 fontFamily: "var(--font-avant-garde-book)",
                 color: "black",
+                textAlign: "left",
+                width: "100%",
+                maxWidth: "550px",
               }}
             >
               Connect with the founder:
@@ -176,6 +231,9 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
               style={{
                 fontSize: "16px",
                 fontFamily: "var(--font-avant-garde-book)",
+                textAlign: "left",
+                width: "100%",
+                maxWidth: "550px",
               }}
             >
               <a 
@@ -194,6 +252,9 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                 fontSize: "16px",
                 fontFamily: "var(--font-avant-garde-book)",
                 color: "black",
+                textAlign: "left",
+                width: "100%",
+                maxWidth: "550px",
               }}
             >
               RCAD 2024
@@ -206,6 +267,9 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                 fontSize: "28px",
                 fontFamily: "var(--font-avant-garde-medium)",
                 color: "black",
+                textAlign: "left",
+                width: "100%",
+                maxWidth: "500px",
               }}
             >
               Your Info:
@@ -214,8 +278,12 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
             {/* Form */}
             <form 
               onSubmit={handleSubmit}
-              className="w-full flex flex-col items-start"
-              style={{ maxWidth: "500px" }}
+              className="flex flex-col"
+              style={{ 
+                maxWidth: "500px", 
+                width: "100%",
+                alignItems: "flex-start",
+              }}
             >
               {/* Name */}
               <div className="w-full mb-6">
@@ -556,9 +624,10 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
         <div 
           className="fixed z-[2010] pointer-events-auto flex items-center"
           style={{
-            top: "20px",
+            top: headerVisible ? "20px" : "-60px",
             right: "20px",
             gap: "16px",
+            transition: "top 0.3s ease-in-out",
           }}
         >
           {/* Cart */}
