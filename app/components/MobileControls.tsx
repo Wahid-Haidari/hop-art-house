@@ -73,31 +73,10 @@ export default function MobileControls() {
     );
   };
 
-  // Look around with touch drag on right side
-  const handleLookStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    lookTouchRef.current = { x: touch.clientX, y: touch.clientY };
-  };
-
-  const handleLookMove = (e: React.TouchEvent) => {
-    if (!lookTouchRef.current) return;
-    
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - lookTouchRef.current.x;
-    const deltaY = touch.clientY - lookTouchRef.current.y;
-
-    window.dispatchEvent(
-      new CustomEvent("look-move", {
-        detail: { x: deltaX * 0.003, y: deltaY * 0.003 },
-      })
-    );
-
-    lookTouchRef.current = { x: touch.clientX, y: touch.clientY };
-  };
-
-  const handleLookEnd = () => {
-    lookTouchRef.current = null;
-  };
+  // Look around with touch drag
+  const lookStartPos = useRef<{ x: number; y: number } | null>(null);
+  const isDragging = useRef(false);
+  const DRAG_THRESHOLD = 10; // pixels before considering it a drag
 
   // Up/Down button handlers
   const handleUpStart = () => {
@@ -120,6 +99,65 @@ export default function MobileControls() {
     window.dispatchEvent(new CustomEvent("button-release"));
   };
 
+  // Attach look handlers to document level so they don't block artwork taps
+  useEffect(() => {
+    const onTouchStart = (e: TouchEvent) => {
+      // Ignore touches on control elements
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-control="true"]')) return;
+      
+      const touch = e.touches[0];
+      lookTouchRef.current = { x: touch.clientX, y: touch.clientY };
+      lookStartPos.current = { x: touch.clientX, y: touch.clientY };
+      isDragging.current = false;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!lookTouchRef.current || !lookStartPos.current) return;
+      
+      const touch = e.touches[0];
+      
+      // Check if we've moved enough to consider this a drag
+      if (!isDragging.current) {
+        const dx = touch.clientX - lookStartPos.current.x;
+        const dy = touch.clientY - lookStartPos.current.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > DRAG_THRESHOLD) {
+          isDragging.current = true;
+        } else {
+          return;
+        }
+      }
+      
+      const deltaX = touch.clientX - lookTouchRef.current.x;
+      const deltaY = touch.clientY - lookTouchRef.current.y;
+
+      window.dispatchEvent(
+        new CustomEvent("look-move", {
+          detail: { x: deltaX * 0.001, y: deltaY * 0.001 },
+        })
+      );
+
+      lookTouchRef.current = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const onTouchEnd = () => {
+      lookTouchRef.current = null;
+      lookStartPos.current = null;
+      isDragging.current = false;
+    };
+
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: true });
+    document.addEventListener("touchend", onTouchEnd);
+
+    return () => {
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
+
   if (!isMobile) return null;
 
   return (
@@ -127,10 +165,11 @@ export default function MobileControls() {
       {/* Movement Joystick - Bottom Left */}
       <div
         ref={joystickRef}
+        data-control="true"
         onTouchStart={handleJoystickStart}
         onTouchMove={handleJoystickMove}
         onTouchEnd={handleJoystickEnd}
-        className="fixed z-50 rounded-full flex items-center justify-center"
+        className="fixed z-50 rounded-full flex items-center justify-center select-none"
         style={{ 
           touchAction: "none", 
           backgroundColor: "rgba(200, 200, 200, 0.8)", 
@@ -138,6 +177,8 @@ export default function MobileControls() {
           height: "100px",
           bottom: "26px",
           left: "26px",
+          userSelect: "none",
+          WebkitUserSelect: "none",
         }}
       >
         {/* Arrows - using SVG with line body + arrowhead */}
@@ -183,39 +224,23 @@ export default function MobileControls() {
         />
       </div>
 
-      {/* Look Control Area - Bottom center between joystick and up/down buttons */}
-      <div
-        onTouchStart={handleLookStart}
-        onTouchMove={handleLookMove}
-        onTouchEnd={handleLookEnd}
-        className="fixed z-40"
-        style={{ 
-          touchAction: "none", 
-          bottom: "0",
-          left: "140px",
-          right: "90px",
-          height: "160px",
-        }}
-      />
-
-      {/* Look Control Area - Top portion of screen */}
-      <div
-        onTouchStart={handleLookStart}
-        onTouchMove={handleLookMove}
-        onTouchEnd={handleLookEnd}
-        className="fixed left-0 top-0 w-full z-40"
-        style={{ touchAction: "none", height: "40%" }}
-      />
-
       {/* Up/Down Buttons - Bottom Right */}
       <div 
-        className="fixed z-50 flex flex-col"
-        style={{ bottom: "26px", right: "26px", gap: "8px" }}
+        data-control="true"
+        className="fixed z-50 flex flex-col select-none"
+        style={{ 
+          bottom: "26px", 
+          right: "26px", 
+          gap: "8px",
+          userSelect: "none",
+          WebkitUserSelect: "none",
+        }}
       >
         <button
+          data-control="true"
           onTouchStart={handleUpStart}
           onTouchEnd={handleUpEnd}
-          className="rounded-full flex items-center justify-center"
+          className="rounded-full flex items-center justify-center select-none"
           style={{ 
             touchAction: "none",
             backgroundColor: upPressed ? "rgba(180, 180, 180, 0.9)" : "rgba(200, 200, 200, 0.8)",
@@ -229,6 +254,7 @@ export default function MobileControls() {
           </svg>
         </button>
         <button
+          data-control="true"
           onTouchStart={handleDownStart}
           onTouchEnd={handleDownEnd}
           className="rounded-full flex items-center justify-center"
