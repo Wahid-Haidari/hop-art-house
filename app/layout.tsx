@@ -31,6 +31,12 @@ const avantGardeBook = localFont({
 export const metadata: Metadata = {
   title: "Hop Art House",
   description: "Where human creativity lives and the people who value it come together.",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 //Destructure children from props, and the props must match the type Readonly<{ children: React.ReactNode }>.
