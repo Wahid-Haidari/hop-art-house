@@ -313,6 +313,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                     borderRadius: "8px",
                     backgroundColor: "white",
                     outline: "none",
+                    color: "black",
                   }}
                 />
               </div>
@@ -344,6 +345,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                     borderRadius: "8px",
                     backgroundColor: "white",
                     outline: "none",
+                    color: "black",
                   }}
                 />
               </div>
@@ -375,6 +377,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                     borderRadius: "8px",
                     backgroundColor: "white",
                     outline: "none",
+                    color: "black",
                   }}
                 />
               </div>
@@ -406,6 +409,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                     borderRadius: "8px",
                     backgroundColor: "white",
                     outline: "none",
+                    color: "black",
                   }}
                 />
               </div>
@@ -438,6 +442,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                     borderRadius: "8px",
                     backgroundColor: "white",
                     outline: "none",
+                    color: "black",
                   }}
                 />
               </div>
@@ -562,6 +567,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                     borderRadius: "8px",
                     backgroundColor: "white",
                     outline: "none",
+                    color: "black",
                   }}
                 />
               </div>
