@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface RotatePhoneProps {
   onLandscape: () => void;
@@ -8,24 +8,27 @@ interface RotatePhoneProps {
 
 export default function RotatePhone({ onLandscape }: RotatePhoneProps) {
   const [isLandscape, setIsLandscape] = useState(false);
+  const [showContinueButton, setShowContinueButton] = useState(false);
+
+  const checkOrientation = useCallback(() => {
+    const landscape = window.innerWidth > window.innerHeight;
+    setIsLandscape(landscape);
+    
+    if (landscape) {
+      onLandscape();
+    }
+  }, [onLandscape]);
 
   useEffect(() => {
-    const checkOrientation = () => {
-      const landscape = window.innerWidth > window.innerHeight;
-      setIsLandscape(landscape);
-      
-      if (landscape) {
-        onLandscape();
-      }
-    };
-
     // Delayed check for orientationchange (dimensions update after event fires)
     const checkOrientationDelayed = () => {
       // Check immediately
       checkOrientation();
-      // Also check after a short delay to catch delayed dimension updates
+      // Also check after delays to catch delayed dimension updates (especially in in-app browsers)
       setTimeout(checkOrientation, 100);
       setTimeout(checkOrientation, 300);
+      setTimeout(checkOrientation, 500);
+      setTimeout(checkOrientation, 1000);
     };
 
     // Check on mount
@@ -40,14 +43,24 @@ export default function RotatePhone({ onLandscape }: RotatePhoneProps) {
       screen.orientation.addEventListener("change", checkOrientationDelayed);
     }
 
+    // Polling fallback for in-app browsers that don't fire events properly
+    const pollInterval = setInterval(checkOrientation, 500);
+
+    // Show continue button after 5 seconds as fallback
+    const buttonTimer = setTimeout(() => {
+      setShowContinueButton(true);
+    }, 5000);
+
     return () => {
       window.removeEventListener("resize", checkOrientation);
       window.removeEventListener("orientationchange", checkOrientationDelayed);
       if (screen.orientation) {
         screen.orientation.removeEventListener("change", checkOrientationDelayed);
       }
+      clearInterval(pollInterval);
+      clearTimeout(buttonTimer);
     };
-  }, [onLandscape]);
+  }, [checkOrientation]);
 
   // Don't render if already in landscape
   if (isLandscape) return null;
@@ -198,6 +211,24 @@ export default function RotatePhone({ onLandscape }: RotatePhoneProps) {
           <span>Phone</span>
         </div>
       </div>
+
+      {/* Continue button - appears after 5 seconds as fallback for in-app browsers */}
+      {showContinueButton && (
+        <button
+          onClick={onLandscape}
+          className="mt-12 px-8 py-3 rounded-full"
+          style={{
+            backgroundColor: "#1a1a2e",
+            color: "#F7C41A",
+            fontSize: "16px",
+            fontFamily: "var(--font-avant-garde-medium)",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Continue Anyway
+        </button>
+      )}
     </div>
   );
 }
