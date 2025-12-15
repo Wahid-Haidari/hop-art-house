@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { COLORS } from "../colors";
 
 interface RotatePhoneProps {
   onLandscape: () => void;
@@ -8,6 +9,7 @@ interface RotatePhoneProps {
 
 export default function RotatePhone({ onLandscape }: RotatePhoneProps) {
   const [isLandscape, setIsLandscape] = useState(false);
+  const [showContinueButton, setShowContinueButton] = useState(false);
 
   useEffect(() => {
     const checkOrientation = () => {
@@ -40,12 +42,18 @@ export default function RotatePhone({ onLandscape }: RotatePhoneProps) {
       screen.orientation.addEventListener("change", checkOrientationDelayed);
     }
 
+    // Show continue button after 3 seconds
+    const buttonTimer = setTimeout(() => {
+      setShowContinueButton(true);
+    }, 3000);
+
     return () => {
       window.removeEventListener("resize", checkOrientation);
       window.removeEventListener("orientationchange", checkOrientationDelayed);
       if (screen.orientation) {
         screen.orientation.removeEventListener("change", checkOrientationDelayed);
       }
+      clearTimeout(buttonTimer);
     };
   }, [onLandscape]);
 
@@ -198,6 +206,40 @@ export default function RotatePhone({ onLandscape }: RotatePhoneProps) {
           <span>Phone</span>
         </div>
       </div>
+
+      {/* Continue button - appears after 3 seconds for in-app browsers */}
+      {showContinueButton && (
+        <button
+          onClick={onLandscape}
+          className="cursor-pointer hover:opacity-80 flex items-center gap-2"
+          style={{
+            position: "absolute",
+            bottom: "15%",
+            backgroundColor: COLORS.primary,
+            color: "black",
+            border: "2px solid black",
+            padding: "12px 48px",
+            fontSize: "18px",
+            fontFamily: "var(--font-avant-garde-medium)",
+            borderRadius: "8px",
+          }}
+        >
+          Continue Anyway
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
