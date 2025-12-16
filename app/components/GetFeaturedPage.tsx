@@ -71,11 +71,18 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
     setSubmitted(true);
   };
 
+  // Prevent wheel events from bubbling up to the window
+  // This stops the "scroll up to return to landing page" behavior
+  const handleWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div 
       ref={scrollContainerRef}
       className="fixed inset-0 z-[2000] overflow-y-auto"
       style={{ backgroundColor: "white" }}
+      onWheel={handleWheel}
     >
       <div 
         className="min-h-screen flex flex-col pb-32" 

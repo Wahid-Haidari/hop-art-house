@@ -44,11 +44,18 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
     return () => container.removeEventListener("scroll", handleScroll);
   }, [isMobile]);
   
+  // Prevent wheel events from bubbling up to the window
+  // This stops the "scroll up to return to landing page" behavior
+  const handleWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+  };
+  
   return (
     <div 
       ref={scrollContainerRef}
       className="fixed inset-0 z-[3000] overflow-y-auto"
       style={{ backgroundColor: COLORS.primary }}
+      onWheel={handleWheel}
     >
       <div 
         className="py-16" 

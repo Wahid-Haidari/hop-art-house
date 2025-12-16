@@ -56,14 +56,24 @@ export async function POST(request: NextRequest) {
       });
     } catch (uploadError: unknown) {
       console.error("Vercel Blob upload error:", uploadError);
+      console.error("File details - name:", file.name, "size:", file.size, "type:", file.type);
       
       // Check for specific error types
       const errorMessage = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      const errorName = uploadError instanceof Error ? uploadError.name : "Unknown";
       
-      if (errorMessage.includes("Forbidden") || errorMessage.includes("403")) {
+      console.error("Error name:", errorName, "Error message:", errorMessage);
+      
+      if (errorMessage.includes("Forbidden") || errorMessage.includes("403") || errorMessage.includes("blocked")) {
         return NextResponse.json({ 
-          error: "Upload blocked by Vercel. The file may be too large, have an unsupported format, or be flagged by content moderation. Try compressing the image or using a different file." 
+          error: "Upload blocked. The image may be too large or flagged by content moderation. Try compressing the image or using a smaller file." 
         }, { status: 403 });
+      }
+      
+      if (errorMessage.includes("too large") || errorMessage.includes("size")) {
+        return NextResponse.json({ 
+          error: `File too large. Vercel Blob has a 4.5MB limit. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.` 
+        }, { status: 413 });
       }
       
       return NextResponse.json({ 

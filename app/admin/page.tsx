@@ -511,52 +511,53 @@ export default function AdminPage() {
                   sizeControls={artworkData.artworkPreview ? (
                     <div style={{ 
                       display: "flex", 
-                      flexDirection: "column",
-                      gap: "8px",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: "10px",
                     }}>
-                      <span style={{ fontSize: "12px", color: "#666", fontWeight: "500" }}>Display Size</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                          <label style={{ fontSize: "12px", color: "#666" }}>W:</label>
-                          <input
-                            type="number"
-                            step="0.1"
-                            min="0.5"
-                            max="5"
-                            value={artworkData.displayWidth.toFixed(1)}
-                            onChange={(e) => handleDimensionChange(selectedWall, index, "displayWidth", parseFloat(e.target.value) || 1.5)}
-                            style={{
-                              width: "50px",
-                              padding: "4px",
-                              border: "2px solid black",
-                              borderRadius: "6px",
-                              textAlign: "center",
-                              fontSize: "12px",
-                            }}
-                          />
-                        </div>
-                        <span style={{ color: "#999" }}>×</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                          <label style={{ fontSize: "12px", color: "#666" }}>H:</label>
-                          <input
-                            type="number"
-                            step="0.1"
-                            min="0.5"
-                            max="5"
-                            value={artworkData.displayHeight.toFixed(1)}
-                            onChange={(e) => handleDimensionChange(selectedWall, index, "displayHeight", parseFloat(e.target.value) || 2.0)}
-                            style={{
-                              width: "50px",
-                              padding: "4px",
-                              border: "2px solid black",
-                              borderRadius: "6px",
-                              textAlign: "center",
-                              fontSize: "12px",
-                            }}
-                          />
-                        </div>
+                      <span style={{ fontSize: "12px", color: "#000", fontWeight: "600" }}>Display Size</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <label style={{ fontSize: "12px", color: "#000", fontWeight: "500" }}>W:</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0.5"
+                          max="5"
+                          value={artworkData.displayWidth.toFixed(1)}
+                          onChange={(e) => handleDimensionChange(selectedWall, index, "displayWidth", parseFloat(e.target.value) || 1.5)}
+                          style={{
+                            width: "50px",
+                            padding: "4px",
+                            border: "2px solid black",
+                            borderRadius: "6px",
+                            textAlign: "center",
+                            fontSize: "12px",
+                            color: "#000",
+                          }}
+                        />
                       </div>
-                      <span style={{ fontSize: "10px", color: "#999" }}>(3D units)</span>
+                      <span style={{ color: "#000", fontWeight: "500" }}>×</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <label style={{ fontSize: "12px", color: "#000", fontWeight: "500" }}>H:</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0.5"
+                          max="5"
+                          value={artworkData.displayHeight.toFixed(1)}
+                          onChange={(e) => handleDimensionChange(selectedWall, index, "displayHeight", parseFloat(e.target.value) || 2.0)}
+                          style={{
+                            width: "50px",
+                            padding: "4px",
+                            border: "2px solid black",
+                            borderRadius: "6px",
+                            textAlign: "center",
+                            fontSize: "12px",
+                            color: "#000",
+                          }}
+                        />
+                      </div>
+                      <span style={{ fontSize: "11px", color: "#000", fontWeight: "500" }}>(3D units)</span>
                     </div>
                   ) : undefined}
                 />
@@ -698,13 +699,13 @@ function UploadBox({
             zIndex: 10,
           }}
         >
-          <div style={{ fontSize: "14px", color: "#666" }}>{isDeleting ? "Deleting..." : "Uploading..."}</div>
+          <div style={{ fontSize: "14px", color: "#000" }}>{isDeleting ? "Deleting..." : "Uploading..."}</div>
         </div>
       )}
 
       {/* Left side - Upload content */}
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: "14px", color: "#666", marginBottom: "12px" }}>
+        <div style={{ fontSize: "14px", color: "#000", marginBottom: "12px" }}>
           {label}
           {acceptPdf && <span style={{ fontSize: "11px", marginLeft: "8px" }}>(Image or PDF)</span>}
         </div>
@@ -731,7 +732,7 @@ function UploadBox({
                   <polyline points="14 2 14 8 20 8" />
                   <text x="8" y="17" fontSize="6" fill="#e74c3c" stroke="none" fontWeight="bold">PDF</text>
                 </svg>
-                <span style={{ fontSize: "11px", color: "#666", marginTop: "8px", textAlign: "center", padding: "0 8px", wordBreak: "break-all" }}>
+                <span style={{ fontSize: "11px", color: "#000", marginTop: "8px", textAlign: "center", padding: "0 8px", wordBreak: "break-all" }}>
                   PDF uploaded
                 </span>
               </div>
@@ -808,7 +809,7 @@ function UploadBox({
               </svg>
               Upload
             </button>
-            <div style={{ fontSize: "12px", color: "#999", marginTop: "12px" }}>Size limit: 10mb</div>
+            <div style={{ fontSize: "12px", color: "#000", marginTop: "12px" }}>Size limit: 10mb</div>
           </div>
         )}
       </div>
