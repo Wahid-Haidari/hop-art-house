@@ -4,12 +4,9 @@ import { useTexture, Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef, Suspense, useState, Component, ReactNode, useMemo } from "react";
 import * as THREE from "three";
-import * as pdfjsLib from "pdfjs-dist";
 
-// Set the worker source for PDF.js
-if (typeof window !== "undefined") {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-}
+// PDF.js will be loaded dynamically on the client
+let pdfjsLib: typeof import("pdfjs-dist") | null = null;
 
 interface GalleryArtworkProps {
   art: string;
@@ -48,7 +45,9 @@ class TextureErrorBoundary extends Component<
 
 // Helper to check if URL is a PDF
 function isPdf(url: string): boolean {
-  return url.toLowerCase().endsWith(".pdf") || url.includes("application/pdf");
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  return lowerUrl.endsWith(".pdf") || lowerUrl.includes(".pdf?") || lowerUrl.includes("application/pdf");
 }
 
 // Component to render PDF first page as a texture in 3D
@@ -78,6 +77,13 @@ function PdfCard({
       try {
         setIsLoading(true);
         setError(false);
+
+        // Dynamically import PDF.js only on client
+        if (!pdfjsLib) {
+          const pdfjs = await import("pdfjs-dist");
+          pdfjsLib = pdfjs;
+          pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+        }
 
         // Load the PDF document
         const loadingTask = pdfjsLib.getDocument(url);
