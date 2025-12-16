@@ -38,7 +38,9 @@ let writeLock: Promise<void> | null = null;
 
 // Cache the latest config in memory to avoid eventual consistency issues
 let latestConfig: ArtworksConfig | null = null;
+let latestConfigUrl: string | null = null;  // Store URL of last written config
 let lastWriteTime: number = 0;
+const CACHE_DURATION = 30000; // 30 seconds - longer cache to handle blob list delays
 
 const defaultConfig: ArtworksConfig = {
   first: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, aspectRatio: DEFAULT_ASPECT_RATIO, displayWidth: DEFAULT_WIDTH, displayHeight: DEFAULT_HEIGHT })) },
@@ -49,10 +51,30 @@ const defaultConfig: ArtworksConfig = {
 
 async function readConfig(): Promise<ArtworksConfig> {
   try {
-    // If we have a fresh cached config (written in the last 5 seconds), use it
-    if (latestConfig && (Date.now() - lastWriteTime) < 5000) {
+    // If we have a fresh cached config, use it (extended cache duration)
+    if (latestConfig && (Date.now() - lastWriteTime) < CACHE_DURATION) {
       console.log("Using cached config from memory (fresh)");
       return JSON.parse(JSON.stringify(latestConfig)); // Deep clone
+    }
+    
+    // If we have a cached URL from last write, try that first before listing
+    if (latestConfigUrl) {
+      try {
+        console.log("Trying cached config URL:", latestConfigUrl);
+        const response = await fetch(latestConfigUrl, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+        });
+        if (response.ok) {
+          const config = await response.json();
+          console.log("Loaded config from cached URL successfully");
+          latestConfig = config;
+          lastWriteTime = Date.now(); // Refresh the cache time
+          return config;
+        }
+      } catch (e) {
+        console.error("Failed to fetch from cached URL:", e);
+      }
     }
 
     // List blobs and sort by filename (which includes timestamp)
@@ -61,9 +83,13 @@ async function readConfig(): Promise<ArtworksConfig> {
     const configBlobs = blobs
       .filter(b => b.pathname.startsWith(CONFIG_PREFIX))
       // Sort by the timestamp in the filename (descending - newest first)
+      // Filename format: config/artworks-config-{timestamp}-{random}.json
       .sort((a, b) => {
-        const timestampA = parseInt(a.pathname.match(/\d+/g)?.pop() || "0");
-        const timestampB = parseInt(b.pathname.match(/\d+/g)?.pop() || "0");
+        // Extract timestamp after "artworks-config-" and before the next "-" or ".json"
+        const matchA = a.pathname.match(/artworks-config-(\d+)/);
+        const matchB = b.pathname.match(/artworks-config-(\d+)/);
+        const timestampA = parseInt(matchA?.[1] || "0");
+        const timestampB = parseInt(matchB?.[1] || "0");
         return timestampB - timestampA;
       });
     
@@ -100,10 +126,11 @@ async function readConfig(): Promise<ArtworksConfig> {
 
 async function writeConfig(config: ArtworksConfig) {
   try {
-    // Write new config with unique name
+    // Write new config with unique name (timestamp + random suffix to avoid collisions)
     const configJson = JSON.stringify(config, null, 2);
     const timestamp = Date.now();
-    const newConfigName = `${CONFIG_PREFIX}-${timestamp}.json`;
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const newConfigName = `${CONFIG_PREFIX}-${timestamp}-${randomSuffix}.json`;
     
     console.log("Writing new config:", newConfigName);
     
@@ -114,8 +141,9 @@ async function writeConfig(config: ArtworksConfig) {
     
     console.log("Config written successfully:", result.url);
     
-    // Update our cached config immediately
+    // Update our cached config and URL immediately
     latestConfig = JSON.parse(JSON.stringify(config)); // Deep clone
+    latestConfigUrl = result.url;  // Store the URL for future reads
     lastWriteTime = timestamp;
     
     // Only clean up if we have more than 10 config files (to avoid issues)
@@ -125,8 +153,11 @@ async function writeConfig(config: ArtworksConfig) {
       const configBlobs = blobs
         .filter(b => b.pathname.startsWith(CONFIG_PREFIX))
         .sort((a, b) => {
-          const timestampA = parseInt(a.pathname.match(/\d+/g)?.pop() || "0");
-          const timestampB = parseInt(b.pathname.match(/\d+/g)?.pop() || "0");
+          // Extract timestamp after "artworks-config-" and before the next "-" or ".json"
+          const matchA = a.pathname.match(/artworks-config-(\d+)/);
+          const matchB = b.pathname.match(/artworks-config-(\d+)/);
+          const timestampA = parseInt(matchA?.[1] || "0");
+          const timestampB = parseInt(matchB?.[1] || "0");
           return timestampB - timestampA;
         });
       

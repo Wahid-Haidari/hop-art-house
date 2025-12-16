@@ -132,9 +132,19 @@ export default function AdminPage() {
         body: formData,
       });
 
+      // Try to parse as JSON, but handle non-JSON responses
+      const contentType = response.headers.get("content-type");
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Upload failed");
+        if (contentType && contentType.includes("application/json")) {
+          const error = await response.json();
+          throw new Error(error.error || "Upload failed");
+        } else {
+          const text = await response.text();
+          if (response.status === 403) {
+            throw new Error("Upload blocked. The image may be too large or flagged by content moderation. Try compressing the image or using a smaller file.");
+          }
+          throw new Error(text || `Upload failed with status ${response.status}`);
+        }
       }
 
       const result = await response.json();

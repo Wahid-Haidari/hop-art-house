@@ -36,24 +36,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid field type" }, { status: 400 });
     }
 
-    // Create a unique filename
+    // Create a unique filename with timestamp and random suffix
     const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).slice(2, 8);
     const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const filename = `artworks/${wall}-${artworkIndex}-${field}-${timestamp}-${originalName}`;
+    const filename = `artworks/${wall}-${artworkIndex}-${field}-${timestamp}-${randomSuffix}-${originalName}`;
 
     // Upload to Vercel Blob
-    const blob = await put(filename, file, {
-      access: "public",
-    });
+    try {
+      const blob = await put(filename, file, {
+        access: "public",
+      });
 
-    return NextResponse.json({
-      success: true,
-      url: blob.url,
-      filename: blob.pathname,
-      fileType: isPDF ? "pdf" : "image",
-    });
+      return NextResponse.json({
+        success: true,
+        url: blob.url,
+        filename: blob.pathname,
+        fileType: isPDF ? "pdf" : "image",
+      });
+    } catch (uploadError: unknown) {
+      console.error("Vercel Blob upload error:", uploadError);
+      
+      // Check for specific error types
+      const errorMessage = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      
+      if (errorMessage.includes("Forbidden") || errorMessage.includes("403")) {
+        return NextResponse.json({ 
+          error: "Upload blocked by Vercel. The file may be too large, have an unsupported format, or be flagged by content moderation. Try compressing the image or using a different file." 
+        }, { status: 403 });
+      }
+      
+      return NextResponse.json({ 
+        error: `Upload failed: ${errorMessage}` 
+      }, { status: 500 });
+    }
   } catch (error) {
     console.error("Upload error:", error);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: `Upload failed: ${errorMessage}` }, { status: 500 });
   }
 }
