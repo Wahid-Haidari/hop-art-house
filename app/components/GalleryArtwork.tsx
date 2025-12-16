@@ -14,6 +14,8 @@ interface GalleryArtworkProps {
   position: [number, number, number];
   rotation?: [number, number, number];
   aspectRatio?: number;  // height/width ratio of the artwork image
+  displayWidth?: number;  // display width in 3D units (default 1.5)
+  displayHeight?: number;  // display height in 3D units (calculated from aspectRatio)
   onOpenOverlay: (img: string) => void;
 }
 
@@ -152,6 +154,8 @@ export default function GalleryArtwork({
   position,
   rotation = [0, 0, 0],
   aspectRatio = 1.33,
+  displayWidth = 1.5,
+  displayHeight,
   onOpenOverlay
 }: GalleryArtworkProps) {
   const { camera, gl } = useThree();
@@ -159,8 +163,8 @@ export default function GalleryArtwork({
   const artistCardMeshRef = useRef<THREE.Mesh>(null);
   const infoCardMeshRef = useRef<THREE.Mesh>(null);
 
-  const ART_WIDTH = 1.5;
-  const ART_HEIGHT = ART_WIDTH * aspectRatio;  // Calculate height from aspect ratio
+  const ART_WIDTH = displayWidth;
+  const ART_HEIGHT = displayHeight ?? (ART_WIDTH * aspectRatio);  // Use displayHeight if provided, else calculate
   const CARD_WIDTH = 0.5;
   const CARD_HEIGHT = 0.7;
   const GAP = 0.1;

@@ -119,6 +119,8 @@ export default function Home() {
                     position={artwork.position}
                     rotation={artwork.rotation}
                     aspectRatio={artwork.aspectRatio}
+                    displayWidth={artwork.displayWidth}
+                    displayHeight={artwork.displayHeight}
                     onOpenOverlay={setOverlayImage}
                   />
 
@@ -127,6 +129,8 @@ export default function Home() {
                     artRotation={artwork.rotation}
                     triggerDistance={7}
                     aspectRatio={artwork.aspectRatio}
+                    displayWidth={artwork.displayWidth}
+                    displayHeight={artwork.displayHeight}
                   />
 
                   <PurchasePanel 
@@ -136,6 +140,8 @@ export default function Home() {
                     artPosition={artwork.position}
                     artRotation={artwork.rotation}
                     aspectRatio={artwork.aspectRatio}
+                    displayWidth={artwork.displayWidth}
+                    displayHeight={artwork.displayHeight}
                   />
                 </group>
               ))}

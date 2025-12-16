@@ -9,6 +9,8 @@ export interface ArtworkData {
   position: [number, number, number];
   rotation: [number, number, number];
   aspectRatio?: number;  // height/width ratio of the artwork image
+  displayWidth?: number;  // Width in 3D units
+  displayHeight?: number; // Height in 3D units
 }
 
 // Wall positions configuration

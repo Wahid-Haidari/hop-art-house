@@ -15,7 +15,9 @@ interface ArtworkUpload {
   artistBioPreview: string | null;
   artistBioPdf: string | null;
   artistBioPdfPreview: string | null;
-  aspectRatio: number;  // height/width ratio
+  aspectRatio: number;  // height/width ratio (for auto-calculation)
+  displayWidth: number;  // Width in 3D units
+  displayHeight: number; // Height in 3D units
 }
 
 interface WallData {
@@ -34,6 +36,8 @@ const initialArtwork: ArtworkUpload = {
   artistBioPdf: null,
   artistBioPdfPreview: null,
   aspectRatio: 1.33,  // Default 4:3 portrait
+  displayWidth: 1.5,   // Default width in 3D units
+  displayHeight: 2.0,  // Default height (1.5 * 1.33)
 };
 
 const wallNames: { key: WallName; label: string; description: string }[] = [
@@ -62,7 +66,11 @@ export default function AdminPage() {
 
   const loadConfig = async () => {
     try {
-      const response = await fetch("/api/artworks");
+      // Add cache-busting to ensure we get fresh data
+      const response = await fetch(`/api/artworks?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       if (response.ok) {
         const config = await response.json();
         // Convert the saved config to include preview URLs
@@ -76,6 +84,9 @@ export default function AdminPage() {
         for (const wallKey of ["first", "second", "third", "fourth"] as WallName[]) {
           newWallData[wallKey].artworks = Array(4).fill(null).map((_, index) => {
             const saved = config[wallKey]?.artworks?.[index];
+            const aspectRatio = saved?.aspectRatio ?? 1.33;
+            const displayWidth = saved?.displayWidth ?? 1.5;
+            const displayHeight = saved?.displayHeight ?? (displayWidth * aspectRatio);
             return {
               artwork: saved?.artwork || null,
               artworkPreview: saved?.artwork || null,
@@ -87,7 +98,9 @@ export default function AdminPage() {
               artistBioPreview: saved?.artistBio || null,
               artistBioPdf: saved?.artistBioPdf || null,
               artistBioPdfPreview: saved?.artistBioPdf || null,
-              aspectRatio: saved?.aspectRatio ?? 1.33,
+              aspectRatio,
+              displayWidth,
+              displayHeight,
             };
           });
         }
@@ -135,7 +148,7 @@ export default function AdminPage() {
   const saveToConfig = async (
     wallKey: WallName,
     artworkIndex: number,
-    field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf" | "aspectRatio",
+    field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf" | "aspectRatio" | "displayWidth" | "displayHeight",
     value: string | number
   ) => {
     try {
@@ -151,6 +164,59 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Save config error:", error);
       throw error;
+    }
+  };
+
+  const handleDimensionChange = async (
+    wallKey: WallName,
+    artworkIndex: number,
+    dimension: "displayWidth" | "displayHeight",
+    value: number
+  ) => {
+    // Get current artwork data to calculate the other dimension based on aspect ratio
+    const currentArtwork = wallData[wallKey].artworks[artworkIndex];
+    const aspectRatio = currentArtwork.aspectRatio || 1.33;
+    
+    let newWidth: number;
+    let newHeight: number;
+    
+    if (dimension === "displayWidth") {
+      newWidth = value;
+      newHeight = value * aspectRatio;  // Maintain aspect ratio
+    } else {
+      newHeight = value;
+      newWidth = value / aspectRatio;  // Maintain aspect ratio
+    }
+    
+    // Update local state with both dimensions
+    setWallData((prev) => {
+      const newData = { ...prev };
+      const newArtworks = [...newData[wallKey].artworks];
+      newArtworks[artworkIndex] = {
+        ...newArtworks[artworkIndex],
+        displayWidth: newWidth,
+        displayHeight: newHeight,
+      };
+      newData[wallKey] = { artworks: newArtworks };
+      return newData;
+    });
+
+    // Save both dimensions to config in a single batch request
+    try {
+      await fetch("/api/artworks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wall: wallKey,
+          artworkIndex,
+          updates: {
+            displayWidth: newWidth,
+            displayHeight: newHeight,
+          }
+        }),
+      });
+    } catch (error) {
+      console.error(`Failed to save dimensions:`, error);
     }
   };
 
@@ -186,10 +252,14 @@ export default function AdminPage() {
     setUploadingField(fieldKey);
 
     try {
-      // If uploading artwork image, detect aspect ratio
+      // If uploading artwork image, detect aspect ratio and set dimensions
       let aspectRatio: number | null = null;
+      let displayWidth = 1.5;  // Default width
+      let displayHeight = 2.0; // Default height
+      
       if (field === "artwork" && file.type.startsWith("image/")) {
         aspectRatio = await getImageAspectRatio(file);
+        displayHeight = displayWidth * aspectRatio;
       }
 
       // Create local preview first
@@ -201,7 +271,7 @@ export default function AdminPage() {
           newArtworks[artworkIndex] = {
             ...newArtworks[artworkIndex],
             [`${field}Preview`]: reader.result as string,
-            ...(aspectRatio !== null ? { aspectRatio } : {}),
+            ...(aspectRatio !== null ? { aspectRatio, displayWidth, displayHeight } : {}),
           };
           newData[wallKey] = { artworks: newArtworks };
           return newData;
@@ -213,12 +283,26 @@ export default function AdminPage() {
       const url = await uploadFile(file, wallKey, artworkIndex, field);
 
       if (url) {
-        // Save to config
-        await saveToConfig(wallKey, artworkIndex, field, url);
-        
-        // If we detected aspect ratio, save it too
+        // Save all updates in a single batch request to avoid race conditions
         if (aspectRatio !== null) {
-          await saveToConfig(wallKey, artworkIndex, "aspectRatio", aspectRatio);
+          // Batch update: artwork URL + aspectRatio + dimensions
+          await fetch("/api/artworks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              wall: wallKey,
+              artworkIndex,
+              updates: {
+                [field]: url,
+                aspectRatio,
+                displayWidth,
+                displayHeight,
+              }
+            }),
+          });
+        } else {
+          // Single field update for non-artwork files
+          await saveToConfig(wallKey, artworkIndex, field, url);
         }
 
         // Update state with the permanent URL
@@ -229,7 +313,7 @@ export default function AdminPage() {
             ...newArtworks[artworkIndex],
             [field]: url,
             [`${field}Preview`]: url,
-            ...(aspectRatio !== null ? { aspectRatio } : {}),
+            ...(aspectRatio !== null ? { aspectRatio, displayWidth, displayHeight } : {}),
           };
           newData[wallKey] = { artworks: newArtworks };
           return newData;
@@ -404,7 +488,7 @@ export default function AdminPage() {
               </h2>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {/* Artwork Upload */}
+                {/* Artwork Upload with Size Controls inside */}
                 <UploadBox
                   label="Artwork"
                   preview={artworkData.artworkPreview}
@@ -414,6 +498,57 @@ export default function AdminPage() {
                   inputId={`artwork-${selectedWall}-${index}`}
                   isUploading={uploadingField === `${selectedWall}-${index}-artwork`}
                   isDeleting={deletingField === `${selectedWall}-${index}-artwork`}
+                  sizeControls={artworkData.artworkPreview ? (
+                    <div style={{ 
+                      display: "flex", 
+                      flexDirection: "column",
+                      gap: "8px",
+                    }}>
+                      <span style={{ fontSize: "12px", color: "#666", fontWeight: "500" }}>Display Size</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <label style={{ fontSize: "12px", color: "#666" }}>W:</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            min="0.5"
+                            max="5"
+                            value={artworkData.displayWidth.toFixed(1)}
+                            onChange={(e) => handleDimensionChange(selectedWall, index, "displayWidth", parseFloat(e.target.value) || 1.5)}
+                            style={{
+                              width: "50px",
+                              padding: "4px",
+                              border: "2px solid black",
+                              borderRadius: "6px",
+                              textAlign: "center",
+                              fontSize: "12px",
+                            }}
+                          />
+                        </div>
+                        <span style={{ color: "#999" }}>×</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <label style={{ fontSize: "12px", color: "#666" }}>H:</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            min="0.5"
+                            max="5"
+                            value={artworkData.displayHeight.toFixed(1)}
+                            onChange={(e) => handleDimensionChange(selectedWall, index, "displayHeight", parseFloat(e.target.value) || 2.0)}
+                            style={{
+                              width: "50px",
+                              padding: "4px",
+                              border: "2px solid black",
+                              borderRadius: "6px",
+                              textAlign: "center",
+                              fontSize: "12px",
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <span style={{ fontSize: "10px", color: "#999" }}>(3D units)</span>
+                    </div>
+                  ) : undefined}
                 />
 
                 {/* Artist Label - Image and PDF side by side */}
@@ -492,6 +627,7 @@ interface UploadBoxProps {
   isUploading?: boolean;
   isDeleting?: boolean;
   acceptPdf?: boolean;
+  sizeControls?: React.ReactNode;
 }
 
 function UploadBox({ 
@@ -504,6 +640,7 @@ function UploadBox({
   isUploading,
   isDeleting,
   acceptPdf,
+  sizeControls,
 }: UploadBoxProps) {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -675,6 +812,13 @@ function UploadBox({
         disabled={isUploading}
         style={{ display: "none" }}
       />
+
+      {/* Size controls on the right */}
+      {sizeControls && (
+        <div style={{ marginLeft: "16px", display: "flex", alignItems: "center" }}>
+          {sizeControls}
+        </div>
+      )}
     </div>
   );
 }

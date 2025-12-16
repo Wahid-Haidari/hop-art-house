@@ -8,6 +8,8 @@ interface ProximityMessageProps {
   artRotation: [number, number, number];
   triggerDistance?: number;
   aspectRatio?: number;
+  displayWidth?: number;
+  displayHeight?: number;
 }
 
 export default function ProximityMessage({
@@ -15,6 +17,8 @@ export default function ProximityMessage({
   artRotation,
   triggerDistance = 3,
   aspectRatio = 1.33,
+  displayWidth = 1.5,
+  displayHeight,
 }: ProximityMessageProps) {
   const { position: playerPosition } = usePlayerPosition();
 
@@ -35,8 +39,8 @@ export default function ProximityMessage({
   if (!isNear) return null;
 
   // Card layout constants (same as GalleryArtwork)
-  const ART_WIDTH = 1.5;
-  const ART_HEIGHT = ART_WIDTH * aspectRatio;  // Calculate height from aspect ratio
+  const ART_WIDTH = displayWidth;
+  const ART_HEIGHT = displayHeight ?? (ART_WIDTH * aspectRatio);  // Use displayHeight if provided, else calculate
   const CARD_WIDTH = 0.5;
   const CARD_HEIGHT = 0.7;
   const GAP = 0.1;

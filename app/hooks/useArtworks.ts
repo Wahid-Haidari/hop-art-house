@@ -10,6 +10,8 @@ interface WallArtwork {
   artistBio: string | null;
   artistBioPdf: string | null;
   aspectRatio?: number;  // height/width ratio
+  displayWidth?: number;  // Width in 3D units
+  displayHeight?: number; // Height in 3D units
 }
 
 interface WallData {
@@ -78,6 +80,10 @@ export function useArtworks() {
                   artAspectRatio = await getImageAspectRatio(artworkConfig.artwork!);
                 }
                 
+                // Use custom dimensions if provided, otherwise calculate from aspect ratio
+                const displayWidth = artworkConfig.displayWidth ?? 1.5;
+                const displayHeight = artworkConfig.displayHeight ?? (displayWidth * artAspectRatio);
+                
                 return {
                   id: `${wallName}-${artIndex + 1}`,
                   title: `Artwork ${wallIndex * 4 + artIndex + 1}`,
@@ -89,6 +95,8 @@ export function useArtworks() {
                   position: pos.position,
                   rotation: pos.rotation,
                   aspectRatio: artAspectRatio,
+                  displayWidth,
+                  displayHeight,
                 };
               })();
               artworkPromises.push(promise);
