@@ -169,10 +169,15 @@ export default function GalleryArtwork({
   const CARD_HEIGHT = 0.7;
   const GAP = 0.1;
 
+  // Calculate the Y offset to make artwork bottom-aligned
+  // The position Y represents where the bottom of the artwork should be
+  // We offset by half the height to move the center up
+  const artYOffset = ART_HEIGHT / 2;
+  const artPosition: [number, number, number] = [position[0], position[1] + artYOffset, position[2]];
+
   const artSideOffset = (ART_WIDTH / 2) + (CARD_WIDTH / 2) + GAP;
-  // Position cards relative to the bottom of the artwork
-  const artBottom = -(ART_HEIGHT / 2);
-  const infoCardY = artBottom + (CARD_HEIGHT / 2);  // Bottom card aligned with art bottom
+  // Position cards relative to the bottom of the artwork (using original position Y as reference)
+  const infoCardY = CARD_HEIGHT / 2;  // Bottom card starts at artwork bottom
   const artistCardY = infoCardY + CARD_HEIGHT + GAP;  // Top card above bottom card
 
   const isLeftWall = Math.abs(rotation[1] - Math.PI / 2) < 0.1;
@@ -272,7 +277,7 @@ export default function GalleryArtwork({
     <>
       <ImageCard
         url={art}
-        position={position}
+        position={artPosition}
         rotation={rotation}
         width={ART_WIDTH}
         height={ART_HEIGHT}

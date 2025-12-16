@@ -34,7 +34,8 @@ export default function PurchasePanel({
     const [artX, artY, artZ] = artPosition;
     const ART_WIDTH = displayWidth;
     const ART_HEIGHT = displayHeight ?? (ART_WIDTH * aspectRatio);  // Use displayHeight if provided, else calculate
-    const artBottom = artY - ART_HEIGHT / 2;
+    // The artwork is bottom-aligned, so artY is the bottom of the artwork
+    const artBottom = artY;
     const artRightEdge = artX + ART_WIDTH / 2;
     const CARD_WIDTH = 0.5;
     const SIZE_WIDTH = 0.75;

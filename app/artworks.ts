@@ -18,34 +18,37 @@ export interface ArtworkData {
 // Wall 2 = Right wall (Second Wall in admin) - clockwise
 // Wall 3 = Front wall (Third Wall in admin) - clockwise
 // Wall 4 = Left wall (Fourth Wall in admin) - clockwise
+// Y value represents the BOTTOM of the artwork (all artworks bottom-aligned)
+
+const ARTWORK_BOTTOM_HEIGHT = 2.2;  // Height from floor where artwork bottom aligns
 
 export const wallPositions = {
   // Wall 1: Back wall - 4 artworks (facing forward, rotation [0, 0, 0])
   first: [
-    { position: [-6, 3.2, -9.95] as [number, number, number], rotation: [0, 0, 0] as [number, number, number] },
-    { position: [-2, 3.2, -9.95] as [number, number, number], rotation: [0, 0, 0] as [number, number, number] },
-    { position: [2, 3.2, -9.95] as [number, number, number], rotation: [0, 0, 0] as [number, number, number] },
-    { position: [6, 3.2, -9.95] as [number, number, number], rotation: [0, 0, 0] as [number, number, number] },
+    { position: [-6, ARTWORK_BOTTOM_HEIGHT, -9.95] as [number, number, number], rotation: [0, 0, 0] as [number, number, number] },
+    { position: [-2, ARTWORK_BOTTOM_HEIGHT, -9.95] as [number, number, number], rotation: [0, 0, 0] as [number, number, number] },
+    { position: [2, ARTWORK_BOTTOM_HEIGHT, -9.95] as [number, number, number], rotation: [0, 0, 0] as [number, number, number] },
+    { position: [6, ARTWORK_BOTTOM_HEIGHT, -9.95] as [number, number, number], rotation: [0, 0, 0] as [number, number, number] },
   ],
   // Wall 2: Right wall - 4 artworks (facing left, rotation [0, -Math.PI / 2, 0])
   second: [
-    { position: [9.95, 3.2, -6] as [number, number, number], rotation: [0, -Math.PI / 2, 0] as [number, number, number] },
-    { position: [9.95, 3.2, -2] as [number, number, number], rotation: [0, -Math.PI / 2, 0] as [number, number, number] },
-    { position: [9.95, 3.2, 2] as [number, number, number], rotation: [0, -Math.PI / 2, 0] as [number, number, number] },
-    { position: [9.95, 3.2, 6] as [number, number, number], rotation: [0, -Math.PI / 2, 0] as [number, number, number] },
+    { position: [9.95, ARTWORK_BOTTOM_HEIGHT, -6] as [number, number, number], rotation: [0, -Math.PI / 2, 0] as [number, number, number] },
+    { position: [9.95, ARTWORK_BOTTOM_HEIGHT, -2] as [number, number, number], rotation: [0, -Math.PI / 2, 0] as [number, number, number] },
+    { position: [9.95, ARTWORK_BOTTOM_HEIGHT, 2] as [number, number, number], rotation: [0, -Math.PI / 2, 0] as [number, number, number] },
+    { position: [9.95, ARTWORK_BOTTOM_HEIGHT, 6] as [number, number, number], rotation: [0, -Math.PI / 2, 0] as [number, number, number] },
   ],
   // Wall 3: Front wall - 4 artworks (facing backward, rotation [0, Math.PI, 0])
   third: [
-    { position: [6, 3.2, 9.95] as [number, number, number], rotation: [0, Math.PI, 0] as [number, number, number] },
-    { position: [2, 3.2, 9.95] as [number, number, number], rotation: [0, Math.PI, 0] as [number, number, number] },
-    { position: [-2, 3.2, 9.95] as [number, number, number], rotation: [0, Math.PI, 0] as [number, number, number] },
-    { position: [-6, 3.2, 9.95] as [number, number, number], rotation: [0, Math.PI, 0] as [number, number, number] },
+    { position: [6, ARTWORK_BOTTOM_HEIGHT, 9.95] as [number, number, number], rotation: [0, Math.PI, 0] as [number, number, number] },
+    { position: [2, ARTWORK_BOTTOM_HEIGHT, 9.95] as [number, number, number], rotation: [0, Math.PI, 0] as [number, number, number] },
+    { position: [-2, ARTWORK_BOTTOM_HEIGHT, 9.95] as [number, number, number], rotation: [0, Math.PI, 0] as [number, number, number] },
+    { position: [-6, ARTWORK_BOTTOM_HEIGHT, 9.95] as [number, number, number], rotation: [0, Math.PI, 0] as [number, number, number] },
   ],
   // Wall 4: Left wall - 4 artworks (facing right, rotation [0, Math.PI / 2, 0])
   fourth: [
-    { position: [-9.95, 3.2, 6] as [number, number, number], rotation: [0, Math.PI / 2, 0] as [number, number, number] },
-    { position: [-9.95, 3.2, 2] as [number, number, number], rotation: [0, Math.PI / 2, 0] as [number, number, number] },
-    { position: [-9.95, 3.2, -2] as [number, number, number], rotation: [0, Math.PI / 2, 0] as [number, number, number] },
-    { position: [-9.95, 3.2, -6] as [number, number, number], rotation: [0, Math.PI / 2, 0] as [number, number, number] },
+    { position: [-9.95, ARTWORK_BOTTOM_HEIGHT, 6] as [number, number, number], rotation: [0, Math.PI / 2, 0] as [number, number, number] },
+    { position: [-9.95, ARTWORK_BOTTOM_HEIGHT, 2] as [number, number, number], rotation: [0, Math.PI / 2, 0] as [number, number, number] },
+    { position: [-9.95, ARTWORK_BOTTOM_HEIGHT, -2] as [number, number, number], rotation: [0, Math.PI / 2, 0] as [number, number, number] },
+    { position: [-9.95, ARTWORK_BOTTOM_HEIGHT, -6] as [number, number, number], rotation: [0, Math.PI / 2, 0] as [number, number, number] },
   ],
 };

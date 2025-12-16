@@ -48,9 +48,9 @@ export default function ProximityMessage({
   const artSideOffset = (ART_WIDTH / 2) + (CARD_WIDTH / 2) + GAP;
   
   // Position cards relative to the bottom of the artwork (same as GalleryArtwork)
-  const artBottom = -(ART_HEIGHT / 2);
-  const infoCardY = artBottom + (CARD_HEIGHT / 2);  // Bottom card
-  const artistCardY = infoCardY + CARD_HEIGHT + GAP;  // Top card
+  // Cards are bottom-aligned with the artwork
+  const infoCardY = CARD_HEIGHT / 2;  // Bottom card starts at artwork bottom
+  const artistCardY = infoCardY + CARD_HEIGHT + GAP;  // Top card above bottom card
   
   // Message position: above the artist card with the same gap
   const messageY = artY + artistCardY + (CARD_HEIGHT / 2) + GAP;
