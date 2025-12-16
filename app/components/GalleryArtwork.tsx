@@ -85,8 +85,15 @@ function PdfCard({
           pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
         }
 
-        // Load the PDF document
-        const loadingTask = pdfjsLib.getDocument(url);
+        // First fetch the PDF as array buffer to avoid CORS issues
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch PDF: ${response.status}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+
+        // Load the PDF document from array buffer
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
         const pdf = await loadingTask.promise;
         
         // Get the first page
