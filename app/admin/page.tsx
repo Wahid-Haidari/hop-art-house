@@ -342,13 +342,40 @@ export default function AdminPage() {
           fontSize: "48px",
           fontWeight: "bold",
           textAlign: "center",
-          marginBottom: "60px",
+          marginBottom: "20px",
           color: "black",
           fontFamily: "var(--font-avant-garde-demi), Arial, sans-serif",
         }}
       >
         CURATION
       </h1>
+
+      {/* Edit Gallery Button */}
+      <div style={{ textAlign: "center", marginBottom: "40px" }}>
+        <a
+          href="/?edit=true"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "12px 24px",
+            borderRadius: "20px",
+            border: "2px solid black",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            fontSize: "14px",
+            fontFamily: "var(--font-avant-garde-book), Arial, sans-serif",
+            textDecoration: "none",
+            cursor: "pointer",
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+          Edit Gallery (Resize Artworks)
+        </a>
+      </div>
 
       <div style={{ display: "flex", gap: "60px", maxWidth: "1200px", margin: "0 auto" }}>
         {/* Wall Selection Buttons */}

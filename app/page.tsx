@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import GalleryArtwork from "./components/GalleryArtwork";
 import PurchasePanel from "./components/PurchasePanel";
-import { useState, useCallback, useEffect } from "react"; 
+import { useState, useCallback, useEffect, Suspense } from "react"; 
 import FullscreenOverlay from "./components/FullscreenOverlay";
 import Wall from "./components/Wall";
 import Floor from "./components/Floor";
@@ -20,13 +20,24 @@ import Player from "./components/Player";
 import MobileControls from "./components/MobileControls";
 import RotatePhone from "./components/RotatePhone";
 import { useMobile } from "./hooks/useMobile";
+import { useSearchParams } from "next/navigation";
+import EditModeOverlay from "./components/EditModeOverlay";
 
-export default function Home() {
+function HomeContent() {
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [showLanding, setShowLanding] = useState(true);
   const [showRotatePhone, setShowRotatePhone] = useState(false);
   const isMobile = useMobile();
-  const { artworks, isLoading } = useArtworks();
+  const { artworks, isLoading, refetch } = useArtworks();
+  const searchParams = useSearchParams();
+  const isEditMode = searchParams.get("edit") === "true";
+
+  // In edit mode, skip landing page
+  useEffect(() => {
+    if (isEditMode) {
+      setShowLanding(false);
+    }
+  }, [isEditMode]);
 
   const handleEnterFromLanding = () => {
     // Re-check mobile at the moment of entry
@@ -146,11 +157,26 @@ export default function Home() {
           image={overlayImage}
           onClose={() => setOverlayImage(null)}
         />
-        {!showLanding && <GalleryFooter onReturnToLanding={handleReturnToLanding} />}
-        {!showLanding && <AssistancePanel visible={!showLanding} />}
+        {!showLanding && !isEditMode && <GalleryFooter onReturnToLanding={handleReturnToLanding} />}
+        {!showLanding && !isEditMode && <AssistancePanel visible={!showLanding} />}
+        {isEditMode && (
+          <EditModeOverlay
+            artworks={artworks}
+            onDimensionChange={() => refetch()}
+            onExit={() => window.location.href = "/"}
+          />
+        )}
       </main>
       
     </PlayerProvider>
     </CartProvider>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div style={{ backgroundColor: "#E8E4EC", minHeight: "100vh" }} />}>
+      <HomeContent />
+    </Suspense>
   );
 }
