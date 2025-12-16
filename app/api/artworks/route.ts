@@ -127,19 +127,38 @@ export async function POST(request: NextRequest) {
 
     // Update the specific field based on type
     const artwork = config[wall as keyof ArtworksConfig].artworks[artworkIndex];
+    
+    // Helper to delete old blob if it exists and is different from new URL
+    const deleteOldBlob = async (oldUrl: string | null, newUrl: string | null) => {
+      if (oldUrl && oldUrl !== newUrl && oldUrl.includes("blob.vercel-storage.com")) {
+        try {
+          await del(oldUrl);
+          console.log(`Deleted old blob: ${oldUrl}`);
+        } catch (error) {
+          console.error(`Failed to delete old blob: ${oldUrl}`, error);
+          // Don't throw - we still want to update the config even if delete fails
+        }
+      }
+    };
+
     if (field === "width") {
       artwork.width = typeof url === "number" ? url : parseInt(url) || 12;
     } else if (field === "height") {
       artwork.height = typeof url === "number" ? url : parseInt(url) || 15;
     } else if (field === "artwork") {
+      await deleteOldBlob(artwork.artwork, url as string);
       artwork.artwork = url as string;
     } else if (field === "artistLabel") {
+      await deleteOldBlob(artwork.artistLabel, url as string);
       artwork.artistLabel = url as string;
     } else if (field === "artistLabelPdf") {
+      await deleteOldBlob(artwork.artistLabelPdf, url as string);
       artwork.artistLabelPdf = url as string;
     } else if (field === "artistBio") {
+      await deleteOldBlob(artwork.artistBio, url as string);
       artwork.artistBio = url as string;
     } else if (field === "artistBioPdf") {
+      await deleteOldBlob(artwork.artistBioPdf, url as string);
       artwork.artistBioPdf = url as string;
     }
 
@@ -149,5 +168,65 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error saving config:", error);
     return NextResponse.json({ error: "Failed to save configuration" }, { status: 500 });
+  }
+}
+
+// DELETE - Remove a specific artwork field and its blob
+export async function DELETE(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { wall, artworkIndex, field } = body;
+
+    if (!wall || artworkIndex === undefined || !field) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const validFields = ["artwork", "artistLabel", "artistLabelPdf", "artistBio", "artistBioPdf"];
+    if (!validFields.includes(field)) {
+      return NextResponse.json({ error: "Invalid field" }, { status: 400 });
+    }
+
+    const config = await readConfig();
+
+    if (!config[wall as keyof ArtworksConfig]) {
+      return NextResponse.json({ error: "Invalid wall" }, { status: 400 });
+    }
+
+    const artwork = config[wall as keyof ArtworksConfig].artworks[artworkIndex];
+    if (!artwork) {
+      return NextResponse.json({ error: "Artwork not found" }, { status: 404 });
+    }
+
+    const oldUrl = artwork[field as keyof WallArtwork] as string | null;
+    
+    // Delete the blob if it exists
+    if (oldUrl && oldUrl.includes("blob.vercel-storage.com")) {
+      try {
+        await del(oldUrl);
+        console.log(`Deleted blob: ${oldUrl}`);
+      } catch (error) {
+        console.error(`Failed to delete blob: ${oldUrl}`, error);
+      }
+    }
+
+    // Clear the field in config
+    if (field === "artwork") {
+      artwork.artwork = null;
+    } else if (field === "artistLabel") {
+      artwork.artistLabel = null;
+    } else if (field === "artistLabelPdf") {
+      artwork.artistLabelPdf = null;
+    } else if (field === "artistBio") {
+      artwork.artistBio = null;
+    } else if (field === "artistBioPdf") {
+      artwork.artistBioPdf = null;
+    }
+    
+    await writeConfig(config);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting artwork field:", error);
+    return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
 }

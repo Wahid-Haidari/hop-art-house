@@ -269,6 +269,48 @@ export default function AdminPage() {
     }
   };
 
+  const handleDelete = async (
+    wallKey: WallName,
+    artworkIndex: number,
+    field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf"
+  ) => {
+    if (!confirm("Are you sure you want to delete this file?")) {
+      return;
+    }
+
+    const fieldKey = `${wallKey}-${artworkIndex}-${field}`;
+    setUploadingField(fieldKey);
+
+    try {
+      const response = await fetch("/api/artworks", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wall: wallKey, artworkIndex, field }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete");
+      }
+
+      // Update local state
+      setWallData((prev) => {
+        const newData = { ...prev };
+        const newArtworks = [...newData[wallKey].artworks];
+        newArtworks[artworkIndex] = {
+          ...newArtworks[artworkIndex],
+          [field]: null,
+          [`${field}Preview`]: null,
+        };
+        newData[wallKey] = { artworks: newArtworks };
+        return newData;
+      });
+    } catch (error) {
+      alert(`Delete failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setUploadingField(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <main
@@ -364,6 +406,7 @@ export default function AdminPage() {
                   height={artworkData.height}
                   onWidthChange={(w) => handleDimensionChange(selectedWall, index, "width", w)}
                   onHeightChange={(h) => handleDimensionChange(selectedWall, index, "height", h)}
+                  onDelete={() => handleDelete(selectedWall, index, "artwork")}
                 />
 
                 {/* Artist Label - Image and PDF side by side */}
@@ -376,6 +419,7 @@ export default function AdminPage() {
                       onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistLabel")}
                       inputId={`artistLabel-${selectedWall}-${index}`}
                       isUploading={uploadingField === `${selectedWall}-${index}-artistLabel`}
+                      onDelete={() => handleDelete(selectedWall, index, "artistLabel")}
                     />
                   </div>
                   <div style={{ flex: 1 }}>
@@ -387,6 +431,7 @@ export default function AdminPage() {
                       inputId={`artistLabelPdf-${selectedWall}-${index}`}
                       isUploading={uploadingField === `${selectedWall}-${index}-artistLabelPdf`}
                       acceptPdf
+                      onDelete={() => handleDelete(selectedWall, index, "artistLabelPdf")}
                     />
                   </div>
                 </div>
@@ -401,6 +446,7 @@ export default function AdminPage() {
                       onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistBio")}
                       inputId={`artistBio-${selectedWall}-${index}`}
                       isUploading={uploadingField === `${selectedWall}-${index}-artistBio`}
+                      onDelete={() => handleDelete(selectedWall, index, "artistBio")}
                     />
                   </div>
                   <div style={{ flex: 1 }}>
@@ -412,6 +458,7 @@ export default function AdminPage() {
                       inputId={`artistBioPdf-${selectedWall}-${index}`}
                       isUploading={uploadingField === `${selectedWall}-${index}-artistBioPdf`}
                       acceptPdf
+                      onDelete={() => handleDelete(selectedWall, index, "artistBioPdf")}
                     />
                   </div>
                 </div>
@@ -437,6 +484,7 @@ interface UploadBoxProps {
   onWidthChange?: (width: number) => void;
   onHeightChange?: (height: number) => void;
   acceptPdf?: boolean;
+  onDelete?: () => void;
 }
 
 function UploadBox({ 
@@ -452,6 +500,7 @@ function UploadBox({
   onWidthChange,
   onHeightChange,
   acceptPdf,
+  onDelete,
 }: UploadBoxProps) {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -548,22 +597,40 @@ function UploadBox({
                 }}
               />
             )}
-            <button
-              onClick={() => inputRef.current?.click()}
-              disabled={isUploading}
-              style={{
-                marginTop: "8px",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                border: "2px solid black",
-                backgroundColor: "#F5C542",
-                color: "black",
-                fontSize: "12px",
-                cursor: isUploading ? "not-allowed" : "pointer",
-              }}
-            >
-              Change
-            </button>
+            <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+              <button
+                onClick={() => inputRef.current?.click()}
+                disabled={isUploading}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  border: "2px solid black",
+                  backgroundColor: "#F5C542",
+                  color: "black",
+                  fontSize: "12px",
+                  cursor: isUploading ? "not-allowed" : "pointer",
+                }}
+              >
+                Change
+              </button>
+              {onDelete && (
+                <button
+                  onClick={onDelete}
+                  disabled={isUploading}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "2px solid #e74c3c",
+                    backgroundColor: "white",
+                    color: "#e74c3c",
+                    fontSize: "12px",
+                    cursor: isUploading ? "not-allowed" : "pointer",
+                  }}
+                >
+                  Delete
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div style={{ textAlign: "center", maxWidth: "200px" }}>
