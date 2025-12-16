@@ -1,0 +1,470 @@
+"use client";
+
+import { useState, useRef, DragEvent, ChangeEvent, useEffect } from "react";
+
+type WallName = "first" | "second" | "third" | "fourth";
+
+interface ArtworkUpload {
+  artwork: string | null;
+  artworkPreview: string | null;
+  artistLabel: string | null;
+  artistLabelPreview: string | null;
+  artistBio: string | null;
+  artistBioPreview: string | null;
+}
+
+interface WallData {
+  artworks: ArtworkUpload[];
+}
+
+const initialArtwork: ArtworkUpload = {
+  artwork: null,
+  artworkPreview: null,
+  artistLabel: null,
+  artistLabelPreview: null,
+  artistBio: null,
+  artistBioPreview: null,
+};
+
+const wallNames: { key: WallName; label: string; description: string }[] = [
+  { key: "first", label: "First Wall", description: "Back Wall" },
+  { key: "second", label: "Second Wall", description: "Right Wall" },
+  { key: "third", label: "Third Wall", description: "Front Wall" },
+  { key: "fourth", label: "Fourth Wall", description: "Left Wall" },
+];
+
+export default function AdminPage() {
+  const [selectedWall, setSelectedWall] = useState<WallName>("first");
+  const [wallData, setWallData] = useState<Record<WallName, WallData>>({
+    first: { artworks: Array(4).fill(null).map(() => ({ ...initialArtwork })) },
+    second: { artworks: Array(4).fill(null).map(() => ({ ...initialArtwork })) },
+    third: { artworks: Array(4).fill(null).map(() => ({ ...initialArtwork })) },
+    fourth: { artworks: Array(4).fill(null).map(() => ({ ...initialArtwork })) },
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
+
+  // Load existing configuration on mount
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  const loadConfig = async () => {
+    try {
+      const response = await fetch("/api/artworks");
+      if (response.ok) {
+        const config = await response.json();
+        // Convert the saved config to include preview URLs
+        const newWallData: Record<WallName, WallData> = {
+          first: { artworks: [] },
+          second: { artworks: [] },
+          third: { artworks: [] },
+          fourth: { artworks: [] },
+        };
+
+        for (const wallKey of ["first", "second", "third", "fourth"] as WallName[]) {
+          newWallData[wallKey].artworks = Array(4).fill(null).map((_, index) => {
+            const saved = config[wallKey]?.artworks?.[index];
+            return {
+              artwork: saved?.artwork || null,
+              artworkPreview: saved?.artwork || null,
+              artistLabel: saved?.artistLabel || null,
+              artistLabelPreview: saved?.artistLabel || null,
+              artistBio: saved?.artistBio || null,
+              artistBioPreview: saved?.artistBio || null,
+            };
+          });
+        }
+
+        setWallData(newWallData);
+      }
+    } catch (error) {
+      console.error("Error loading config:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const uploadFile = async (
+    file: File,
+    wallKey: WallName,
+    artworkIndex: number,
+    field: "artwork" | "artistLabel" | "artistBio"
+  ): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("wall", wallKey);
+    formData.append("artworkIndex", artworkIndex.toString());
+    formData.append("field", field);
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Upload failed");
+      }
+
+      const result = await response.json();
+      return result.url;
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error;
+    }
+  };
+
+  const saveToConfig = async (
+    wallKey: WallName,
+    artworkIndex: number,
+    field: "artwork" | "artistLabel" | "artistBio",
+    url: string
+  ) => {
+    try {
+      const response = await fetch("/api/artworks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wall: wallKey, artworkIndex, field, url }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save configuration");
+      }
+    } catch (error) {
+      console.error("Save config error:", error);
+      throw error;
+    }
+  };
+
+  const handleFileSelect = async (
+    wallKey: WallName,
+    artworkIndex: number,
+    field: "artwork" | "artistLabel" | "artistBio",
+    file: File
+  ) => {
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File size must be less than 10MB");
+      return;
+    }
+
+    const fieldKey = `${wallKey}-${artworkIndex}-${field}`;
+    setUploadingField(fieldKey);
+
+    try {
+      // Create local preview first
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setWallData((prev) => {
+          const newData = { ...prev };
+          const newArtworks = [...newData[wallKey].artworks];
+          newArtworks[artworkIndex] = {
+            ...newArtworks[artworkIndex],
+            [`${field}Preview`]: reader.result as string,
+          };
+          newData[wallKey] = { artworks: newArtworks };
+          return newData;
+        });
+      };
+      reader.readAsDataURL(file);
+
+      // Upload file to server
+      const url = await uploadFile(file, wallKey, artworkIndex, field);
+
+      if (url) {
+        // Save to config
+        await saveToConfig(wallKey, artworkIndex, field, url);
+
+        // Update state with the permanent URL
+        setWallData((prev) => {
+          const newData = { ...prev };
+          const newArtworks = [...newData[wallKey].artworks];
+          newArtworks[artworkIndex] = {
+            ...newArtworks[artworkIndex],
+            [field]: url,
+            [`${field}Preview`]: url,
+          };
+          newData[wallKey] = { artworks: newArtworks };
+          return newData;
+        });
+      }
+    } catch (error) {
+      alert(`Upload failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setUploadingField(null);
+    }
+  };
+
+  const handleDrop = (
+    e: DragEvent<HTMLDivElement>,
+    wallKey: WallName,
+    artworkIndex: number,
+    field: "artwork" | "artistLabel" | "artistBio"
+  ) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) {
+      handleFileSelect(wallKey, artworkIndex, field, file);
+    }
+  };
+
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    wallKey: WallName,
+    artworkIndex: number,
+    field: "artwork" | "artistLabel" | "artistBio"
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(wallKey, artworkIndex, field, file);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#E8E4EC",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ fontSize: "18px", color: "black" }}>Loading...</div>
+      </main>
+    );
+  }
+
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#E8E4EC",
+        padding: "60px 40px",
+        fontFamily: "var(--font-avant-garde-book), Arial, sans-serif",
+      }}
+    >
+      {/* Title */}
+      <h1
+        style={{
+          fontSize: "48px",
+          fontWeight: "bold",
+          textAlign: "center",
+          marginBottom: "60px",
+          color: "black",
+          fontFamily: "var(--font-avant-garde-demi), Arial, sans-serif",
+        }}
+      >
+        CURATION
+      </h1>
+
+      <div style={{ display: "flex", gap: "60px", maxWidth: "1200px", margin: "0 auto" }}>
+        {/* Wall Selection Buttons */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", paddingTop: "40px" }}>
+          {wallNames.map((wall) => (
+            <button
+              key={wall.key}
+              onClick={() => setSelectedWall(wall.key)}
+              style={{
+                padding: "12px 24px",
+                borderRadius: "20px",
+                border: "2px solid black",
+                backgroundColor: selectedWall === wall.key ? "#F5C542" : "white",
+                color: "black",
+                fontSize: "14px",
+                fontFamily: "var(--font-avant-garde-book), Arial, sans-serif",
+                cursor: "pointer",
+                minWidth: "140px",
+                transition: "background-color 0.2s ease",
+                textAlign: "center",
+              }}
+            >
+              <div>{wall.label}</div>
+              <div style={{ fontSize: "11px", opacity: 0.7, marginTop: "2px" }}>{wall.description}</div>
+            </button>
+          ))}
+        </div>
+
+        {/* Artwork Upload Section */}
+        <div style={{ flex: 1 }}>
+          {wallData[selectedWall].artworks.map((artworkData, index) => (
+            <div key={index} style={{ marginBottom: "40px" }}>
+              <h2
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "500",
+                  marginBottom: "16px",
+                  color: "black",
+                }}
+              >
+                Artwork {index + 1}:
+              </h2>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {/* Artwork Upload */}
+                <UploadBox
+                  label="Artwork"
+                  preview={artworkData.artworkPreview}
+                  onDrop={(e) => handleDrop(e, selectedWall, index, "artwork")}
+                  onInputChange={(e) => handleInputChange(e, selectedWall, index, "artwork")}
+                  inputId={`artwork-${selectedWall}-${index}`}
+                  isUploading={uploadingField === `${selectedWall}-${index}-artwork`}
+                />
+
+                {/* Artist Label Upload */}
+                <UploadBox
+                  label="Artist label"
+                  preview={artworkData.artistLabelPreview}
+                  onDrop={(e) => handleDrop(e, selectedWall, index, "artistLabel")}
+                  onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistLabel")}
+                  inputId={`artistLabel-${selectedWall}-${index}`}
+                  isUploading={uploadingField === `${selectedWall}-${index}-artistLabel`}
+                />
+
+                {/* Artist Bio Upload */}
+                <UploadBox
+                  label="Artist bio"
+                  preview={artworkData.artistBioPreview}
+                  onDrop={(e) => handleDrop(e, selectedWall, index, "artistBio")}
+                  onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistBio")}
+                  inputId={`artistBio-${selectedWall}-${index}`}
+                  isUploading={uploadingField === `${selectedWall}-${index}-artistBio`}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+interface UploadBoxProps {
+  label: string;
+  preview: string | null;
+  onDrop: (e: DragEvent<HTMLDivElement>) => void;
+  onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  inputId: string;
+  isUploading?: boolean;
+}
+
+function UploadBox({ label, preview, onDrop, onInputChange, inputId, isUploading }: UploadBoxProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragging(true);
+      }}
+      onDragLeave={() => setIsDragging(false)}
+      onDrop={(e) => {
+        setIsDragging(false);
+        onDrop(e);
+      }}
+      style={{
+        border: "2px dashed #999",
+        borderRadius: "8px",
+        padding: "20px",
+        backgroundColor: isDragging ? "#f0f0f0" : "white",
+        transition: "background-color 0.2s ease",
+        opacity: isUploading ? 0.7 : 1,
+        position: "relative",
+      }}
+    >
+      {isUploading && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(255,255,255,0.8)",
+            borderRadius: "8px",
+            zIndex: 10,
+          }}
+        >
+          <div style={{ fontSize: "14px", color: "#666" }}>Uploading...</div>
+        </div>
+      )}
+
+      <div style={{ fontSize: "14px", color: "#666", marginBottom: "12px" }}>{label}</div>
+
+      {preview ? (
+        <div style={{ position: "relative" }}>
+          <img
+            src={preview}
+            alt={label}
+            style={{
+              maxWidth: "200px",
+              maxHeight: "150px",
+              objectFit: "contain",
+              borderRadius: "4px",
+            }}
+          />
+          <button
+            onClick={() => inputRef.current?.click()}
+            disabled={isUploading}
+            style={{
+              marginTop: "8px",
+              padding: "8px 16px",
+              borderRadius: "20px",
+              border: "2px solid black",
+              backgroundColor: "#F5C542",
+              color: "black",
+              fontSize: "12px",
+              cursor: isUploading ? "not-allowed" : "pointer",
+            }}
+          >
+            Change
+          </button>
+        </div>
+      ) : (
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "16px", color: "black", marginBottom: "12px" }}>Drag & Drop</div>
+          <button
+            onClick={() => inputRef.current?.click()}
+            disabled={isUploading}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "20px",
+              border: "2px solid black",
+              backgroundColor: "#F5C542",
+              color: "black",
+              fontSize: "14px",
+              cursor: isUploading ? "not-allowed" : "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            Upload
+          </button>
+          <div style={{ fontSize: "12px", color: "#999", marginTop: "12px" }}>Size limit: 10mb</div>
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        id={inputId}
+        type="file"
+        accept="image/*"
+        onChange={onInputChange}
+        disabled={isUploading}
+        style={{ display: "none" }}
+      />
+    </div>
+  );
+}

@@ -11,7 +11,7 @@ import Ceiling from "./components/Ceiling";
 import { PlayerProvider } from "./components/PlayerContext";
 import ProximityMessage from "./components/ProximityMessage";
 import Tree from "./components/Tree";
-import { artworks } from "./artworks";
+import { useArtworks } from "./hooks/useArtworks";
 import LandingPage from "./components/LandingPage";
 import { CartProvider } from "./components/CartContext";
 import GalleryFooter from "./components/GalleryFooter";
@@ -26,6 +26,7 @@ export default function Home() {
   const [showLanding, setShowLanding] = useState(true);
   const [showRotatePhone, setShowRotatePhone] = useState(false);
   const isMobile = useMobile();
+  const { artworks, isLoading } = useArtworks();
 
   const handleEnterFromLanding = () => {
     // Re-check mobile at the moment of entry

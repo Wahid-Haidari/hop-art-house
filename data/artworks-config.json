@@ -1,0 +1,98 @@
+{
+  "first": {
+    "artworks": [
+      {
+        "artwork": "/uploads/first-0-artwork-1765859550918-1.jpeg",
+        "artistLabel": "/uploads/first-0-artistLabel-1765859554498-2.jpeg",
+        "artistBio": "/uploads/first-0-artistBio-1765859558832-3.jpeg"
+      },
+      {
+        "artwork": "/uploads/first-0-artwork-1765859550918-1.jpeg",
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": "/uploads/first-0-artwork-1765859550918-1.jpeg",
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": "/uploads/first-0-artwork-1765859550918-1.jpeg",
+        "artistLabel": null,
+        "artistBio": null
+      }
+    ]
+  },
+  "second": {
+    "artworks": [
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      }
+    ]
+  },
+  "third": {
+    "artworks": [
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      }
+    ]
+  },
+  "fourth": {
+    "artworks": [
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      },
+      {
+        "artwork": null,
+        "artistLabel": null,
+        "artistBio": null
+      }
+    ]
+  }
+}

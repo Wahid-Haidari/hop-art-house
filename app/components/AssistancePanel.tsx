@@ -37,7 +37,7 @@ export default function AssistancePanel({ visible }: AssistancePanelProps) {
           onMouseLeave={() => setHoverShowInstructions(false)}
         >
           <div 
-            className="bg-[#F7C41A] border-4 border-black rounded-lg p-6 shadow-lg"
+            className="bg-[#F7C41A] border-2 border-black rounded-lg p-6 shadow-lg"
             style={{ width: "240px" }}
           >
             <div className="text-black text-sm leading-loose space-y-2" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
