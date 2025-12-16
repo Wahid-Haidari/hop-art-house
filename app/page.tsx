@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import GalleryArtwork from "./components/GalleryArtwork";
 import PurchasePanel from "./components/PurchasePanel";
-import { useState, useCallback } from "react"; 
+import { useState, useCallback, useEffect } from "react"; 
 import FullscreenOverlay from "./components/FullscreenOverlay";
 import Wall from "./components/Wall";
 import Floor from "./components/Floor";
@@ -40,9 +40,29 @@ export default function Home() {
     }
   };
 
+  const handleReturnToLanding = useCallback(() => {
+    setShowLanding(true);
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleLandscape = useCallback(() => {
     setShowRotatePhone(false);
   }, []);
+
+  // Desktop: scroll up to return to landing page
+  useEffect(() => {
+    if (isMobile || showLanding) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Only trigger on scroll up (negative deltaY)
+      if (e.deltaY < -50) {
+        handleReturnToLanding();
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel);
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, [isMobile, showLanding, handleReturnToLanding]);
 
   return (
     <CartProvider>
@@ -123,7 +143,7 @@ export default function Home() {
           image={overlayImage}
           onClose={() => setOverlayImage(null)}
         />
-        {!showLanding && <GalleryFooter />}
+        {!showLanding && <GalleryFooter onReturnToLanding={handleReturnToLanding} />}
         {!showLanding && <AssistancePanel visible={!showLanding} />}
       </main>
       

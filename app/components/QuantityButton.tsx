@@ -164,9 +164,9 @@ export default function QuantityButton({
         <meshBasicMaterial color={COLORS.white} toneMapped={false} />
       </mesh>
 
-      {/* Quantity Number */}
+      {/* Quantity Number - positioned 2px lower */}
       <Text
-        position={[numberX, 0, 0.012]}
+        position={[numberX, -0.008, 0.012]}
         fontSize={FONT_SIZE}
         font="/font/ITC Avant Garde Gothic Std Book.otf"
         color="black"

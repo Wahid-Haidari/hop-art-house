@@ -255,9 +255,9 @@ export default function SizeDropdown({
               <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </mesh>
 
-            {/* Price */}
+            {/* Price - positioned 2px lower */}
             <Text
-              position={[priceX, 0, 0.014]}
+              position={[priceX, -0.008, 0.014]}
               fontSize={FONT_SIZE}
               font="/font/ITC Avant Garde Gothic Std Book.otf"
               color="black"
@@ -273,9 +273,9 @@ export default function SizeDropdown({
               <meshBasicMaterial color="black" />
             </mesh>
 
-            {/* Dimensions */}
+            {/* Dimensions - positioned 2px lower */}
             <Text
-              position={[dimensionsX, 0, 0.014]}
+              position={[dimensionsX, -0.008, 0.014]}
               fontSize={FONT_SIZE}
               font="/font/ITC Avant Garde Gothic Std Book.otf"
               color="black"
@@ -317,9 +317,9 @@ export default function SizeDropdown({
                 <meshBasicMaterial transparent opacity={0} depthWrite={false} />
               </mesh>
 
-              {/* Price */}
+              {/* Price - positioned 2px lower */}
               <Text
-                position={[priceX, 0, 0.014]}
+                position={[priceX, -0.008, 0.014]}
                 fontSize={FONT_SIZE}
                 font="/font/ITC Avant Garde Gothic Std Book.otf"
                 color="black"
@@ -335,9 +335,9 @@ export default function SizeDropdown({
                 <meshBasicMaterial color="black" />
               </mesh>
 
-              {/* Dimensions */}
+              {/* Dimensions - positioned 2px lower */}
               <Text
-                position={[dimensionsX, 0, 0.014]}
+                position={[dimensionsX, -0.008, 0.014]}
                 fontSize={FONT_SIZE}
                 font="/font/ITC Avant Garde Gothic Std Book.otf"
                 color="black"

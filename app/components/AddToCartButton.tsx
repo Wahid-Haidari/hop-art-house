@@ -149,9 +149,9 @@ export default function AddToCartButton({
         <meshBasicMaterial color={isPressed ? "white" : COLORS.primary} toneMapped={false} depthWrite={false} />
       </mesh>
 
-      {/* Add to Cart Text */}
+      {/* Add to Cart Text - positioned 2px lower */}
       <Text
-        position={[0, 0, 0.002]}
+        position={[0, -0.008, 0.002]}
         fontSize={FONT_SIZE}
         font="/font/ITC Avant Garde Gothic Std Book.otf"
         color="black"

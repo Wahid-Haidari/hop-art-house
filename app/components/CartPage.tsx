@@ -200,12 +200,15 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
 
           <button
             onClick={onCheckout}
-            className="w-full py-4 cursor-pointer border-none"
+            className="w-full py-4 cursor-pointer"
             style={{ 
               backgroundColor: COLORS.primary,
               fontSize: "18px",
               fontFamily: "var(--font-avant-garde-medium)",
               color: "black",
+              border: "2px solid black",
+              borderRadius: "8px",
+              paddingTop: "18px",
               marginBottom: isMobile ? "16px" : "0",
             }}
           >

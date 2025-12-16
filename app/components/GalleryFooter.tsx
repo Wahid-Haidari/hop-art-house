@@ -7,7 +7,11 @@ import GetFeaturedPage from "./GetFeaturedPage";
 import AboutPage from "./AboutPage";
 import { useMobile } from "../hooks/useMobile";
 
-export default function GalleryFooter() {
+interface GalleryFooterProps {
+  onReturnToLanding?: () => void;
+}
+
+export default function GalleryFooter({ onReturnToLanding }: GalleryFooterProps) {
   const { getTotalItems } = useCart();
   const [showCartPage, setShowCartPage] = useState(false);
   const [showGetFeatured, setShowGetFeatured] = useState(false);
@@ -88,6 +92,44 @@ export default function GalleryFooter() {
             className="w-full h-full"
             alt="Hop Art House"
           />
+        </div>
+      )}
+
+      {/* Return button - Top Left (Desktop only) */}
+      {!isMobile && onReturnToLanding && (
+        <div 
+          onClick={onReturnToLanding}
+          className="fixed z-50 pointer-events-auto cursor-pointer hover:opacity-70 select-none"
+          style={{
+            top: "20px",
+            left: "28px",
+            fontSize: "16px",
+            fontFamily: "var(--font-avant-garde-medium)",
+            color: "black",
+            userSelect: "none",
+          }}
+        >
+          Return
+        </div>
+      )}
+
+      {/* Mobile: Return Button */}
+      {isMobile && onReturnToLanding && (
+        <div 
+          onClick={onReturnToLanding}
+          className="fixed z-50 pointer-events-auto cursor-pointer select-none"
+          style={{
+            top: headerVisible ? "20px" : "-60px",
+            left: "20px",
+            fontSize: "14px",
+            fontFamily: "var(--font-avant-garde-medium)",
+            color: "black",
+            transition: "top 0.3s ease-in-out",
+            userSelect: "none",
+            WebkitUserSelect: "none",
+          }}
+        >
+          Return
         </div>
       )}
 
