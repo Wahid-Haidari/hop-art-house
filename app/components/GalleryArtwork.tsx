@@ -85,8 +85,9 @@ function PdfCard({
           pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
         }
 
-        // First fetch the PDF as array buffer to avoid CORS issues
-        const response = await fetch(url);
+        // Use proxy API to fetch PDF (avoids Vercel bot protection issues)
+        const proxyUrl = `/api/proxy-pdf?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
         if (!response.ok) {
           throw new Error(`Failed to fetch PDF: ${response.status}`);
         }
