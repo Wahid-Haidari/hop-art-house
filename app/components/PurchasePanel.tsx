@@ -12,6 +12,7 @@ interface PurchasePanelProps {
     artworkImage: string;
     artPosition: [number, number, number];
     artRotation: [number, number, number];
+    aspectRatio?: number;
 }
 
 export default function PurchasePanel({
@@ -19,16 +20,17 @@ export default function PurchasePanel({
     artworkTitle,
     artworkImage,
     artPosition,
-    artRotation
+    artRotation,
+    aspectRatio = 1.33
 }: PurchasePanelProps) {
     const { addItem } = useCart();
     const [selectedSize, setSelectedSize] = useState(0);
     const [selectedQuantity, setSelectedQuantity] = useState(1);
 
     const [artX, artY, artZ] = artPosition;
-    const ART_HEIGHT = 2.5;
-    const artBottom = artY - ART_HEIGHT / 2;
     const ART_WIDTH = 1.5;
+    const ART_HEIGHT = ART_WIDTH * aspectRatio;  // Calculate height from aspect ratio
+    const artBottom = artY - ART_HEIGHT / 2;
     const artRightEdge = artX + ART_WIDTH / 2;
     const CARD_WIDTH = 0.5;
     const SIZE_WIDTH = 0.75;

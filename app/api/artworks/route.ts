@@ -7,8 +7,7 @@ export interface WallArtwork {
   artistLabelPdf: string | null;     // PDF to open on click (optional)
   artistBio: string | null;          // Image for display on wall
   artistBioPdf: string | null;       // PDF to open on click (optional)
-  width: number;
-  height: number;
+  aspectRatio: number;               // height/width ratio of the artwork image
 }
 
 export interface WallData {
@@ -22,23 +21,27 @@ export interface ArtworksConfig {
   fourth: WallData;
 }
 
-const CONFIG_FILENAME = "config/artworks-config.json";
+// Default aspect ratio (4:3 portrait)
+const DEFAULT_ASPECT_RATIO = 1.33;
+const CONFIG_PREFIX = "config/artworks-config";
 
 const defaultConfig: ArtworksConfig = {
-  first: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, width: 12, height: 15 })) },
-  second: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, width: 12, height: 15 })) },
-  third: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, width: 12, height: 15 })) },
-  fourth: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, width: 12, height: 15 })) },
+  first: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, aspectRatio: DEFAULT_ASPECT_RATIO })) },
+  second: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, aspectRatio: DEFAULT_ASPECT_RATIO })) },
+  third: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, aspectRatio: DEFAULT_ASPECT_RATIO })) },
+  fourth: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, aspectRatio: DEFAULT_ASPECT_RATIO })) },
 };
 
 async function readConfig(): Promise<ArtworksConfig> {
   try {
-    // List blobs to find our config file
+    // List blobs to find our config file (get the most recent one)
     const { blobs } = await list({ prefix: "config/" });
-    const configBlob = blobs.find(b => b.pathname === CONFIG_FILENAME);
+    const configBlobs = blobs
+      .filter(b => b.pathname.startsWith(CONFIG_PREFIX))
+      .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
     
-    if (configBlob) {
-      const response = await fetch(configBlob.url);
+    if (configBlobs.length > 0) {
+      const response = await fetch(configBlobs[0].url);
       if (response.ok) {
         return await response.json();
       }
@@ -52,19 +55,24 @@ async function readConfig(): Promise<ArtworksConfig> {
 
 async function writeConfig(config: ArtworksConfig) {
   try {
-    // Delete existing config if it exists
-    const { blobs } = await list({ prefix: "config/" });
-    const existingConfig = blobs.find(b => b.pathname === CONFIG_FILENAME);
-    if (existingConfig) {
-      await del(existingConfig.url);
-    }
-    
-    // Write new config
+    // Write new config with unique name
     const configJson = JSON.stringify(config, null, 2);
-    await put(CONFIG_FILENAME, configJson, {
+    const newConfigName = `${CONFIG_PREFIX}-${Date.now()}.json`;
+    
+    await put(newConfigName, configJson, {
       access: "public",
       contentType: "application/json",
     });
+    
+    // Clean up old config files (keep only the newest)
+    const { blobs } = await list({ prefix: "config/" });
+    const oldConfigs = blobs
+      .filter(b => b.pathname.startsWith(CONFIG_PREFIX) && b.pathname !== newConfigName);
+    
+    // Delete old configs (fire and forget)
+    for (const oldConfig of oldConfigs) {
+      del(oldConfig.url).catch(() => {});
+    }
   } catch (error) {
     console.error("Error writing config:", error);
     throw error;
@@ -107,8 +115,7 @@ export async function POST(request: NextRequest) {
         artistLabelPdf: null,
         artistBio: null,
         artistBioPdf: null,
-        width: 12,
-        height: 15,
+        aspectRatio: DEFAULT_ASPECT_RATIO,
       }));
     }
 
@@ -120,31 +127,26 @@ export async function POST(request: NextRequest) {
         artistLabelPdf: null,
         artistBio: null,
         artistBioPdf: null,
-        width: 12,
-        height: 15,
+        aspectRatio: DEFAULT_ASPECT_RATIO,
       };
     }
 
     // Update the specific field based on type
     const artwork = config[wall as keyof ArtworksConfig].artworks[artworkIndex];
     
-    // Helper to delete old blob if it exists and is different from new URL
+    // Helper to delete old blob if replacing
     const deleteOldBlob = async (oldUrl: string | null, newUrl: string | null) => {
       if (oldUrl && oldUrl !== newUrl && oldUrl.includes("blob.vercel-storage.com")) {
         try {
           await del(oldUrl);
-          console.log(`Deleted old blob: ${oldUrl}`);
         } catch (error) {
           console.error(`Failed to delete old blob: ${oldUrl}`, error);
-          // Don't throw - we still want to update the config even if delete fails
         }
       }
     };
 
-    if (field === "width") {
-      artwork.width = typeof url === "number" ? url : parseInt(url) || 12;
-    } else if (field === "height") {
-      artwork.height = typeof url === "number" ? url : parseInt(url) || 15;
+    if (field === "aspectRatio") {
+      artwork.aspectRatio = typeof url === "number" ? url : parseFloat(url) || DEFAULT_ASPECT_RATIO;
     } else if (field === "artwork") {
       await deleteOldBlob(artwork.artwork, url as string);
       artwork.artwork = url as string;
@@ -171,62 +173,47 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE - Remove a specific artwork field and its blob
+// DELETE - Remove an artwork or specific field
 export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json();
-    const { wall, artworkIndex, field } = body;
+    const { wall, artworkIndex, field, blobUrl } = body;
 
-    if (!wall || artworkIndex === undefined || !field) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
-
-    const validFields = ["artwork", "artistLabel", "artistLabelPdf", "artistBio", "artistBioPdf"];
-    if (!validFields.includes(field)) {
-      return NextResponse.json({ error: "Invalid field" }, { status: 400 });
-    }
-
-    const config = await readConfig();
-
-    if (!config[wall as keyof ArtworksConfig]) {
-      return NextResponse.json({ error: "Invalid wall" }, { status: 400 });
-    }
-
-    const artwork = config[wall as keyof ArtworksConfig].artworks[artworkIndex];
-    if (!artwork) {
-      return NextResponse.json({ error: "Artwork not found" }, { status: 404 });
-    }
-
-    const oldUrl = artwork[field as keyof WallArtwork] as string | null;
-    
-    // Delete the blob if it exists
-    if (oldUrl && oldUrl.includes("blob.vercel-storage.com")) {
+    // Delete the blob if provided
+    if (blobUrl && blobUrl.includes("blob.vercel-storage.com")) {
       try {
-        await del(oldUrl);
-        console.log(`Deleted blob: ${oldUrl}`);
+        await del(blobUrl);
+        console.log(`Deleted blob: ${blobUrl}`);
       } catch (error) {
-        console.error(`Failed to delete blob: ${oldUrl}`, error);
+        console.error(`Failed to delete blob: ${blobUrl}`, error);
       }
     }
 
-    // Clear the field in config
-    if (field === "artwork") {
-      artwork.artwork = null;
-    } else if (field === "artistLabel") {
-      artwork.artistLabel = null;
-    } else if (field === "artistLabelPdf") {
-      artwork.artistLabelPdf = null;
-    } else if (field === "artistBio") {
-      artwork.artistBio = null;
-    } else if (field === "artistBioPdf") {
-      artwork.artistBioPdf = null;
+    // Update the config to remove the field
+    if (wall && artworkIndex !== undefined && field) {
+      const config = await readConfig();
+      const artwork = config[wall as keyof ArtworksConfig]?.artworks?.[artworkIndex];
+      
+      if (artwork) {
+        if (field === "artwork") {
+          artwork.artwork = null;
+        } else if (field === "artistLabel") {
+          artwork.artistLabel = null;
+        } else if (field === "artistLabelPdf") {
+          artwork.artistLabelPdf = null;
+        } else if (field === "artistBio") {
+          artwork.artistBio = null;
+        } else if (field === "artistBioPdf") {
+          artwork.artistBioPdf = null;
+        }
+        
+        await writeConfig(config);
+      }
     }
-    
-    await writeConfig(config);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting artwork field:", error);
+    console.error("Error deleting:", error);
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
 }

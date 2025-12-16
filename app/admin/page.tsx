@@ -15,8 +15,7 @@ interface ArtworkUpload {
   artistBioPreview: string | null;
   artistBioPdf: string | null;
   artistBioPdfPreview: string | null;
-  width: number;
-  height: number;
+  aspectRatio: number;  // height/width ratio
 }
 
 interface WallData {
@@ -34,8 +33,7 @@ const initialArtwork: ArtworkUpload = {
   artistBioPreview: null,
   artistBioPdf: null,
   artistBioPdfPreview: null,
-  width: 12,
-  height: 15,
+  aspectRatio: 1.33,  // Default 4:3 portrait
 };
 
 const wallNames: { key: WallName; label: string; description: string }[] = [
@@ -55,6 +53,7 @@ export default function AdminPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [deletingField, setDeletingField] = useState<string | null>(null);
 
   // Load existing configuration on mount
   useEffect(() => {
@@ -88,8 +87,7 @@ export default function AdminPage() {
               artistBioPreview: saved?.artistBio || null,
               artistBioPdf: saved?.artistBioPdf || null,
               artistBioPdfPreview: saved?.artistBioPdf || null,
-              width: saved?.width ?? 12,
-              height: saved?.height ?? 15,
+              aspectRatio: saved?.aspectRatio ?? 1.33,
             };
           });
         }
@@ -137,7 +135,7 @@ export default function AdminPage() {
   const saveToConfig = async (
     wallKey: WallName,
     artworkIndex: number,
-    field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf" | "width" | "height",
+    field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf" | "aspectRatio",
     value: string | number
   ) => {
     try {
@@ -156,30 +154,21 @@ export default function AdminPage() {
     }
   };
 
-  const handleDimensionChange = async (
-    wallKey: WallName,
-    artworkIndex: number,
-    dimension: "width" | "height",
-    value: number
-  ) => {
-    // Update local state
-    setWallData((prev) => {
-      const newData = { ...prev };
-      const newArtworks = [...newData[wallKey].artworks];
-      newArtworks[artworkIndex] = {
-        ...newArtworks[artworkIndex],
-        [dimension]: value,
+  // Helper to get image aspect ratio
+  const getImageAspectRatio = (file: File): Promise<number> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        // aspectRatio = height / width (for portrait images > 1, for landscape < 1)
+        const ratio = img.height / img.width;
+        URL.revokeObjectURL(img.src);
+        resolve(ratio);
       };
-      newData[wallKey] = { artworks: newArtworks };
-      return newData;
+      img.onerror = () => {
+        resolve(1.33); // Default to 4:3 portrait on error
+      };
+      img.src = URL.createObjectURL(file);
     });
-
-    // Save to config
-    try {
-      await saveToConfig(wallKey, artworkIndex, dimension, value);
-    } catch (error) {
-      console.error(`Failed to save ${dimension}:`, error);
-    }
   };
 
   const handleFileSelect = async (
@@ -197,6 +186,12 @@ export default function AdminPage() {
     setUploadingField(fieldKey);
 
     try {
+      // If uploading artwork image, detect aspect ratio
+      let aspectRatio: number | null = null;
+      if (field === "artwork" && file.type.startsWith("image/")) {
+        aspectRatio = await getImageAspectRatio(file);
+      }
+
       // Create local preview first
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -206,6 +201,7 @@ export default function AdminPage() {
           newArtworks[artworkIndex] = {
             ...newArtworks[artworkIndex],
             [`${field}Preview`]: reader.result as string,
+            ...(aspectRatio !== null ? { aspectRatio } : {}),
           };
           newData[wallKey] = { artworks: newArtworks };
           return newData;
@@ -219,6 +215,11 @@ export default function AdminPage() {
       if (url) {
         // Save to config
         await saveToConfig(wallKey, artworkIndex, field, url);
+        
+        // If we detected aspect ratio, save it too
+        if (aspectRatio !== null) {
+          await saveToConfig(wallKey, artworkIndex, "aspectRatio", aspectRatio);
+        }
 
         // Update state with the permanent URL
         setWallData((prev) => {
@@ -228,6 +229,7 @@ export default function AdminPage() {
             ...newArtworks[artworkIndex],
             [field]: url,
             [`${field}Preview`]: url,
+            ...(aspectRatio !== null ? { aspectRatio } : {}),
           };
           newData[wallKey] = { artworks: newArtworks };
           return newData;
@@ -274,22 +276,31 @@ export default function AdminPage() {
     artworkIndex: number,
     field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf"
   ) => {
-    if (!confirm("Are you sure you want to delete this file?")) {
-      return;
-    }
-
     const fieldKey = `${wallKey}-${artworkIndex}-${field}`;
-    setUploadingField(fieldKey);
-
+    const currentData = wallData[wallKey].artworks[artworkIndex];
+    const blobUrl = currentData[field];
+    
+    if (!blobUrl) return;
+    
+    if (!confirm("Are you sure you want to delete this file?")) return;
+    
+    setDeletingField(fieldKey);
+    
     try {
+      // Delete from Vercel Blob and update config
       const response = await fetch("/api/artworks", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wall: wallKey, artworkIndex, field }),
+        body: JSON.stringify({ 
+          wall: wallKey, 
+          artworkIndex, 
+          field, 
+          blobUrl 
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete");
+        throw new Error("Failed to delete file");
       }
 
       // Update local state
@@ -307,7 +318,7 @@ export default function AdminPage() {
     } catch (error) {
       alert(`Delete failed: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
-      setUploadingField(null);
+      setDeletingField(null);
     }
   };
 
@@ -393,20 +404,16 @@ export default function AdminPage() {
               </h2>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {/* Artwork Upload with Dimensions */}
+                {/* Artwork Upload */}
                 <UploadBox
                   label="Artwork"
                   preview={artworkData.artworkPreview}
                   onDrop={(e) => handleDrop(e, selectedWall, index, "artwork")}
                   onInputChange={(e) => handleInputChange(e, selectedWall, index, "artwork")}
+                  onDelete={() => handleDelete(selectedWall, index, "artwork")}
                   inputId={`artwork-${selectedWall}-${index}`}
                   isUploading={uploadingField === `${selectedWall}-${index}-artwork`}
-                  showDimensions
-                  width={artworkData.width}
-                  height={artworkData.height}
-                  onWidthChange={(w) => handleDimensionChange(selectedWall, index, "width", w)}
-                  onHeightChange={(h) => handleDimensionChange(selectedWall, index, "height", h)}
-                  onDelete={() => handleDelete(selectedWall, index, "artwork")}
+                  isDeleting={deletingField === `${selectedWall}-${index}-artwork`}
                 />
 
                 {/* Artist Label - Image and PDF side by side */}
@@ -417,9 +424,10 @@ export default function AdminPage() {
                       preview={artworkData.artistLabelPreview}
                       onDrop={(e) => handleDrop(e, selectedWall, index, "artistLabel")}
                       onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistLabel")}
+                      onDelete={() => handleDelete(selectedWall, index, "artistLabel")}
                       inputId={`artistLabel-${selectedWall}-${index}`}
                       isUploading={uploadingField === `${selectedWall}-${index}-artistLabel`}
-                      onDelete={() => handleDelete(selectedWall, index, "artistLabel")}
+                      isDeleting={deletingField === `${selectedWall}-${index}-artistLabel`}
                     />
                   </div>
                   <div style={{ flex: 1 }}>
@@ -428,10 +436,11 @@ export default function AdminPage() {
                       preview={artworkData.artistLabelPdfPreview}
                       onDrop={(e) => handleDrop(e, selectedWall, index, "artistLabelPdf")}
                       onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistLabelPdf")}
+                      onDelete={() => handleDelete(selectedWall, index, "artistLabelPdf")}
                       inputId={`artistLabelPdf-${selectedWall}-${index}`}
                       isUploading={uploadingField === `${selectedWall}-${index}-artistLabelPdf`}
+                      isDeleting={deletingField === `${selectedWall}-${index}-artistLabelPdf`}
                       acceptPdf
-                      onDelete={() => handleDelete(selectedWall, index, "artistLabelPdf")}
                     />
                   </div>
                 </div>
@@ -444,9 +453,10 @@ export default function AdminPage() {
                       preview={artworkData.artistBioPreview}
                       onDrop={(e) => handleDrop(e, selectedWall, index, "artistBio")}
                       onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistBio")}
+                      onDelete={() => handleDelete(selectedWall, index, "artistBio")}
                       inputId={`artistBio-${selectedWall}-${index}`}
                       isUploading={uploadingField === `${selectedWall}-${index}-artistBio`}
-                      onDelete={() => handleDelete(selectedWall, index, "artistBio")}
+                      isDeleting={deletingField === `${selectedWall}-${index}-artistBio`}
                     />
                   </div>
                   <div style={{ flex: 1 }}>
@@ -455,10 +465,11 @@ export default function AdminPage() {
                       preview={artworkData.artistBioPdfPreview}
                       onDrop={(e) => handleDrop(e, selectedWall, index, "artistBioPdf")}
                       onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistBioPdf")}
+                      onDelete={() => handleDelete(selectedWall, index, "artistBioPdf")}
                       inputId={`artistBioPdf-${selectedWall}-${index}`}
                       isUploading={uploadingField === `${selectedWall}-${index}-artistBioPdf`}
+                      isDeleting={deletingField === `${selectedWall}-${index}-artistBioPdf`}
                       acceptPdf
-                      onDelete={() => handleDelete(selectedWall, index, "artistBioPdf")}
                     />
                   </div>
                 </div>
@@ -476,31 +487,23 @@ interface UploadBoxProps {
   preview: string | null;
   onDrop: (e: DragEvent<HTMLDivElement>) => void;
   onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onDelete?: () => void;
   inputId: string;
   isUploading?: boolean;
-  showDimensions?: boolean;
-  width?: number;
-  height?: number;
-  onWidthChange?: (width: number) => void;
-  onHeightChange?: (height: number) => void;
+  isDeleting?: boolean;
   acceptPdf?: boolean;
-  onDelete?: () => void;
 }
 
 function UploadBox({ 
   label, 
   preview, 
   onDrop, 
-  onInputChange, 
+  onInputChange,
+  onDelete,
   inputId, 
   isUploading,
-  showDimensions,
-  width,
-  height,
-  onWidthChange,
-  onHeightChange,
+  isDeleting,
   acceptPdf,
-  onDelete,
 }: UploadBoxProps) {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -525,14 +528,14 @@ function UploadBox({
         padding: "20px",
         backgroundColor: isDragging ? "#f0f0f0" : "white",
         transition: "background-color 0.2s ease",
-        opacity: isUploading ? 0.7 : 1,
+        opacity: isUploading || isDeleting ? 0.7 : 1,
         position: "relative",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "flex-start",
       }}
     >
-      {isUploading && (
+      {(isUploading || isDeleting) && (
         <div
           style={{
             position: "absolute",
@@ -548,7 +551,7 @@ function UploadBox({
             zIndex: 10,
           }}
         >
-          <div style={{ fontSize: "14px", color: "#666" }}>Uploading...</div>
+          <div style={{ fontSize: "14px", color: "#666" }}>{isDeleting ? "Deleting..." : "Uploading..."}</div>
         </div>
       )}
 
@@ -600,7 +603,7 @@ function UploadBox({
             <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
               <button
                 onClick={() => inputRef.current?.click()}
-                disabled={isUploading}
+                disabled={isUploading || isDeleting}
                 style={{
                   padding: "8px 16px",
                   borderRadius: "20px",
@@ -608,7 +611,7 @@ function UploadBox({
                   backgroundColor: "#F5C542",
                   color: "black",
                   fontSize: "12px",
-                  cursor: isUploading ? "not-allowed" : "pointer",
+                  cursor: isUploading || isDeleting ? "not-allowed" : "pointer",
                 }}
               >
                 Change
@@ -616,15 +619,15 @@ function UploadBox({
               {onDelete && (
                 <button
                   onClick={onDelete}
-                  disabled={isUploading}
+                  disabled={isUploading || isDeleting}
                   style={{
                     padding: "8px 16px",
                     borderRadius: "20px",
-                    border: "2px solid #e74c3c",
+                    border: "2px solid #dc3545",
                     backgroundColor: "white",
-                    color: "#e74c3c",
+                    color: "#dc3545",
                     fontSize: "12px",
-                    cursor: isUploading ? "not-allowed" : "pointer",
+                    cursor: isUploading || isDeleting ? "not-allowed" : "pointer",
                   }}
                 >
                   Delete
@@ -662,51 +665,6 @@ function UploadBox({
           </div>
         )}
       </div>
-
-      {/* Right side - Dimension inputs (only for artwork) */}
-      {showDimensions && (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "20px" }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>W</div>
-            <input
-              type="number"
-              value={width ?? 12}
-              onChange={(e) => onWidthChange?.(parseInt(e.target.value) || 12)}
-              style={{
-                width: "50px",
-                padding: "8px",
-                border: "2px solid black",
-                borderRadius: "8px",
-                textAlign: "center",
-                fontSize: "14px",
-                fontFamily: "var(--font-avant-garde-book), Arial, sans-serif",
-              }}
-              min={1}
-              max={100}
-            />
-          </div>
-          <div style={{ fontSize: "16px", color: "black", marginTop: "16px" }}>X</div>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>H</div>
-            <input
-              type="number"
-              value={height ?? 15}
-              onChange={(e) => onHeightChange?.(parseInt(e.target.value) || 15)}
-              style={{
-                width: "50px",
-                padding: "8px",
-                border: "2px solid black",
-                borderRadius: "8px",
-                textAlign: "center",
-                fontSize: "14px",
-                fontFamily: "var(--font-avant-garde-book), Arial, sans-serif",
-              }}
-              min={1}
-              max={100}
-            />
-          </div>
-        </div>
-      )}
 
       <input
         ref={inputRef}

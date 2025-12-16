@@ -118,6 +118,7 @@ export default function Home() {
                     infoCardPdf={artwork.infoCardPdf}
                     position={artwork.position}
                     rotation={artwork.rotation}
+                    aspectRatio={artwork.aspectRatio}
                     onOpenOverlay={setOverlayImage}
                   />
 
@@ -125,6 +126,7 @@ export default function Home() {
                     artPosition={artwork.position}
                     artRotation={artwork.rotation}
                     triggerDistance={7}
+                    aspectRatio={artwork.aspectRatio}
                   />
 
                   <PurchasePanel 
@@ -133,6 +135,7 @@ export default function Home() {
                     artworkImage={artwork.art}
                     artPosition={artwork.position}
                     artRotation={artwork.rotation}
+                    aspectRatio={artwork.aspectRatio}
                   />
                 </group>
               ))}

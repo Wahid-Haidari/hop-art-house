@@ -13,6 +13,7 @@ interface GalleryArtworkProps {
   infoCardPdf?: string | null;
   position: [number, number, number];
   rotation?: [number, number, number];
+  aspectRatio?: number;  // height/width ratio of the artwork image
   onOpenOverlay: (img: string) => void;
 }
 
@@ -150,6 +151,7 @@ export default function GalleryArtwork({
   infoCardPdf,
   position,
   rotation = [0, 0, 0],
+  aspectRatio = 1.33,
   onOpenOverlay
 }: GalleryArtworkProps) {
   const { camera, gl } = useThree();
@@ -158,14 +160,16 @@ export default function GalleryArtwork({
   const infoCardMeshRef = useRef<THREE.Mesh>(null);
 
   const ART_WIDTH = 1.5;
-  const ART_HEIGHT = 2.5;
+  const ART_HEIGHT = ART_WIDTH * aspectRatio;  // Calculate height from aspect ratio
   const CARD_WIDTH = 0.5;
   const CARD_HEIGHT = 0.7;
   const GAP = 0.1;
 
   const artSideOffset = (ART_WIDTH / 2) + (CARD_WIDTH / 2) + GAP;
-  const verticalDown = -((ART_HEIGHT / 2) - (CARD_HEIGHT / 2));
-  const verticalUp = verticalDown + CARD_HEIGHT + GAP;
+  // Position cards relative to the bottom of the artwork
+  const artBottom = -(ART_HEIGHT / 2);
+  const infoCardY = artBottom + (CARD_HEIGHT / 2);  // Bottom card aligned with art bottom
+  const artistCardY = infoCardY + CARD_HEIGHT + GAP;  // Top card above bottom card
 
   const isLeftWall = Math.abs(rotation[1] - Math.PI / 2) < 0.1;
   const isRightWall = Math.abs(rotation[1] + Math.PI / 2) < 0.1;
@@ -175,17 +179,17 @@ export default function GalleryArtwork({
   let infoCardPos: [number, number, number];
 
   if (isLeftWall) {
-    artistCardPos = [position[0], position[1] + verticalUp, position[2] - artSideOffset];
-    infoCardPos = [position[0], position[1] + verticalDown, position[2] - artSideOffset];
+    artistCardPos = [position[0], position[1] + artistCardY, position[2] - artSideOffset];
+    infoCardPos = [position[0], position[1] + infoCardY, position[2] - artSideOffset];
   } else if (isRightWall) {
-    artistCardPos = [position[0], position[1] + verticalUp, position[2] + artSideOffset];
-    infoCardPos = [position[0], position[1] + verticalDown, position[2] + artSideOffset];
+    artistCardPos = [position[0], position[1] + artistCardY, position[2] + artSideOffset];
+    infoCardPos = [position[0], position[1] + infoCardY, position[2] + artSideOffset];
   } else if (isFrontWall) {
-    artistCardPos = [position[0] - artSideOffset, position[1] + verticalUp, position[2]];
-    infoCardPos = [position[0] - artSideOffset, position[1] + verticalDown, position[2]];
+    artistCardPos = [position[0] - artSideOffset, position[1] + artistCardY, position[2]];
+    infoCardPos = [position[0] - artSideOffset, position[1] + infoCardY, position[2]];
   } else {
-    artistCardPos = [position[0] + artSideOffset, position[1] + verticalUp, position[2]];
-    infoCardPos = [position[0] + artSideOffset, position[1] + verticalDown, position[2]];
+    artistCardPos = [position[0] + artSideOffset, position[1] + artistCardY, position[2]];
+    infoCardPos = [position[0] + artSideOffset, position[1] + infoCardY, position[2]];
   }
 
   useEffect(() => {

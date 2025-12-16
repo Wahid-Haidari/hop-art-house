@@ -8,8 +8,7 @@ export interface ArtworkData {
   infoCardPdf?: string | null;    // PDF to open on click (optional)
   position: [number, number, number];
   rotation: [number, number, number];
-  width?: number;  // Width in inches
-  height?: number; // Height in inches
+  aspectRatio?: number;  // height/width ratio of the artwork image
 }
 
 // Wall positions configuration
@@ -48,55 +47,3 @@ export const wallPositions = {
     { position: [-9.95, 3.2, -6] as [number, number, number], rotation: [0, Math.PI / 2, 0] as [number, number, number] },
   ],
 };
-
-// Default placeholder image
-const PLACEHOLDER_ART = "/Tigress.jpg";
-const PLACEHOLDER_ARTIST_CARD = "/Artist Bio.jpg";
-const PLACEHOLDER_INFO_CARD = "/Art Label.jpg";
-
-// Default artworks (fallback when no admin config is loaded)
-export const defaultArtworks: ArtworkData[] = [
-  // Back wall (Wall 1)
-  ...wallPositions.first.map((pos, i) => ({
-    id: `first-${i + 1}`,
-    title: `Artwork ${i + 1}`,
-    art: PLACEHOLDER_ART,
-    artistCard: PLACEHOLDER_ARTIST_CARD,
-    infoCard: PLACEHOLDER_INFO_CARD,
-    position: pos.position,
-    rotation: pos.rotation,
-  })),
-  // Right wall (Wall 2)
-  ...wallPositions.second.map((pos, i) => ({
-    id: `second-${i + 1}`,
-    title: `Artwork ${i + 5}`,
-    art: PLACEHOLDER_ART,
-    artistCard: PLACEHOLDER_ARTIST_CARD,
-    infoCard: PLACEHOLDER_INFO_CARD,
-    position: pos.position,
-    rotation: pos.rotation,
-  })),
-  // Front wall (Wall 3)
-  ...wallPositions.third.map((pos, i) => ({
-    id: `third-${i + 1}`,
-    title: `Artwork ${i + 9}`,
-    art: PLACEHOLDER_ART,
-    artistCard: PLACEHOLDER_ARTIST_CARD,
-    infoCard: PLACEHOLDER_INFO_CARD,
-    position: pos.position,
-    rotation: pos.rotation,
-  })),
-  // Left wall (Wall 4)
-  ...wallPositions.fourth.map((pos, i) => ({
-    id: `fourth-${i + 1}`,
-    title: `Artwork ${i + 13}`,
-    art: PLACEHOLDER_ART,
-    artistCard: PLACEHOLDER_ARTIST_CARD,
-    infoCard: PLACEHOLDER_INFO_CARD,
-    position: pos.position,
-    rotation: pos.rotation,
-  })),
-];
-
-// Keep the old export for backward compatibility
-export const artworks = defaultArtworks;
