@@ -11,6 +11,8 @@ interface ArtworkUpload {
   artistLabelPreview: string | null;
   artistBio: string | null;
   artistBioPreview: string | null;
+  width: number;
+  height: number;
 }
 
 interface WallData {
@@ -24,6 +26,8 @@ const initialArtwork: ArtworkUpload = {
   artistLabelPreview: null,
   artistBio: null,
   artistBioPreview: null,
+  width: 12,
+  height: 15,
 };
 
 const wallNames: { key: WallName; label: string; description: string }[] = [
@@ -72,6 +76,8 @@ export default function AdminPage() {
               artistLabelPreview: saved?.artistLabel || null,
               artistBio: saved?.artistBio || null,
               artistBioPreview: saved?.artistBio || null,
+              width: saved?.width ?? 12,
+              height: saved?.height ?? 15,
             };
           });
         }
@@ -119,14 +125,14 @@ export default function AdminPage() {
   const saveToConfig = async (
     wallKey: WallName,
     artworkIndex: number,
-    field: "artwork" | "artistLabel" | "artistBio",
-    url: string
+    field: "artwork" | "artistLabel" | "artistBio" | "width" | "height",
+    value: string | number
   ) => {
     try {
       const response = await fetch("/api/artworks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wall: wallKey, artworkIndex, field, url }),
+        body: JSON.stringify({ wall: wallKey, artworkIndex, field, url: value }),
       });
 
       if (!response.ok) {
@@ -135,6 +141,32 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Save config error:", error);
       throw error;
+    }
+  };
+
+  const handleDimensionChange = async (
+    wallKey: WallName,
+    artworkIndex: number,
+    dimension: "width" | "height",
+    value: number
+  ) => {
+    // Update local state
+    setWallData((prev) => {
+      const newData = { ...prev };
+      const newArtworks = [...newData[wallKey].artworks];
+      newArtworks[artworkIndex] = {
+        ...newArtworks[artworkIndex],
+        [dimension]: value,
+      };
+      newData[wallKey] = { artworks: newArtworks };
+      return newData;
+    });
+
+    // Save to config
+    try {
+      await saveToConfig(wallKey, artworkIndex, dimension, value);
+    } catch (error) {
+      console.error(`Failed to save ${dimension}:`, error);
     }
   };
 
@@ -303,7 +335,7 @@ export default function AdminPage() {
               </h2>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {/* Artwork Upload */}
+                {/* Artwork Upload with Dimensions */}
                 <UploadBox
                   label="Artwork"
                   preview={artworkData.artworkPreview}
@@ -311,6 +343,11 @@ export default function AdminPage() {
                   onInputChange={(e) => handleInputChange(e, selectedWall, index, "artwork")}
                   inputId={`artwork-${selectedWall}-${index}`}
                   isUploading={uploadingField === `${selectedWall}-${index}-artwork`}
+                  showDimensions
+                  width={artworkData.width}
+                  height={artworkData.height}
+                  onWidthChange={(w) => handleDimensionChange(selectedWall, index, "width", w)}
+                  onHeightChange={(h) => handleDimensionChange(selectedWall, index, "height", h)}
                 />
 
                 {/* Artist Label Upload */}
@@ -321,6 +358,7 @@ export default function AdminPage() {
                   onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistLabel")}
                   inputId={`artistLabel-${selectedWall}-${index}`}
                   isUploading={uploadingField === `${selectedWall}-${index}-artistLabel`}
+                  acceptPdf
                 />
 
                 {/* Artist Bio Upload */}
@@ -331,6 +369,7 @@ export default function AdminPage() {
                   onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistBio")}
                   inputId={`artistBio-${selectedWall}-${index}`}
                   isUploading={uploadingField === `${selectedWall}-${index}-artistBio`}
+                  acceptPdf
                 />
               </div>
             </div>
@@ -348,11 +387,33 @@ interface UploadBoxProps {
   onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   inputId: string;
   isUploading?: boolean;
+  showDimensions?: boolean;
+  width?: number;
+  height?: number;
+  onWidthChange?: (width: number) => void;
+  onHeightChange?: (height: number) => void;
+  acceptPdf?: boolean;
 }
 
-function UploadBox({ label, preview, onDrop, onInputChange, inputId, isUploading }: UploadBoxProps) {
+function UploadBox({ 
+  label, 
+  preview, 
+  onDrop, 
+  onInputChange, 
+  inputId, 
+  isUploading,
+  showDimensions,
+  width,
+  height,
+  onWidthChange,
+  onHeightChange,
+  acceptPdf,
+}: UploadBoxProps) {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Check if preview is a PDF
+  const isPdfPreview = preview?.toLowerCase().endsWith('.pdf') || preview?.includes('application/pdf');
 
   return (
     <div
@@ -373,6 +434,9 @@ function UploadBox({ label, preview, onDrop, onInputChange, inputId, isUploading
         transition: "background-color 0.2s ease",
         opacity: isUploading ? 0.7 : 1,
         position: "relative",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
       }}
     >
       {isUploading && (
@@ -395,64 +459,141 @@ function UploadBox({ label, preview, onDrop, onInputChange, inputId, isUploading
         </div>
       )}
 
-      <div style={{ fontSize: "14px", color: "#666", marginBottom: "12px" }}>{label}</div>
-
-      {preview ? (
-        <div style={{ position: "relative" }}>
-          <img
-            src={preview}
-            alt={label}
-            style={{
-              maxWidth: "200px",
-              maxHeight: "150px",
-              objectFit: "contain",
-              borderRadius: "4px",
-            }}
-          />
-          <button
-            onClick={() => inputRef.current?.click()}
-            disabled={isUploading}
-            style={{
-              marginTop: "8px",
-              padding: "8px 16px",
-              borderRadius: "20px",
-              border: "2px solid black",
-              backgroundColor: "#F5C542",
-              color: "black",
-              fontSize: "12px",
-              cursor: isUploading ? "not-allowed" : "pointer",
-            }}
-          >
-            Change
-          </button>
+      {/* Left side - Upload content */}
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: "14px", color: "#666", marginBottom: "12px" }}>
+          {label}
+          {acceptPdf && <span style={{ fontSize: "11px", marginLeft: "8px" }}>(Image or PDF)</span>}
         </div>
-      ) : (
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "16px", color: "black", marginBottom: "12px" }}>Drag & Drop</div>
-          <button
-            onClick={() => inputRef.current?.click()}
-            disabled={isUploading}
-            style={{
-              padding: "10px 20px",
-              borderRadius: "20px",
-              border: "2px solid black",
-              backgroundColor: "#F5C542",
-              color: "black",
-              fontSize: "14px",
-              cursor: isUploading ? "not-allowed" : "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            Upload
-          </button>
-          <div style={{ fontSize: "12px", color: "#999", marginTop: "12px" }}>Size limit: 10mb</div>
+
+        {preview ? (
+          <div style={{ position: "relative" }}>
+            {isPdfPreview ? (
+              // PDF preview - show icon and filename
+              <div
+                style={{
+                  width: "200px",
+                  height: "150px",
+                  backgroundColor: "#f5f5f5",
+                  borderRadius: "4px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px solid #ddd",
+                }}
+              >
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <text x="8" y="17" fontSize="6" fill="#e74c3c" stroke="none" fontWeight="bold">PDF</text>
+                </svg>
+                <span style={{ fontSize: "11px", color: "#666", marginTop: "8px", textAlign: "center", padding: "0 8px", wordBreak: "break-all" }}>
+                  PDF uploaded
+                </span>
+              </div>
+            ) : (
+              <img
+                src={preview}
+                alt={label}
+                style={{
+                  maxWidth: "200px",
+                  maxHeight: "150px",
+                  objectFit: "contain",
+                  borderRadius: "4px",
+                }}
+              />
+            )}
+            <button
+              onClick={() => inputRef.current?.click()}
+              disabled={isUploading}
+              style={{
+                marginTop: "8px",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: "2px solid black",
+                backgroundColor: "#F5C542",
+                color: "black",
+                fontSize: "12px",
+                cursor: isUploading ? "not-allowed" : "pointer",
+              }}
+            >
+              Change
+            </button>
+          </div>
+        ) : (
+          <div style={{ textAlign: "center", maxWidth: "200px" }}>
+            <div style={{ fontSize: "16px", color: "black", marginBottom: "12px" }}>Drag & Drop</div>
+            <button
+              onClick={() => inputRef.current?.click()}
+              disabled={isUploading}
+              style={{
+                padding: "10px 20px",
+                borderRadius: "20px",
+                border: "2px solid black",
+                backgroundColor: "#F5C542",
+                color: "black",
+                fontSize: "14px",
+                cursor: isUploading ? "not-allowed" : "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              Upload
+            </button>
+            <div style={{ fontSize: "12px", color: "#999", marginTop: "12px" }}>Size limit: 10mb</div>
+          </div>
+        )}
+      </div>
+
+      {/* Right side - Dimension inputs (only for artwork) */}
+      {showDimensions && (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "20px" }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>W</div>
+            <input
+              type="number"
+              value={width ?? 12}
+              onChange={(e) => onWidthChange?.(parseInt(e.target.value) || 12)}
+              style={{
+                width: "50px",
+                padding: "8px",
+                border: "2px solid black",
+                borderRadius: "8px",
+                textAlign: "center",
+                fontSize: "14px",
+                fontFamily: "var(--font-avant-garde-book), Arial, sans-serif",
+              }}
+              min={1}
+              max={100}
+            />
+          </div>
+          <div style={{ fontSize: "16px", color: "black", marginTop: "16px" }}>X</div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "12px", color: "#666", marginBottom: "4px" }}>H</div>
+            <input
+              type="number"
+              value={height ?? 15}
+              onChange={(e) => onHeightChange?.(parseInt(e.target.value) || 15)}
+              style={{
+                width: "50px",
+                padding: "8px",
+                border: "2px solid black",
+                borderRadius: "8px",
+                textAlign: "center",
+                fontSize: "14px",
+                fontFamily: "var(--font-avant-garde-book), Arial, sans-serif",
+              }}
+              min={1}
+              max={100}
+            />
+          </div>
         </div>
       )}
 
@@ -460,7 +601,7 @@ function UploadBox({ label, preview, onDrop, onInputChange, inputId, isUploading
         ref={inputRef}
         id={inputId}
         type="file"
-        accept="image/*"
+        accept={acceptPdf ? "image/*,.pdf,application/pdf" : "image/*"}
         onChange={onInputChange}
         disabled={isUploading}
         style={{ display: "none" }}

@@ -1,8 +1,8 @@
 "use client";
 
-import { useTexture } from "@react-three/drei";
+import { useTexture, Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Suspense, useState, Component, ReactNode } from "react";
 import * as THREE from "three";
 
 interface GalleryArtworkProps {
@@ -12,6 +12,188 @@ interface GalleryArtworkProps {
   position: [number, number, number];
   rotation?: [number, number, number];
   onOpenOverlay: (img: string) => void;
+}
+
+// Simple error boundary for 3D components
+class TextureErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("Texture loading error:", error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+// Helper to check if URL is a PDF
+function isPdf(url: string): boolean {
+  return url.toLowerCase().endsWith(".pdf") || url.includes("application/pdf");
+}
+
+// Component for PDF placeholder in 3D
+function PdfPlaceholder({ 
+  position, 
+  rotation, 
+  width, 
+  height,
+  meshRef,
+  label 
+}: { 
+  position: [number, number, number]; 
+  rotation: [number, number, number];
+  width: number;
+  height: number;
+  meshRef: React.RefObject<THREE.Mesh | null>;
+  label: string;
+}) {
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh ref={meshRef}>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial color="#f5f5f5" />
+      </mesh>
+      {/* PDF Icon */}
+      <Text
+        position={[0, 0.05, 0.01]}
+        fontSize={0.12}
+        color="#dc2626"
+        anchorX="center"
+        anchorY="middle"
+      >
+        PDF
+      </Text>
+      {/* Label */}
+      <Text
+        position={[0, -0.1, 0.01]}
+        fontSize={0.06}
+        color="#666666"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={width * 0.9}
+      >
+        {label}
+      </Text>
+    </group>
+  );
+}
+
+// Component for image texture in 3D
+function ImageCardInner({
+  url,
+  position,
+  rotation,
+  width,
+  height,
+  meshRef,
+  transparent = false
+}: {
+  url: string;
+  position: [number, number, number];
+  rotation: [number, number, number];
+  width: number;
+  height: number;
+  meshRef: React.RefObject<THREE.Mesh | null>;
+  transparent?: boolean;
+}) {
+  const texture = useTexture(url);
+  return (
+    <mesh ref={meshRef} position={position} rotation={rotation}>
+      <planeGeometry args={[width, height]} />
+      <meshBasicMaterial map={texture} transparent={transparent} />
+    </mesh>
+  );
+}
+
+// Placeholder shown when image fails to load or is loading
+function ImagePlaceholder({
+  position,
+  rotation,
+  width,
+  height,
+  meshRef,
+  label = "Loading..."
+}: {
+  position: [number, number, number];
+  rotation: [number, number, number];
+  width: number;
+  height: number;
+  meshRef: React.RefObject<THREE.Mesh | null>;
+  label?: string;
+}) {
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh ref={meshRef}>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial color="#e5e5e5" />
+      </mesh>
+      <Text
+        position={[0, 0, 0.01]}
+        fontSize={Math.min(width, height) * 0.15}
+        color="#999999"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={width * 0.9}
+      >
+        {label}
+      </Text>
+    </group>
+  );
+}
+
+// Wrapped ImageCard with error boundary and suspense
+function ImageCard(props: {
+  url: string;
+  position: [number, number, number];
+  rotation: [number, number, number];
+  width: number;
+  height: number;
+  meshRef: React.RefObject<THREE.Mesh | null>;
+  transparent?: boolean;
+}) {
+  return (
+    <TextureErrorBoundary
+      fallback={
+        <ImagePlaceholder
+          position={props.position}
+          rotation={props.rotation}
+          width={props.width}
+          height={props.height}
+          meshRef={props.meshRef}
+          label="Image not found"
+        />
+      }
+    >
+      <Suspense
+        fallback={
+          <ImagePlaceholder
+            position={props.position}
+            rotation={props.rotation}
+            width={props.width}
+            height={props.height}
+            meshRef={props.meshRef}
+            label="Loading..."
+          />
+        }
+      >
+        <ImageCardInner {...props} />
+      </Suspense>
+    </TextureErrorBoundary>
+  );
 }
 
 export default function GalleryArtwork({
@@ -37,10 +219,9 @@ export default function GalleryArtwork({
 
     const GAP = 0.1 //space between the artist card and art info card
 
-
-    const artTex = useTexture(art);
-    const artistTex = useTexture(artistCard);
-    const infoTex = useTexture(infoCard);
+    // Check if artist card or info card are PDFs
+    const artistCardIsPdf = isPdf(artistCard);
+    const infoCardIsPdf = isPdf(infoCard);
 
     // Card offsets based on YOUR layout
     const artSideOffset = (ART_WIDTH / 2) + (CARD_WIDTH / 2) + GAP;  // Space between the center of the art and the center of the cards that are to the right.
@@ -48,11 +229,12 @@ export default function GalleryArtwork({
     const verticalUp = verticalDown + CARD_HEIGHT + GAP // This is the distance the artist card sits above the artwork’s center.
 
     // If rotation.y = 0 → artwork faces user (back wall)
-    // If rotation.y > 0 → artwork is on left wall
+    // If rotation.y > 0 → artwork is on left wall or front wall
     // If rotation.y < 0 → artwork is on right wall
-    const isLeftWall = rotation[1] > 0;
-    const isRightWall = rotation[1] < 0;
-    const isSideWall = isLeftWall || isRightWall;
+    const isLeftWall = Math.abs(rotation[1] - Math.PI / 2) < 0.1;
+    const isRightWall = Math.abs(rotation[1] + Math.PI / 2) < 0.1;
+    const isFrontWall = Math.abs(rotation[1] - Math.PI) < 0.1 || Math.abs(rotation[1] + Math.PI) < 0.1;
+    const isBackWall = Math.abs(rotation[1]) < 0.1;
 
 
   // Calculate card positions
@@ -82,6 +264,18 @@ export default function GalleryArtwork({
       position[0],
       position[1] + verticalDown,
       position[2] + artSideOffset
+    ];
+  } else if (isFrontWall) {
+    // Front wall - cards to the left (negative X from viewer's perspective)
+    artistCardPos = [
+      position[0] - artSideOffset,
+      position[1] + verticalUp,
+      position[2]
+    ];
+    infoCardPos = [
+      position[0] - artSideOffset,
+      position[1] + verticalDown,
+      position[2]
     ];
   } else {
     // Back wall - cards to the right (positive X)
@@ -186,23 +380,59 @@ export default function GalleryArtwork({
 
   return (
     <>
-      {/* ARTWORK */}
-      <mesh ref={artMeshRef} position={position} rotation={rotation}>
-        <planeGeometry args={[ART_WIDTH, ART_HEIGHT]} />
-        <meshBasicMaterial map={artTex} />
-      </mesh>
+      {/* ARTWORK - always an image */}
+      <ImageCard
+        url={art}
+        position={position}
+        rotation={rotation}
+        width={ART_WIDTH}
+        height={ART_HEIGHT}
+        meshRef={artMeshRef}
+      />
 
-      {/* ARTIST CARD */}
-      <mesh ref={artistCardMeshRef} position={artistCardPos} rotation={rotation}>
-        <planeGeometry args={[CARD_WIDTH, CARD_HEIGHT]} />
-        <meshBasicMaterial map={artistTex} transparent />
-      </mesh>
+      {/* ARTIST CARD - can be PDF or image */}
+      {artistCardIsPdf ? (
+        <PdfPlaceholder
+          position={artistCardPos}
+          rotation={rotation}
+          width={CARD_WIDTH}
+          height={CARD_HEIGHT}
+          meshRef={artistCardMeshRef}
+          label="Click to view"
+        />
+      ) : (
+        <ImageCard
+          url={artistCard}
+          position={artistCardPos}
+          rotation={rotation}
+          width={CARD_WIDTH}
+          height={CARD_HEIGHT}
+          meshRef={artistCardMeshRef}
+          transparent
+        />
+      )}
 
-      {/* ART INFO CARD */}
-      <mesh ref={infoCardMeshRef} position={infoCardPos} rotation={rotation}>
-        <planeGeometry args={[CARD_WIDTH, CARD_HEIGHT]} />
-        <meshBasicMaterial map={infoTex} transparent />
-      </mesh>
+      {/* ART INFO CARD - can be PDF or image */}
+      {infoCardIsPdf ? (
+        <PdfPlaceholder
+          position={infoCardPos}
+          rotation={rotation}
+          width={CARD_WIDTH}
+          height={CARD_HEIGHT}
+          meshRef={infoCardMeshRef}
+          label="Click to view"
+        />
+      ) : (
+        <ImageCard
+          url={infoCard}
+          position={infoCardPos}
+          rotation={rotation}
+          width={CARD_WIDTH}
+          height={CARD_HEIGHT}
+          meshRef={infoCardMeshRef}
+          transparent
+        />
+      )}
     </>
   );
 }

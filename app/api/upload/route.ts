@@ -18,9 +18,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File size exceeds 10MB limit" }, { status: 400 });
     }
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "Only image files are allowed" }, { status: 400 });
+    // Validate file type - images for artwork, images or PDFs for labels/bios
+    const isImage = file.type.startsWith("image/");
+    const isPDF = file.type === "application/pdf";
+    
+    if (field === "artwork") {
+      // Artwork must be an image
+      if (!isImage) {
+        return NextResponse.json({ error: "Artwork must be an image file" }, { status: 400 });
+      }
+    } else {
+      // Artist label and bio can be image or PDF
+      if (!isImage && !isPDF) {
+        return NextResponse.json({ error: "Only image or PDF files are allowed" }, { status: 400 });
+      }
     }
 
     // Create a unique filename
@@ -37,6 +48,7 @@ export async function POST(request: NextRequest) {
       success: true,
       url: blob.url,
       filename: blob.pathname,
+      fileType: isPDF ? "pdf" : "image",
     });
   } catch (error) {
     console.error("Upload error:", error);

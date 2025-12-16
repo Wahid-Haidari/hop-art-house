@@ -6,6 +6,8 @@ export interface ArtworkData {
   infoCard: string;
   position: [number, number, number];
   rotation: [number, number, number];
+  width?: number;  // Width in inches
+  height?: number; // Height in inches
 }
 
 // Wall positions configuration

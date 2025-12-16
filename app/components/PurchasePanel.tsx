@@ -91,6 +91,20 @@ export default function PurchasePanel({
         // Size button next to quantity
         sizeZ = quantityZ - QUANTITY_WIDTH / 2 - GAP - SIZE_WIDTH / 2;
         sizeX = baseX;
+    } else if (Math.abs(rotY - Math.PI) < 0.1 || Math.abs(rotY + Math.PI) < 0.1) {
+        // Front wall - buttons to the left (from viewer's perspective looking at the wall)
+        const artLeftEdge = artX - ART_WIDTH / 2;
+        
+        // Add to cart button (aligned with info card which is on the left)
+        const infoCardCenterX = artLeftEdge - CARD_WIDTH / 2 - GAP;
+        addToCartX = infoCardCenterX;
+        addToCartZ = baseZ;
+        // Quantity button to the right of add to cart
+        quantityX = addToCartX + ADD_TO_CART_WIDTH / 2 + GAP + QUANTITY_WIDTH / 2;
+        quantityZ = baseZ;
+        // Size button to the right of quantity
+        sizeX = quantityX + QUANTITY_WIDTH / 2 + GAP + SIZE_WIDTH / 2;
+        sizeZ = baseZ;
     } else {
         // Default fallback
         quantityX = baseX;

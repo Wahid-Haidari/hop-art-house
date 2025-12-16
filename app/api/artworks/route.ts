@@ -5,6 +5,8 @@ export interface WallArtwork {
   artwork: string | null;
   artistLabel: string | null;
   artistBio: string | null;
+  width: number;
+  height: number;
 }
 
 export interface WallData {
@@ -21,10 +23,10 @@ export interface ArtworksConfig {
 const CONFIG_FILENAME = "config/artworks-config.json";
 
 const defaultConfig: ArtworksConfig = {
-  first: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null })) },
-  second: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null })) },
-  third: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null })) },
-  fourth: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null })) },
+  first: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null, width: 12, height: 15 })) },
+  second: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null, width: 12, height: 15 })) },
+  third: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null, width: 12, height: 15 })) },
+  fourth: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null, width: 12, height: 15 })) },
 };
 
 async function readConfig(): Promise<ArtworksConfig> {
@@ -101,6 +103,8 @@ export async function POST(request: NextRequest) {
         artwork: null,
         artistLabel: null,
         artistBio: null,
+        width: 12,
+        height: 15,
       }));
     }
 
@@ -110,11 +114,24 @@ export async function POST(request: NextRequest) {
         artwork: null,
         artistLabel: null,
         artistBio: null,
+        width: 12,
+        height: 15,
       };
     }
 
-    // Update the specific field
-    config[wall as keyof ArtworksConfig].artworks[artworkIndex][field as keyof WallArtwork] = url;
+    // Update the specific field based on type
+    const artwork = config[wall as keyof ArtworksConfig].artworks[artworkIndex];
+    if (field === "width") {
+      artwork.width = typeof url === "number" ? url : parseInt(url) || 12;
+    } else if (field === "height") {
+      artwork.height = typeof url === "number" ? url : parseInt(url) || 15;
+    } else if (field === "artwork") {
+      artwork.artwork = url as string;
+    } else if (field === "artistLabel") {
+      artwork.artistLabel = url as string;
+    } else if (field === "artistBio") {
+      artwork.artistBio = url as string;
+    }
 
     await writeConfig(config);
 

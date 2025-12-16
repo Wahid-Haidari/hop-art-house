@@ -7,6 +7,8 @@ interface WallArtwork {
   artwork: string | null;
   artistLabel: string | null;
   artistBio: string | null;
+  width?: number;
+  height?: number;
 }
 
 interface WallData {
@@ -64,6 +66,9 @@ export function useArtworks() {
               infoCard: artworkConfig?.artistLabel || PLACEHOLDER_INFO_CARD,
               position: pos.position,
               rotation: pos.rotation,
+              // Include dimensions (in inches)
+              width: artworkConfig?.width ?? 12,
+              height: artworkConfig?.height ?? 15,
             });
           });
         });

@@ -28,6 +28,8 @@ export default function FullscreenOverlay({ image, onClose }: FullscreenOverlayP
 
   if (!image) return null;
 
+  const isPdf = image.toLowerCase().endsWith(".pdf") || image.includes("application/pdf");
+
   return (
     <div
       style={{
@@ -66,15 +68,29 @@ export default function FullscreenOverlay({ image, onClose }: FullscreenOverlayP
         ✕
       </button>
 
-      {/* IMAGE */}
-      <img
-        src={image}
-        style={{
-          maxWidth: "90vw",
-          maxHeight: "90vh",
-          borderRadius: "10px",
-        }}
-      />
+      {/* CONTENT - PDF or IMAGE */}
+      {isPdf ? (
+        <iframe
+          src={image}
+          style={{
+            width: "90vw",
+            height: "90vh",
+            borderRadius: "10px",
+            border: "none",
+            background: "white",
+          }}
+          title="PDF Viewer"
+        />
+      ) : (
+        <img
+          src={image}
+          style={{
+            maxWidth: "90vw",
+            maxHeight: "90vh",
+            borderRadius: "10px",
+          }}
+        />
+      )}
     </div>
   );
 }
