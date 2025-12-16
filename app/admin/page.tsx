@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, DragEvent, ChangeEvent, useEffect } from "react";
+import AdminAuth from "../components/AdminAuth";
 
 type WallName = "first" | "second" | "third" | "fourth";
 
@@ -58,11 +59,46 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [deletingField, setDeletingField] = useState<string | null>(null);
+  
+  // Authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [hasAdmin, setHasAdmin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
+
+  // Check authentication on mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("/api/auth/session");
+      const data = await response.json();
+      setIsAuthenticated(data.authenticated);
+      setHasAdmin(data.hasAdmin);
+      setAdminEmail(data.email || null);
+    } catch {
+      setIsAuthenticated(false);
+      setHasAdmin(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/auth/signout", { method: "POST" });
+      setIsAuthenticated(false);
+      setAdminEmail(null);
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
+  };
 
   // Load existing configuration on mount
   useEffect(() => {
-    loadConfig();
-  }, []);
+    if (isAuthenticated) {
+      loadConfig();
+    }
+  }, [isAuthenticated]);
 
   const loadConfig = async () => {
     try {
@@ -416,6 +452,36 @@ export default function AdminPage() {
     }
   };
 
+  // Show loading while checking auth
+  if (isAuthenticated === null) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#E8E4EC",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ fontSize: "18px", color: "black" }}>Loading...</div>
+      </main>
+    );
+  }
+
+  // Show auth form if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <AdminAuth 
+        hasAdmin={hasAdmin} 
+        onAuthenticated={() => {
+          setIsAuthenticated(true);
+          checkAuth();
+        }} 
+      />
+    );
+  }
+
   if (isLoading) {
     return (
       <main
@@ -441,6 +507,35 @@ export default function AdminPage() {
         fontFamily: "var(--font-avant-garde-book), Arial, sans-serif",
       }}
     >
+      {/* Sign Out Button */}
+      <div style={{
+        position: "fixed",
+        top: "20px",
+        right: "20px",
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        zIndex: 100,
+      }}>
+        {adminEmail && (
+          <span style={{ fontSize: "14px", color: "#666" }}>{adminEmail}</span>
+        )}
+        <button
+          onClick={handleSignOut}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "white",
+            color: "#333",
+            border: "2px solid #333",
+            borderRadius: "8px",
+            fontSize: "14px",
+            cursor: "pointer",
+          }}
+        >
+          Sign Out
+        </button>
+      </div>
+
       {/* Title */}
       <h1
         style={{
