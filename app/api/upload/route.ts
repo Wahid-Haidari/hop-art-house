@@ -18,20 +18,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File size exceeds 10MB limit" }, { status: 400 });
     }
 
-    // Validate file type - images for artwork, images or PDFs for labels/bios
+    // Validate file type based on field
     const isImage = file.type.startsWith("image/");
     const isPDF = file.type === "application/pdf";
     
-    if (field === "artwork") {
-      // Artwork must be an image
+    if (field === "artwork" || field === "artistLabel" || field === "artistBio") {
+      // These fields must be images (displayed on wall)
       if (!isImage) {
-        return NextResponse.json({ error: "Artwork must be an image file" }, { status: 400 });
+        return NextResponse.json({ error: "This field requires an image file" }, { status: 400 });
+      }
+    } else if (field === "artistLabelPdf" || field === "artistBioPdf") {
+      // These fields must be PDFs (opened on click)
+      if (!isPDF) {
+        return NextResponse.json({ error: "This field requires a PDF file" }, { status: 400 });
       }
     } else {
-      // Artist label and bio can be image or PDF
-      if (!isImage && !isPDF) {
-        return NextResponse.json({ error: "Only image or PDF files are allowed" }, { status: 400 });
-      }
+      return NextResponse.json({ error: "Invalid field type" }, { status: 400 });
     }
 
     // Create a unique filename

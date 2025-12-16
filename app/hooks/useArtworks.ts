@@ -6,7 +6,9 @@ import { ArtworkData, wallPositions, defaultArtworks } from "../artworks";
 interface WallArtwork {
   artwork: string | null;
   artistLabel: string | null;
+  artistLabelPdf: string | null;
   artistBio: string | null;
+  artistBioPdf: string | null;
   width?: number;
   height?: number;
 }
@@ -60,10 +62,14 @@ export function useArtworks() {
               title: `Artwork ${wallIndex * 4 + artIndex + 1}`,
               // Use uploaded image if available, otherwise use default Tigress
               art: artworkConfig?.artwork || PLACEHOLDER_ART,
-              // Use uploaded artist bio if available, otherwise use default
+              // Use uploaded artist bio image if available, otherwise use default
               artistCard: artworkConfig?.artistBio || PLACEHOLDER_ARTIST_CARD,
-              // Use uploaded artist label if available, otherwise use default
+              // PDF to open when clicking artist card (optional)
+              artistCardPdf: artworkConfig?.artistBioPdf || null,
+              // Use uploaded artist label image if available, otherwise use default
               infoCard: artworkConfig?.artistLabel || PLACEHOLDER_INFO_CARD,
+              // PDF to open when clicking info card (optional)
+              infoCardPdf: artworkConfig?.artistLabelPdf || null,
               position: pos.position,
               rotation: pos.rotation,
               // Include dimensions (in inches)

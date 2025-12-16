@@ -2,8 +2,10 @@ export interface ArtworkData {
   id: string;
   title: string;
   art: string;
-  artistCard: string;
-  infoCard: string;
+  artistCard: string;        // Image displayed on wall
+  artistCardPdf?: string | null;  // PDF to open on click (optional)
+  infoCard: string;          // Image displayed on wall
+  infoCardPdf?: string | null;    // PDF to open on click (optional)
   position: [number, number, number];
   rotation: [number, number, number];
   width?: number;  // Width in inches

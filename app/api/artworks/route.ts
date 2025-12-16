@@ -3,8 +3,10 @@ import { put, list, del } from "@vercel/blob";
 
 export interface WallArtwork {
   artwork: string | null;
-  artistLabel: string | null;
-  artistBio: string | null;
+  artistLabel: string | null;        // Image for display on wall
+  artistLabelPdf: string | null;     // PDF to open on click (optional)
+  artistBio: string | null;          // Image for display on wall
+  artistBioPdf: string | null;       // PDF to open on click (optional)
   width: number;
   height: number;
 }
@@ -23,10 +25,10 @@ export interface ArtworksConfig {
 const CONFIG_FILENAME = "config/artworks-config.json";
 
 const defaultConfig: ArtworksConfig = {
-  first: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null, width: 12, height: 15 })) },
-  second: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null, width: 12, height: 15 })) },
-  third: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null, width: 12, height: 15 })) },
-  fourth: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistBio: null, width: 12, height: 15 })) },
+  first: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, width: 12, height: 15 })) },
+  second: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, width: 12, height: 15 })) },
+  third: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, width: 12, height: 15 })) },
+  fourth: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, width: 12, height: 15 })) },
 };
 
 async function readConfig(): Promise<ArtworksConfig> {
@@ -102,7 +104,9 @@ export async function POST(request: NextRequest) {
       config[wall as keyof ArtworksConfig].artworks = Array(4).fill(null).map(() => ({
         artwork: null,
         artistLabel: null,
+        artistLabelPdf: null,
         artistBio: null,
+        artistBioPdf: null,
         width: 12,
         height: 15,
       }));
@@ -113,7 +117,9 @@ export async function POST(request: NextRequest) {
       config[wall as keyof ArtworksConfig].artworks[artworkIndex] = {
         artwork: null,
         artistLabel: null,
+        artistLabelPdf: null,
         artistBio: null,
+        artistBioPdf: null,
         width: 12,
         height: 15,
       };
@@ -129,8 +135,12 @@ export async function POST(request: NextRequest) {
       artwork.artwork = url as string;
     } else if (field === "artistLabel") {
       artwork.artistLabel = url as string;
+    } else if (field === "artistLabelPdf") {
+      artwork.artistLabelPdf = url as string;
     } else if (field === "artistBio") {
       artwork.artistBio = url as string;
+    } else if (field === "artistBioPdf") {
+      artwork.artistBioPdf = url as string;
     }
 
     await writeConfig(config);

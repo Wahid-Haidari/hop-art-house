@@ -9,8 +9,12 @@ interface ArtworkUpload {
   artworkPreview: string | null;
   artistLabel: string | null;
   artistLabelPreview: string | null;
+  artistLabelPdf: string | null;
+  artistLabelPdfPreview: string | null;
   artistBio: string | null;
   artistBioPreview: string | null;
+  artistBioPdf: string | null;
+  artistBioPdfPreview: string | null;
   width: number;
   height: number;
 }
@@ -24,8 +28,12 @@ const initialArtwork: ArtworkUpload = {
   artworkPreview: null,
   artistLabel: null,
   artistLabelPreview: null,
+  artistLabelPdf: null,
+  artistLabelPdfPreview: null,
   artistBio: null,
   artistBioPreview: null,
+  artistBioPdf: null,
+  artistBioPdfPreview: null,
   width: 12,
   height: 15,
 };
@@ -74,8 +82,12 @@ export default function AdminPage() {
               artworkPreview: saved?.artwork || null,
               artistLabel: saved?.artistLabel || null,
               artistLabelPreview: saved?.artistLabel || null,
+              artistLabelPdf: saved?.artistLabelPdf || null,
+              artistLabelPdfPreview: saved?.artistLabelPdf || null,
               artistBio: saved?.artistBio || null,
               artistBioPreview: saved?.artistBio || null,
+              artistBioPdf: saved?.artistBioPdf || null,
+              artistBioPdfPreview: saved?.artistBioPdf || null,
               width: saved?.width ?? 12,
               height: saved?.height ?? 15,
             };
@@ -95,7 +107,7 @@ export default function AdminPage() {
     file: File,
     wallKey: WallName,
     artworkIndex: number,
-    field: "artwork" | "artistLabel" | "artistBio"
+    field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf"
   ): Promise<string | null> => {
     const formData = new FormData();
     formData.append("file", file);
@@ -125,7 +137,7 @@ export default function AdminPage() {
   const saveToConfig = async (
     wallKey: WallName,
     artworkIndex: number,
-    field: "artwork" | "artistLabel" | "artistBio" | "width" | "height",
+    field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf" | "width" | "height",
     value: string | number
   ) => {
     try {
@@ -173,7 +185,7 @@ export default function AdminPage() {
   const handleFileSelect = async (
     wallKey: WallName,
     artworkIndex: number,
-    field: "artwork" | "artistLabel" | "artistBio",
+    field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf",
     file: File
   ) => {
     if (file.size > 10 * 1024 * 1024) {
@@ -232,11 +244,15 @@ export default function AdminPage() {
     e: DragEvent<HTMLDivElement>,
     wallKey: WallName,
     artworkIndex: number,
-    field: "artwork" | "artistLabel" | "artistBio"
+    field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf"
   ) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
+    const isPdfField = field === "artistLabelPdf" || field === "artistBioPdf";
+    const isValidFile = isPdfField 
+      ? file?.type === "application/pdf"
+      : file?.type.startsWith("image/");
+    if (file && isValidFile) {
       handleFileSelect(wallKey, artworkIndex, field, file);
     }
   };
@@ -245,7 +261,7 @@ export default function AdminPage() {
     e: ChangeEvent<HTMLInputElement>,
     wallKey: WallName,
     artworkIndex: number,
-    field: "artwork" | "artistLabel" | "artistBio"
+    field: "artwork" | "artistLabel" | "artistLabelPdf" | "artistBio" | "artistBioPdf"
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -350,27 +366,55 @@ export default function AdminPage() {
                   onHeightChange={(h) => handleDimensionChange(selectedWall, index, "height", h)}
                 />
 
-                {/* Artist Label Upload */}
-                <UploadBox
-                  label="Artist label"
-                  preview={artworkData.artistLabelPreview}
-                  onDrop={(e) => handleDrop(e, selectedWall, index, "artistLabel")}
-                  onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistLabel")}
-                  inputId={`artistLabel-${selectedWall}-${index}`}
-                  isUploading={uploadingField === `${selectedWall}-${index}-artistLabel`}
-                  acceptPdf
-                />
+                {/* Artist Label - Image and PDF side by side */}
+                <div style={{ display: "flex", gap: "16px" }}>
+                  <div style={{ flex: 1 }}>
+                    <UploadBox
+                      label="Artist label (wall display)"
+                      preview={artworkData.artistLabelPreview}
+                      onDrop={(e) => handleDrop(e, selectedWall, index, "artistLabel")}
+                      onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistLabel")}
+                      inputId={`artistLabel-${selectedWall}-${index}`}
+                      isUploading={uploadingField === `${selectedWall}-${index}-artistLabel`}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <UploadBox
+                      label="Artist label (click to open)"
+                      preview={artworkData.artistLabelPdfPreview}
+                      onDrop={(e) => handleDrop(e, selectedWall, index, "artistLabelPdf")}
+                      onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistLabelPdf")}
+                      inputId={`artistLabelPdf-${selectedWall}-${index}`}
+                      isUploading={uploadingField === `${selectedWall}-${index}-artistLabelPdf`}
+                      acceptPdf
+                    />
+                  </div>
+                </div>
 
-                {/* Artist Bio Upload */}
-                <UploadBox
-                  label="Artist bio"
-                  preview={artworkData.artistBioPreview}
-                  onDrop={(e) => handleDrop(e, selectedWall, index, "artistBio")}
-                  onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistBio")}
-                  inputId={`artistBio-${selectedWall}-${index}`}
-                  isUploading={uploadingField === `${selectedWall}-${index}-artistBio`}
-                  acceptPdf
-                />
+                {/* Artist Bio - Image and PDF side by side */}
+                <div style={{ display: "flex", gap: "16px" }}>
+                  <div style={{ flex: 1 }}>
+                    <UploadBox
+                      label="Artist bio (wall display)"
+                      preview={artworkData.artistBioPreview}
+                      onDrop={(e) => handleDrop(e, selectedWall, index, "artistBio")}
+                      onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistBio")}
+                      inputId={`artistBio-${selectedWall}-${index}`}
+                      isUploading={uploadingField === `${selectedWall}-${index}-artistBio`}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <UploadBox
+                      label="Artist bio (click to open)"
+                      preview={artworkData.artistBioPdfPreview}
+                      onDrop={(e) => handleDrop(e, selectedWall, index, "artistBioPdf")}
+                      onInputChange={(e) => handleInputChange(e, selectedWall, index, "artistBioPdf")}
+                      inputId={`artistBioPdf-${selectedWall}-${index}`}
+                      isUploading={uploadingField === `${selectedWall}-${index}-artistBioPdf`}
+                      acceptPdf
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           ))}

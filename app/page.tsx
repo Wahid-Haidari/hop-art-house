@@ -113,7 +113,9 @@ export default function Home() {
                   <GalleryArtwork
                     art={artwork.art}
                     artistCard={artwork.artistCard}
+                    artistCardPdf={artwork.artistCardPdf}
                     infoCard={artwork.infoCard}
+                    infoCardPdf={artwork.infoCardPdf}
                     position={artwork.position}
                     rotation={artwork.rotation}
                     onOpenOverlay={setOverlayImage}
