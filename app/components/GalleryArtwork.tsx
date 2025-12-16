@@ -2,8 +2,14 @@
 
 import { useTexture, Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { useEffect, useRef, Suspense, useState, Component, ReactNode } from "react";
+import { useEffect, useRef, Suspense, useState, Component, ReactNode, useMemo } from "react";
 import * as THREE from "three";
+import * as pdfjsLib from "pdfjs-dist";
+
+// Set the worker source for PDF.js
+if (typeof window !== "undefined") {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+}
 
 interface GalleryArtworkProps {
   art: string;
@@ -45,50 +51,131 @@ function isPdf(url: string): boolean {
   return url.toLowerCase().endsWith(".pdf") || url.includes("application/pdf");
 }
 
-// Component for PDF placeholder in 3D
-function PdfPlaceholder({ 
+// Component to render PDF first page as a texture in 3D
+function PdfCard({ 
+  url,
   position, 
   rotation, 
   width, 
   height,
   meshRef,
-  label 
 }: { 
+  url: string;
   position: [number, number, number]; 
   rotation: [number, number, number];
   width: number;
   height: number;
   meshRef: React.RefObject<THREE.Mesh | null>;
-  label: string;
 }) {
+  const [texture, setTexture] = useState<THREE.CanvasTexture | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function renderPdf() {
+      try {
+        setIsLoading(true);
+        setError(false);
+
+        // Load the PDF document
+        const loadingTask = pdfjsLib.getDocument(url);
+        const pdf = await loadingTask.promise;
+        
+        // Get the first page
+        const page = await pdf.getPage(1);
+        
+        // Set up canvas with good resolution
+        const scale = 2; // Higher scale = better quality
+        const viewport = page.getViewport({ scale });
+        
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        
+        if (!context) {
+          throw new Error("Could not get canvas context");
+        }
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        // Render PDF page to canvas
+        await page.render({
+          canvasContext: context,
+          viewport: viewport,
+          canvas: canvas,
+        } as Parameters<typeof page.render>[0]).promise;
+
+        if (cancelled) return;
+
+        // Create Three.js texture from canvas
+        const canvasTexture = new THREE.CanvasTexture(canvas);
+        canvasTexture.needsUpdate = true;
+        
+        setTexture(canvasTexture);
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error rendering PDF:", err);
+        if (!cancelled) {
+          setError(true);
+          setIsLoading(false);
+        }
+      }
+    }
+
+    renderPdf();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+
+  if (isLoading) {
+    return (
+      <group position={position} rotation={rotation}>
+        <mesh ref={meshRef}>
+          <planeGeometry args={[width, height]} />
+          <meshBasicMaterial color="#f0f0f0" />
+        </mesh>
+        <Text
+          position={[0, 0, 0.01]}
+          fontSize={Math.min(width, height) * 0.12}
+          color="#666666"
+          anchorX="center"
+          anchorY="middle"
+        >
+          Loading...
+        </Text>
+      </group>
+    );
+  }
+
+  if (error || !texture) {
+    return (
+      <group position={position} rotation={rotation}>
+        <mesh ref={meshRef}>
+          <planeGeometry args={[width, height]} />
+          <meshBasicMaterial color="#fee2e2" />
+        </mesh>
+        <Text
+          position={[0, 0, 0.01]}
+          fontSize={Math.min(width, height) * 0.1}
+          color="#dc2626"
+          anchorX="center"
+          anchorY="middle"
+        >
+          PDF Error
+        </Text>
+      </group>
+    );
+  }
+
   return (
-    <group position={position} rotation={rotation}>
-      <mesh ref={meshRef}>
-        <planeGeometry args={[width, height]} />
-        <meshBasicMaterial color="#f5f5f5" />
-      </mesh>
-      {/* PDF Icon */}
-      <Text
-        position={[0, 0.05, 0.01]}
-        fontSize={0.12}
-        color="#dc2626"
-        anchorX="center"
-        anchorY="middle"
-      >
-        PDF
-      </Text>
-      {/* Label */}
-      <Text
-        position={[0, -0.1, 0.01]}
-        fontSize={0.06}
-        color="#666666"
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={width * 0.9}
-      >
-        {label}
-      </Text>
-    </group>
+    <mesh ref={meshRef} position={position} rotation={rotation}>
+      <planeGeometry args={[width, height]} />
+      <meshBasicMaterial map={texture} />
+    </mesh>
   );
 }
 
@@ -392,13 +479,13 @@ export default function GalleryArtwork({
 
       {/* ARTIST CARD - can be PDF or image */}
       {artistCardIsPdf ? (
-        <PdfPlaceholder
+        <PdfCard
+          url={artistCard}
           position={artistCardPos}
           rotation={rotation}
           width={CARD_WIDTH}
           height={CARD_HEIGHT}
           meshRef={artistCardMeshRef}
-          label="Click to view"
         />
       ) : (
         <ImageCard
@@ -414,13 +501,13 @@ export default function GalleryArtwork({
 
       {/* ART INFO CARD - can be PDF or image */}
       {infoCardIsPdf ? (
-        <PdfPlaceholder
+        <PdfCard
+          url={infoCard}
           position={infoCardPos}
           rotation={rotation}
           width={CARD_WIDTH}
           height={CARD_HEIGHT}
           meshRef={infoCardMeshRef}
-          label="Click to view"
         />
       ) : (
         <ImageCard
