@@ -294,67 +294,33 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             /* Mobile Layout - Full width photo with name overlay, then text below */
             <>
               {/* Photo with name overlay - full width edge to edge */}
-              <div style={{ position: "relative", marginLeft: "-34px", width: "100vw" }}>
+              <div className="relative -ml-[34px] w-screen">
                 <img
                   src="/founders/Grace.png"
                   alt="Grace Sun"
-                  className="w-full"
-                  style={{ display: "block" }}
+                  className="w-full block"
                 />
                 {/* Name and Title overlay at bottom of image */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "24px",
-                    left: "24px",
-                  }}
-                >
-                  <h1
-                    style={{
-                      fontSize: "28px",
-                      fontFamily: "var(--font-avant-garde-medium)",
-                      lineHeight: "110%",
-                      color: "white",
-                      letterSpacing: "1px",
-                      marginBottom: "4px",
-                    }}
-                  >
+                <div className="absolute bottom-6 left-6">
+                  <h1 className="text-[28px] leading-[110%] text-white tracking-[1px] mb-1" style={{ fontFamily: "var(--font-avant-garde-medium)" }}>
                     GRACE SUN
                   </h1>
-                  <p
-                    style={{
-                      fontSize: "18px",
-                      fontFamily: "var(--font-avant-garde-book)",
-                      color: "white",
-                    }}
-                  >
-                    Co-Founder
+                  <p className="text-lg text-white" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                    Business Director
                   </p>
                 </div>
               </div>
               
               {/* Text content below */}
-              <div style={{ marginTop: "24px" }}>
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                    marginBottom: "24px",
-                  }}
-                >
-                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+              <div className="mt-6">
+                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  I was born and raised in Taipei, and later lived in Shanghai, Japan, France, and Canada. Moving between places shaped my awareness of culture, people, and how creative ideas shift across contexts.
                 </p>
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                  }}
-                >
-                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
+                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  I studied art during my early schooling, and creativity has remained part of my life ever since. I'm drawn to design, film, photography, and visual storytelling, with a focus on the human process behind making, the choices, imperfections, and intent that machines can't replicate.
+                </p>
+                <p className="text-base leading-[170%] text-black" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  Hop Art House was founded on the belief that art isn't defined by speed or polish, but by presence. I'm building a space dedicated to work made by people, not algorithms, at a time when that distinction matters more than ever.
                 </p>
               </div>
             </>
@@ -362,68 +328,39 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             /* Desktop Layout - Text on left, photo on right */
             <>
               {/* Left Content */}
-              <div style={{ maxWidth: "600px" }}>
+              <div className="max-w-[600px]">
                 {/* Title */}
-                <h1
-                  style={{
-                    fontSize: "48px",
-                    fontFamily: "var(--font-avant-garde-medium)",
-                    lineHeight: "100%",
-                    color: "black",
-                    marginBottom: "8px",
-                    letterSpacing: "2px",
-                  }}
-                >
+                <h1 className="text-5xl leading-none text-black mb-2 tracking-[2px]" style={{ fontFamily: "var(--font-avant-garde-medium)" }}>
                   GRACE SUN
                 </h1>
                 {/* Role */}
-                <p
-                  style={{
-                    fontSize: "18px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    color: "black",
-                    marginBottom: "24px",
-                  }}
-                >
-                  Co-Founder
+                <p className="text-lg text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  Business Director
                 </p>
 
                 {/* First Paragraph */}
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                    marginBottom: "24px",
-                  }}
-                >
-                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  I was born and raised in Taipei, and later lived in Shanghai, Japan, France, and Canada. Moving between places shaped my awareness of culture, people, and how creative ideas shift across contexts.
                 </p>
 
                 {/* Second Paragraph */}
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                  }}
-                >
-                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
+                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  I studied art during my early schooling, and creativity has remained part of my life ever since. I'm drawn to design, film, photography, and visual storytelling, with a focus on the human process behind making, the choices, imperfections, and intent that machines can't replicate.
+                </p>
+
+                {/* Third Paragraph */}
+                <p className="text-base leading-[170%] text-black" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  Hop Art House was founded on the belief that art isn't defined by speed or polish, but by presence. I'm building a space dedicated to work made by people, not algorithms, at a time when that distinction matters more than ever.
                 </p>
               </div>
 
               {/* Right Image - Grace Photo */}
-              <div 
-                className="flex-shrink-0"
-                style={{ width: "300px", height: "380px", overflow: "hidden" }}
-              >
+              <div className="flex-shrink-0 w-[300px] h-[380px] overflow-hidden">
                 <img
                   src="/founders/Grace.png"
                   alt="Grace Sun"
-                  className="w-full h-full object-cover"
-                  style={{ border: "4px solid black", objectPosition: "right" }}
+                  className="w-full h-full object-cover border-4 border-black"
+                  style={{ objectPosition: "right" }}
                 />
               </div>
             </>
@@ -439,67 +376,30 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             /* Mobile Layout - Full width photo with name overlay, then text below */
             <>
               {/* Photo with name overlay - full width edge to edge */}
-              <div style={{ position: "relative", marginLeft: "-34px", width: "100vw" }}>
+              <div className="relative -ml-[34px] w-screen">
                 <img
                   src="/founders/Wahid.png"
                   alt="Wahid Haidari"
-                  className="w-full"
-                  style={{ display: "block" }}
+                  className="w-full block"
                 />
                 {/* Name and Title overlay at bottom of image */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "24px",
-                    left: "24px",
-                  }}
-                >
-                  <h1
-                    style={{
-                      fontSize: "28px",
-                      fontFamily: "var(--font-avant-garde-medium)",
-                      lineHeight: "110%",
-                      color: "white",
-                      letterSpacing: "1px",
-                      marginBottom: "4px",
-                    }}
-                  >
+                <div className="absolute bottom-6 left-6">
+                  <h1 className="text-[28px] leading-[110%] text-white tracking-[1px] mb-1" style={{ fontFamily: "var(--font-avant-garde-medium)" }}>
                     WAHID HAIDARI
                   </h1>
-                  <p
-                    style={{
-                      fontSize: "18px",
-                      fontFamily: "var(--font-avant-garde-book)",
-                      color: "white",
-                    }}
-                  >
+                  <p className="text-lg text-white" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
                     Technology Director
                   </p>
                 </div>
               </div>
               
               {/* Text content below */}
-              <div style={{ marginTop: "24px" }}>
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                    marginBottom: "24px",
-                  }}
-                >
-                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+              <div className="mt-6">
+                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  I was born and raised in Afghanistan and grew up in a household with two brothers who are artists. As a child, I spent a lot of time drawing with pencil and watercolor, which shaped my early appreciation for art and visual expression. I later moved to Japan for high school, then to the US for my bachelor's degree in Computer Science. I am currently pursuing a Master's in Management of Information Technology.
                 </p>
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                  }}
-                >
-                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
+                <p className="text-base leading-[170%] text-black" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  While my professional path is rooted in technology, art remains an important part of my life as a personal hobby. I am particularly interested in using technology to design practical, human-centered solutions that solve real problems.
                 </p>
               </div>
             </>
@@ -507,68 +407,34 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             /* Desktop Layout - Text on left, photo on right */
             <>
               {/* Left Content */}
-              <div style={{ maxWidth: "600px" }}>
+              <div className="max-w-[600px]">
                 {/* Title */}
-                <h1
-                  style={{
-                    fontSize: "48px",
-                    fontFamily: "var(--font-avant-garde-medium)",
-                    lineHeight: "100%",
-                    color: "black",
-                    marginBottom: "8px",
-                    letterSpacing: "2px",
-                  }}
-                >
+                <h1 className="text-5xl leading-none text-black mb-2 tracking-[2px]" style={{ fontFamily: "var(--font-avant-garde-medium)" }}>
                   WAHID HAIDARI
                 </h1>
                 {/* Role */}
-                <p
-                  style={{
-                    fontSize: "18px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    color: "black",
-                    marginBottom: "24px",
-                  }}
-                >
+                <p className="text-lg text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
                   Technology Director
                 </p>
 
                 {/* First Paragraph */}
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                    marginBottom: "24px",
-                  }}
-                >
-                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  I was born and raised in Afghanistan and grew up in a household with two brothers who are artists. As a child, I spent a lot of time drawing with pencil and watercolor, which shaped my early appreciation for art and visual expression. I later moved to Japan for high school, then to the US for my bachelor's degree in Computer Science. I am currently pursuing a Master's in Management of Information Technology.
                 </p>
 
                 {/* Second Paragraph */}
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                  }}
-                >
-                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
+                <p className="text-base leading-[170%] text-black" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
+                  While my professional path is rooted in technology, art remains an important part of my life as a personal hobby. I am particularly interested in using technology to design practical, human-centered solutions that solve real problems.
                 </p>
               </div>
 
               {/* Right Image - Wahid Photo */}
-              <div 
-                className="flex-shrink-0"
-                style={{ width: "300px", height: "380px", overflow: "hidden" }}
-              >
+              <div className="flex-shrink-0 w-[300px] h-[380px] overflow-hidden">
                 <img
                   src="/founders/Wahid.png"
                   alt="Wahid Haidari"
-                  className="w-full h-full object-cover"
-                  style={{ border: "4px solid black", objectPosition: "right" }}
+                  className="w-full h-full object-cover border-4 border-black"
+                  style={{ objectPosition: "right" }}
                 />
               </div>
             </>

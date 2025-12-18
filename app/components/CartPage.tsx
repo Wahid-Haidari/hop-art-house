@@ -16,7 +16,7 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
   const totalPrice = getTotalPrice();
 
   return (
-    <div className="fixed inset-0 z-[9999] flex" style={{ justifyContent: isMobile ? 'center' : 'flex-end' }}>
+    <div className={`fixed inset-0 z-[9999] flex ${isMobile ? 'justify-center' : 'justify-end'}`}>
       {/* Backdrop - click to close */}
       <div 
         className="absolute inset-0" 
@@ -25,31 +25,20 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
 
       {/* Cart Panel */}
       <div 
-        className="relative bg-white h-full flex flex-col shadow-2xl"
-        style={{ 
-          width: isMobile ? '100vw' : '400px',
-          maxWidth: '100vw',
-          height: '100vh',
-          fontFamily: "var(--font-avant-garde-medium)",
-          borderRadius: isMobile ? 0 : undefined,
-        }}
+        className={`relative bg-white h-screen flex flex-col shadow-2xl ${isMobile ? 'w-screen rounded-none' : 'w-[400px] max-w-full'}`}
+        style={{ fontFamily: "var(--font-avant-garde-medium)" }}
       >
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-5 border-b border-gray-300">
           <h1 
-            className="text-black m-0"
-            style={{ 
-              fontSize: "28px",
-              fontWeight: "500",
-              fontFamily: "var(--font-avant-garde-medium)",
-            }}
+            className="text-black m-0 text-[28px] font-medium"
+            style={{ fontFamily: "var(--font-avant-garde-medium)" }}
           >
             Your Order
           </h1>
           <button
             onClick={onClose}
             className="text-2xl text-gray-600 hover:text-black cursor-pointer bg-transparent border-none"
-            style={{ fontSize: "24px" }}
           >
             ✕
           </button>
@@ -69,16 +58,12 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
                   className="flex items-start gap-4"
                 >
                   {/* Item Image */}
-                  <div 
-                    className="flex-shrink-0 bg-[#8BA4BC] flex items-center justify-center overflow-hidden"
-                    style={{ width: "80px", height: "100px", borderRadius: "8px" }}
-                  >
+                  <div className="flex-shrink-0 bg-[#8BA4BC] flex items-center justify-center overflow-hidden w-20 h-[100px] rounded-lg">
                     <img
                       src={item.artworkImage}
                       alt={item.artworkTitle}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        // Show placeholder X pattern if image fails
                         e.currentTarget.style.display = 'none';
                       }}
                     />
@@ -87,67 +72,37 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
                   {/* Item Details */}
                   <div className="flex-1 min-w-0">
                     <h3 
-                      className="text-black m-0 mb-1"
-                      style={{ 
-                        fontSize: "16px",
-                        fontWeight: "500",
-                        fontFamily: "var(--font-avant-garde-medium)",
-                      }}
+                      className="text-black m-0 mb-1 text-base font-medium"
+                      style={{ fontFamily: "var(--font-avant-garde-medium)" }}
                     >
                       {item.artworkTitle}
                     </h3>
                     <p 
-                      className="text-gray-500 m-0 mb-1"
-                      style={{ 
-                        fontSize: "14px",
-                        fontFamily: "var(--font-avant-garde-book)",
-                      }}
+                      className="text-gray-500 m-0 mb-1 text-sm"
+                      style={{ fontFamily: "var(--font-avant-garde-book)" }}
                     >
                       Sizes: {SIZES[item.sizeIndex].dimensions}
                     </p>
                     <p 
-                      className="text-black m-0"
-                      style={{ 
-                        fontSize: "14px",
-                        fontFamily: "var(--font-avant-garde-book)",
-                      }}
+                      className="text-black m-0 text-sm"
+                      style={{ fontFamily: "var(--font-avant-garde-book)" }}
                     >
                       ${SIZES[item.sizeIndex].price}
                     </p>
                   </div>
 
                   {/* Quantity Selector */}
-                  <div 
-                    className="flex items-center bg-white rounded-lg"
-                    style={{ 
-                      height: "48px",
-                      border: "2px solid black",
-                      borderRadius: "8px",
-                      overflow: "hidden",
-                    }}
-                  >
+                  <div className="flex items-center bg-white rounded-lg h-12 border-2 border-black overflow-hidden">
                     <span 
-                      className="px-4 text-black flex items-center justify-center"
-                      style={{ 
-                        fontSize: "16px",
-                        fontFamily: "var(--font-avant-garde-book)",
-                        minWidth: "40px",
-                      }}
+                      className="px-4 text-black flex items-center justify-center text-base min-w-[40px]"
+                      style={{ fontFamily: "var(--font-avant-garde-book)" }}
                     >
                       {item.quantity}
                     </span>
-                    <div 
-                      className="flex flex-col justify-center bg-gray-100 rounded"
-                      style={{ 
-                        padding: "4px 8px",
-                        marginRight: "4px",
-                        height: "24px",
-                      }}
-                    >
+                    <div className="flex flex-col justify-center bg-gray-100 rounded px-2 py-1 mr-1 h-6">
                       <button
                         onClick={() => updateQuantity(item.artworkId, item.sizeIndex, item.quantity + 1)}
-                        className="flex items-center justify-center hover:opacity-60 cursor-pointer border-none bg-transparent"
-                        style={{ fontSize: "10px", color: "#555", lineHeight: "1" }}
+                        className="flex items-center justify-center hover:opacity-60 cursor-pointer border-none bg-transparent text-[10px] text-gray-600 leading-none"
                       >
                         ▲
                       </button>
@@ -159,8 +114,7 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
                             updateQuantity(item.artworkId, item.sizeIndex, item.quantity - 1);
                           }
                         }}
-                        className="flex items-center justify-center hover:opacity-60 cursor-pointer border-none bg-transparent"
-                        style={{ fontSize: "10px", color: "#555", lineHeight: "1" }}
+                        className="flex items-center justify-center hover:opacity-60 cursor-pointer border-none bg-transparent text-[10px] text-gray-600 leading-none"
                       >
                         ▼
                       </button>
@@ -174,25 +128,18 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
 
         {/* Footer with Subtotal and Checkout */}
         <div 
-          className="px-6 py-5"
-          style={{ paddingBottom: isMobile ? "env(safe-area-inset-bottom, 24px)" : "20px" }}
+          className={`px-6 py-5 ${isMobile ? 'pb-[env(safe-area-inset-bottom,24px)]' : 'pb-5'}`}
         >
           <div className="flex justify-between items-center mb-4">
             <span 
-              className="text-black"
-              style={{ 
-                fontSize: "18px",
-                fontFamily: "var(--font-avant-garde-book)",
-              }}
+              className="text-black text-lg"
+              style={{ fontFamily: "var(--font-avant-garde-book)" }}
             >
               Subtotal
             </span>
             <span 
-              className="text-black"
-              style={{ 
-                fontSize: "18px",
-                fontFamily: "var(--font-avant-garde-medium)",
-              }}
+              className="text-black text-lg"
+              style={{ fontFamily: "var(--font-avant-garde-medium)" }}
             >
               $ {totalPrice.toFixed(2)} USD
             </span>
@@ -200,16 +147,10 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
 
           <button
             onClick={onCheckout}
-            className="w-full py-4 cursor-pointer"
+            className={`w-full py-4 pt-[18px] cursor-pointer text-lg text-black border-2 border-black rounded-lg ${isMobile ? 'mb-4' : 'mb-0'}`}
             style={{ 
               backgroundColor: COLORS.primary,
-              fontSize: "18px",
               fontFamily: "var(--font-avant-garde-medium)",
-              color: "black",
-              border: "2px solid black",
-              borderRadius: "8px",
-              paddingTop: "18px",
-              marginBottom: isMobile ? "16px" : "0",
             }}
           >
             Check Out
