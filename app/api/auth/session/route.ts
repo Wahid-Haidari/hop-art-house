@@ -1,22 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { list } from "@vercel/blob";
+import { kv } from "../../../lib/kv";
 
-const ADMIN_CONFIG_PREFIX = "config/admin-users";
+// KV key for admin users
+const ADMIN_USERS_KEY = "admin:users";
 
-async function getAdminUsers(): Promise<{ email: string; passwordHash: string }[]> {
+interface AdminUser {
+  email: string;
+  passwordHash: string;
+}
+
+async function getAdminUsers(): Promise<AdminUser[]> {
   try {
-    const { blobs } = await list({ prefix: ADMIN_CONFIG_PREFIX });
-    if (blobs.length === 0) return [];
-    
-    const latestBlob = blobs.sort((a, b) => 
-      new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-    )[0];
-    
-    const response = await fetch(latestBlob.url, { cache: 'no-store' });
-    if (response.ok) {
-      return await response.json();
-    }
-    return [];
+    const users = await kv.get<AdminUser[]>(ADMIN_USERS_KEY);
+    return users || [];
   } catch {
     return [];
   }

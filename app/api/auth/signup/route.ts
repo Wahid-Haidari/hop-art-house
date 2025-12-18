@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { put, list } from "@vercel/blob";
+import { kv } from "../../../lib/kv";
 
-const ADMIN_CONFIG_PREFIX = "config/admin-users";
+// KV key for admin users
+const ADMIN_USERS_KEY = "admin:users";
 
-// Simple hash function for passwords (in production, use bcrypt)
+interface AdminUser {
+  email: string;
+  passwordHash: string;
+}
+
+// Simple hash function for passwords
 async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(password + process.env.AUTH_SECRET);
@@ -12,35 +18,33 @@ async function hashPassword(password: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function getAdminUsers(): Promise<{ email: string; passwordHash: string }[]> {
+async function getAdminUsers(): Promise<AdminUser[]> {
   try {
-    const { blobs } = await list({ prefix: ADMIN_CONFIG_PREFIX });
-    if (blobs.length === 0) return [];
-    
-    // Get the latest config
-    const latestBlob = blobs.sort((a, b) => 
-      new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-    )[0];
-    
-    const response = await fetch(latestBlob.url, { cache: 'no-store' });
-    if (response.ok) {
-      return await response.json();
-    }
-    return [];
+    const users = await kv.get<AdminUser[]>(ADMIN_USERS_KEY);
+    return users || [];
   } catch {
     return [];
   }
 }
 
-async function saveAdminUsers(users: { email: string; passwordHash: string }[]): Promise<void> {
-  const timestamp = Date.now();
-  const randomSuffix = Math.random().toString(36).slice(2, 8);
-  const configName = `${ADMIN_CONFIG_PREFIX}-${timestamp}-${randomSuffix}.json`;
+async function saveAdminUsers(users: AdminUser[]): Promise<void> {
+  await kv.set(ADMIN_USERS_KEY, users);
+}
+
+async function createSessionToken(email: string): Promise<string> {
+  const payload = {
+    email,
+    exp: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 days
+  };
+  const encoder = new TextEncoder();
+  const data = encoder.encode(JSON.stringify(payload) + process.env.AUTH_SECRET);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   
-  await put(configName, JSON.stringify(users), {
-    access: "public",
-    contentType: "application/json",
-  });
+  // Base64 encode the payload and append signature
+  const base64Payload = btoa(JSON.stringify(payload));
+  return `${base64Payload}.${signature}`;
 }
 
 export async function POST(request: NextRequest) {
@@ -87,20 +91,4 @@ export async function POST(request: NextRequest) {
     console.error("Signup error:", error);
     return NextResponse.json({ error: "Failed to create account" }, { status: 500 });
   }
-}
-
-async function createSessionToken(email: string): Promise<string> {
-  const payload = {
-    email,
-    exp: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 days
-  };
-  const encoder = new TextEncoder();
-  const data = encoder.encode(JSON.stringify(payload) + process.env.AUTH_SECRET);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  
-  // Base64 encode the payload and append signature
-  const base64Payload = btoa(JSON.stringify(payload));
-  return `${base64Payload}.${signature}`;
 }

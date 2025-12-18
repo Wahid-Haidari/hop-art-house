@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { put, list, del } from "@vercel/blob";
+import { del } from "@vercel/blob";
+import { kv } from "../../lib/kv";
 
 // Force dynamic rendering - prevent any caching
 export const dynamic = 'force-dynamic';
@@ -27,20 +28,13 @@ export interface ArtworksConfig {
   fourth: WallData;
 }
 
-// Default aspect ratio (4:3 portrait)
+// KV key for artworks config
+const CONFIG_KEY = "artworks:config";
+
+// Default values
 const DEFAULT_ASPECT_RATIO = 1.33;
 const DEFAULT_WIDTH = 1.5;
 const DEFAULT_HEIGHT = DEFAULT_WIDTH * DEFAULT_ASPECT_RATIO;
-const CONFIG_PREFIX = "config/artworks-config";
-
-// Simple in-memory lock to prevent concurrent writes
-let writeLock: Promise<void> | null = null;
-
-// Cache the latest config in memory to avoid eventual consistency issues
-let latestConfig: ArtworksConfig | null = null;
-let latestConfigUrl: string | null = null;  // Store URL of last written config
-let lastWriteTime: number = 0;
-const CACHE_DURATION = 30000; // 30 seconds - longer cache to handle blob list delays
 
 const defaultConfig: ArtworksConfig = {
   first: { artworks: Array(4).fill(null).map(() => ({ artwork: null, artistLabel: null, artistLabelPdf: null, artistBio: null, artistBioPdf: null, aspectRatio: DEFAULT_ASPECT_RATIO, displayWidth: DEFAULT_WIDTH, displayHeight: DEFAULT_HEIGHT })) },
@@ -51,155 +45,26 @@ const defaultConfig: ArtworksConfig = {
 
 async function readConfig(): Promise<ArtworksConfig> {
   try {
-    // If we have a fresh cached config, use it (extended cache duration)
-    if (latestConfig && (Date.now() - lastWriteTime) < CACHE_DURATION) {
-      console.log("Using cached config from memory (fresh)");
-      return JSON.parse(JSON.stringify(latestConfig)); // Deep clone
+    const config = await kv.get<ArtworksConfig>(CONFIG_KEY);
+    if (config) {
+      console.log("Loaded config from KV");
+      return config;
     }
-    
-    // If we have a cached URL from last write, try that first before listing
-    if (latestConfigUrl) {
-      try {
-        console.log("Trying cached config URL:", latestConfigUrl);
-        const response = await fetch(latestConfigUrl, {
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
-        });
-        if (response.ok) {
-          const config = await response.json();
-          console.log("Loaded config from cached URL successfully");
-          latestConfig = config;
-          lastWriteTime = Date.now(); // Refresh the cache time
-          return config;
-        }
-      } catch (e) {
-        console.error("Failed to fetch from cached URL:", e);
-      }
-    }
-
-    // List blobs and sort by filename (which includes timestamp)
-    const { blobs } = await list({ prefix: "config/" });
-    
-    const configBlobs = blobs
-      .filter(b => b.pathname.startsWith(CONFIG_PREFIX))
-      // Sort by the timestamp in the filename (descending - newest first)
-      // Filename format: config/artworks-config-{timestamp}-{random}.json
-      .sort((a, b) => {
-        // Extract timestamp after "artworks-config-" and before the next "-" or ".json"
-        const matchA = a.pathname.match(/artworks-config-(\d+)/);
-        const matchB = b.pathname.match(/artworks-config-(\d+)/);
-        const timestampA = parseInt(matchA?.[1] || "0");
-        const timestampB = parseInt(matchB?.[1] || "0");
-        return timestampB - timestampA;
-      });
-    
-    console.log("Found config blobs:", configBlobs.length, "newest:", configBlobs[0]?.pathname);
-    
-    if (configBlobs.length > 0) {
-      // Try to fetch the newest config
-      for (let i = 0; i < Math.min(3, configBlobs.length); i++) {
-        try {
-          console.log("Trying to read config from:", configBlobs[i].pathname);
-          const response = await fetch(configBlobs[i].url, {
-            cache: 'no-store',
-            headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
-          });
-          if (response.ok) {
-            const config = await response.json();
-            console.log("Loaded config successfully from:", configBlobs[i].pathname);
-            latestConfig = config;
-            return config;
-          }
-        } catch (e) {
-          console.error("Failed to fetch config:", configBlobs[i].pathname, e);
-        }
-      }
-    }
-    
-    console.log("No valid config found, returning default config");
-    return latestConfig || defaultConfig;
+    console.log("No config in KV, returning default");
+    return defaultConfig;
   } catch (error) {
-    console.error("Error reading config:", error);
-    return latestConfig || defaultConfig;
+    console.error("Error reading config from KV:", error);
+    return defaultConfig;
   }
 }
 
-async function writeConfig(config: ArtworksConfig) {
+async function writeConfig(config: ArtworksConfig): Promise<void> {
   try {
-    // Write new config with unique name (timestamp + random suffix to avoid collisions)
-    const configJson = JSON.stringify(config, null, 2);
-    const timestamp = Date.now();
-    const randomSuffix = Math.random().toString(36).substring(2, 8);
-    const newConfigName = `${CONFIG_PREFIX}-${timestamp}-${randomSuffix}.json`;
-    
-    console.log("Writing new config:", newConfigName);
-    
-    const result = await put(newConfigName, configJson, {
-      access: "public",
-      contentType: "application/json",
-    });
-    
-    console.log("Config written successfully:", result.url);
-    
-    // Update our cached config and URL immediately
-    latestConfig = JSON.parse(JSON.stringify(config)); // Deep clone
-    latestConfigUrl = result.url;  // Store the URL for future reads
-    lastWriteTime = timestamp;
-    
-    // Only clean up if we have more than 10 config files (to avoid issues)
-    // This cleanup is less aggressive and runs less frequently
-    try {
-      const { blobs } = await list({ prefix: "config/" });
-      const configBlobs = blobs
-        .filter(b => b.pathname.startsWith(CONFIG_PREFIX))
-        .sort((a, b) => {
-          // Extract timestamp after "artworks-config-" and before the next "-" or ".json"
-          const matchA = a.pathname.match(/artworks-config-(\d+)/);
-          const matchB = b.pathname.match(/artworks-config-(\d+)/);
-          const timestampA = parseInt(matchA?.[1] || "0");
-          const timestampB = parseInt(matchB?.[1] || "0");
-          return timestampB - timestampA;
-        });
-      
-      // Keep the 5 newest configs, delete the rest
-      if (configBlobs.length > 5) {
-        const toDelete = configBlobs.slice(5);
-        console.log("Cleaning up old configs:", toDelete.length);
-        for (const oldConfig of toDelete) {
-          del(oldConfig.url).catch(() => {});
-        }
-      }
-    } catch (cleanupError) {
-      console.error("Cleanup error (non-fatal):", cleanupError);
-    }
+    await kv.set(CONFIG_KEY, config);
+    console.log("Config written to KV successfully");
   } catch (error) {
-    console.error("Error writing config:", error);
+    console.error("Error writing config to KV:", error);
     throw error;
-  }
-}
-
-// Wrapper to ensure sequential config updates
-async function updateConfigWithLock(updateFn: (config: ArtworksConfig) => Promise<void>): Promise<void> {
-  // Wait for any pending write to complete
-  if (writeLock) {
-    await writeLock;
-  }
-  
-  // Create a new lock for this operation
-  let resolve: () => void;
-  writeLock = new Promise<void>((r) => { resolve = r; });
-  
-  try {
-    // Read fresh config
-    const config = await readConfig();
-    // Apply the update
-    await updateFn(config);
-    // Write the updated config
-    await writeConfig(config);
-  } finally {
-    // Release the lock
-    resolve!();
-    writeLock = null;
   }
 }
 
@@ -226,95 +91,96 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    let resultConfig: ArtworksConfig | null = null;
+    // Read current config
+    const config = await readConfig();
 
-    await updateConfigWithLock(async (config) => {
-      // Ensure the wall exists and has proper structure
-      if (!config[wall as keyof ArtworksConfig]) {
-        throw new Error("Invalid wall");
-      }
+    // Ensure the wall exists and has proper structure
+    if (!config[wall as keyof ArtworksConfig]) {
+      return NextResponse.json({ error: "Invalid wall" }, { status: 400 });
+    }
 
-      // Ensure artworks array exists and has proper structure
-      if (!Array.isArray(config[wall as keyof ArtworksConfig].artworks)) {
-        config[wall as keyof ArtworksConfig].artworks = Array(4).fill(null).map(() => ({
-          artwork: null,
-          artistLabel: null,
-          artistLabelPdf: null,
-          artistBio: null,
-          artistBioPdf: null,
-          aspectRatio: DEFAULT_ASPECT_RATIO,
-          displayWidth: DEFAULT_WIDTH,
-          displayHeight: DEFAULT_HEIGHT,
-        }));
-      }
+    // Ensure artworks array exists and has proper structure
+    if (!Array.isArray(config[wall as keyof ArtworksConfig].artworks)) {
+      config[wall as keyof ArtworksConfig].artworks = Array(4).fill(null).map(() => ({
+        artwork: null,
+        artistLabel: null,
+        artistLabelPdf: null,
+        artistBio: null,
+        artistBioPdf: null,
+        aspectRatio: DEFAULT_ASPECT_RATIO,
+        displayWidth: DEFAULT_WIDTH,
+        displayHeight: DEFAULT_HEIGHT,
+      }));
+    }
 
-      // Ensure the artwork object exists
-      if (!config[wall as keyof ArtworksConfig].artworks[artworkIndex]) {
-        config[wall as keyof ArtworksConfig].artworks[artworkIndex] = {
-          artwork: null,
-          artistLabel: null,
-          artistLabelPdf: null,
-          artistBio: null,
-          artistBioPdf: null,
-          aspectRatio: DEFAULT_ASPECT_RATIO,
-          displayWidth: DEFAULT_WIDTH,
-          displayHeight: DEFAULT_HEIGHT,
-        };
-      }
-
-      const artwork = config[wall as keyof ArtworksConfig].artworks[artworkIndex];
-      
-      // Helper to delete old blob if replacing
-      const deleteOldBlob = async (oldUrl: string | null, newUrl: string | null) => {
-        if (oldUrl && oldUrl !== newUrl && oldUrl.includes("blob.vercel-storage.com")) {
-          try {
-            await del(oldUrl);
-          } catch (error) {
-            console.error(`Failed to delete old blob: ${oldUrl}`, error);
-          }
-        }
+    // Ensure the artwork object exists
+    if (!config[wall as keyof ArtworksConfig].artworks[artworkIndex]) {
+      config[wall as keyof ArtworksConfig].artworks[artworkIndex] = {
+        artwork: null,
+        artistLabel: null,
+        artistLabelPdf: null,
+        artistBio: null,
+        artistBioPdf: null,
+        aspectRatio: DEFAULT_ASPECT_RATIO,
+        displayWidth: DEFAULT_WIDTH,
+        displayHeight: DEFAULT_HEIGHT,
       };
+    }
 
-      // Helper to update a single field
-      const updateField = async (fieldName: string, value: string | number) => {
-        if (fieldName === "aspectRatio") {
-          artwork.aspectRatio = typeof value === "number" ? value : parseFloat(value as string) || DEFAULT_ASPECT_RATIO;
-        } else if (fieldName === "displayWidth") {
-          artwork.displayWidth = typeof value === "number" ? value : parseFloat(value as string) || DEFAULT_WIDTH;
-        } else if (fieldName === "displayHeight") {
-          artwork.displayHeight = typeof value === "number" ? value : parseFloat(value as string) || DEFAULT_HEIGHT;
-        } else if (fieldName === "artwork") {
-          await deleteOldBlob(artwork.artwork, value as string);
-          artwork.artwork = value as string;
-        } else if (fieldName === "artistLabel") {
-          await deleteOldBlob(artwork.artistLabel, value as string);
-          artwork.artistLabel = value as string;
-        } else if (fieldName === "artistLabelPdf") {
-          await deleteOldBlob(artwork.artistLabelPdf, value as string);
-          artwork.artistLabelPdf = value as string;
-        } else if (fieldName === "artistBio") {
-          await deleteOldBlob(artwork.artistBio, value as string);
-          artwork.artistBio = value as string;
-        } else if (fieldName === "artistBioPdf") {
-          await deleteOldBlob(artwork.artistBioPdf, value as string);
-          artwork.artistBioPdf = value as string;
+    const artwork = config[wall as keyof ArtworksConfig].artworks[artworkIndex];
+    
+    // Helper to delete old blob if replacing
+    const deleteOldBlob = async (oldUrl: string | null, newUrl: string | null) => {
+      if (oldUrl && oldUrl !== newUrl && oldUrl.includes("blob.vercel-storage.com")) {
+        try {
+          await del(oldUrl);
+          console.log(`Deleted old blob: ${oldUrl}`);
+        } catch (error) {
+          console.error(`Failed to delete old blob: ${oldUrl}`, error);
         }
-      };
-
-      // Handle batch updates
-      if (updates && typeof updates === 'object') {
-        for (const [fieldName, value] of Object.entries(updates)) {
-          await updateField(fieldName, value as string | number);
-        }
-      } else if (field) {
-        // Handle single field update (backwards compatible)
-        await updateField(field, url);
       }
+    };
 
-      resultConfig = config;
-    });
+    // Helper to update a single field
+    const updateField = async (fieldName: string, value: string | number) => {
+      if (fieldName === "aspectRatio") {
+        artwork.aspectRatio = typeof value === "number" ? value : parseFloat(value as string) || DEFAULT_ASPECT_RATIO;
+      } else if (fieldName === "displayWidth") {
+        artwork.displayWidth = typeof value === "number" ? value : parseFloat(value as string) || DEFAULT_WIDTH;
+      } else if (fieldName === "displayHeight") {
+        artwork.displayHeight = typeof value === "number" ? value : parseFloat(value as string) || DEFAULT_HEIGHT;
+      } else if (fieldName === "artwork") {
+        await deleteOldBlob(artwork.artwork, value as string);
+        artwork.artwork = value as string;
+      } else if (fieldName === "artistLabel") {
+        await deleteOldBlob(artwork.artistLabel, value as string);
+        artwork.artistLabel = value as string;
+      } else if (fieldName === "artistLabelPdf") {
+        await deleteOldBlob(artwork.artistLabelPdf, value as string);
+        artwork.artistLabelPdf = value as string;
+      } else if (fieldName === "artistBio") {
+        await deleteOldBlob(artwork.artistBio, value as string);
+        artwork.artistBio = value as string;
+      } else if (fieldName === "artistBioPdf") {
+        await deleteOldBlob(artwork.artistBioPdf, value as string);
+        artwork.artistBioPdf = value as string;
+      }
+    };
 
-    return NextResponse.json({ success: true, config: resultConfig });
+    // Handle batch updates
+    if (updates && typeof updates === 'object') {
+      for (const [fieldName, value] of Object.entries(updates)) {
+        await updateField(fieldName, value as string | number);
+      }
+    } else if (field) {
+      // Handle single field update (backwards compatible)
+      await updateField(field, url);
+    }
+
+    // Write updated config to KV
+    await writeConfig(config);
+
+    return NextResponse.json({ success: true, config });
   } catch (error) {
     console.error("Error saving config:", error);
     return NextResponse.json({ error: "Failed to save configuration" }, { status: 500 });
@@ -339,23 +205,24 @@ export async function DELETE(request: NextRequest) {
 
     // Update the config to remove the field
     if (wall && artworkIndex !== undefined && field) {
-      await updateConfigWithLock(async (config) => {
-        const artwork = config[wall as keyof ArtworksConfig]?.artworks?.[artworkIndex];
-        
-        if (artwork) {
-          if (field === "artwork") {
-            artwork.artwork = null;
-          } else if (field === "artistLabel") {
-            artwork.artistLabel = null;
-          } else if (field === "artistLabelPdf") {
-            artwork.artistLabelPdf = null;
-          } else if (field === "artistBio") {
-            artwork.artistBio = null;
-          } else if (field === "artistBioPdf") {
-            artwork.artistBioPdf = null;
-          }
+      const config = await readConfig();
+      const artwork = config[wall as keyof ArtworksConfig]?.artworks?.[artworkIndex];
+      
+      if (artwork) {
+        if (field === "artwork") {
+          artwork.artwork = null;
+        } else if (field === "artistLabel") {
+          artwork.artistLabel = null;
+        } else if (field === "artistLabelPdf") {
+          artwork.artistLabelPdf = null;
+        } else if (field === "artistBio") {
+          artwork.artistBio = null;
+        } else if (field === "artistBioPdf") {
+          artwork.artistBioPdf = null;
         }
-      });
+        
+        await writeConfig(config);
+      }
     }
 
     return NextResponse.json({ success: true });
