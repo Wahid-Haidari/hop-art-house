@@ -396,10 +396,10 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
               {/* Text content below */}
               <div className="mt-6">
                 <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  I was born and raised in Afghanistan and grew up in a household with two brothers who are artists. As a child, I spent a lot of time drawing with pencil and watercolor, which shaped my early appreciation for art and visual expression. I later moved to Japan for high school, then to the US for my bachelor's degree in Computer Science. I am currently pursuing a Master's in Management of Information Technology.
+                  I was born and raised in Afghanistan and grew up in a household with two brothers who are artists. As a child, I spent a lot of time drawing with pencil and watercolor, which shaped my early appreciation for art and visual expression. I later moved to Japan for high school, then to the US for my bachelor's degree in Computer Science. I am currently pursuing a Master's in Management of Information Technology at the University of Oklahoma.
                 </p>
                 <p className="text-base leading-[170%] text-black" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  While my professional path is rooted in technology, art remains an important part of my life as a personal hobby. I am particularly interested in using technology to design practical, human-centered solutions that solve real problems.
+                  I am interested in using technology to design practical, human-centered solutions that solve real problems. While my professional path is rooted in technology, I always appreciate art.
                 </p>
               </div>
             </>
