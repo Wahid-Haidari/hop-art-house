@@ -77,31 +77,49 @@ const wallDefinitions: Record<WallName, {
 };
 
 // Calculate evenly distributed positions for artworks on a wall
-function calculateWallPositions(wallName: WallName, artworkCount: number): [number, number, number][] {
-  if (artworkCount === 0) return [];
+// Now takes artwork widths into account for edge-to-edge equal spacing
+function calculateWallPositions(
+  wallName: WallName, 
+  artworkWidths: number[]
+): [number, number, number][] {
+  if (artworkWidths.length === 0) return [];
   
   const wall = wallDefinitions[wallName];
   const [rangeStart, rangeEnd] = wall.varyingRange;
   const rangeLength = Math.abs(rangeEnd - rangeStart);
+  const direction = rangeEnd > rangeStart ? 1 : -1;
+  
+  // Calculate total width occupied by all artworks
+  const totalArtworkWidth = artworkWidths.reduce((sum, w) => sum + w, 0);
+  
+  // Calculate remaining space for gaps (wall length minus all artwork widths)
+  const remainingSpace = rangeLength - totalArtworkWidth;
+  
+  // Number of gaps = artworks + 1 (gap before first, between each, and after last)
+  const numGaps = artworkWidths.length + 1;
+  const gapSize = remainingSpace / numGaps;
   
   const positions: [number, number, number][] = [];
   
-  // Calculate spacing: divide the usable range into artworkCount + 1 sections
-  // This gives equal space before first artwork, between artworks, and after last artwork
-  const spacing = rangeLength / (artworkCount + 1);
-  const direction = rangeEnd > rangeStart ? 1 : -1;
+  // Start from the wall edge
+  let currentPos = rangeStart;
   
-  for (let i = 0; i < artworkCount; i++) {
-    const offset = spacing * (i + 1) * direction;
-    const varyingValue = rangeStart + offset;
+  for (let i = 0; i < artworkWidths.length; i++) {
+    const artWidth = artworkWidths[i];
+    
+    // Move by gap + half the artwork width to get to center
+    currentPos += direction * (gapSize + artWidth / 2);
     
     let position: [number, number, number];
     if (wall.varyingAxis === 'x') {
-      position = [varyingValue, ARTWORK_BOTTOM_HEIGHT, wall.fixedValue];
+      position = [currentPos, ARTWORK_BOTTOM_HEIGHT, wall.fixedValue];
     } else {
-      position = [wall.fixedValue, ARTWORK_BOTTOM_HEIGHT, varyingValue];
+      position = [wall.fixedValue, ARTWORK_BOTTOM_HEIGHT, currentPos];
     }
     positions.push(position);
+    
+    // Move past the second half of this artwork for the next iteration
+    currentPos += direction * (artWidth / 2);
   }
   
   return positions;
@@ -136,11 +154,12 @@ export function useArtworks() {
         }
         
         const config: ArtworksConfig = await response.json();
-        const artworkPromises: Promise<ArtworkData | null>[] = [];
+        const allArtworks: ArtworkData[] = [];
         
         const walls: WallName[] = ["first", "second", "third", "fourth"];
         
-        walls.forEach((wallName, wallIndex) => {
+        for (const wallName of walls) {
+          const wallIndex = walls.indexOf(wallName);
           const wallConfig = config[wallName];
           
           // First, collect all uploaded artworks for this wall (with their original indices)
@@ -152,46 +171,66 @@ export function useArtworks() {
             }
           });
           
-          // Calculate positions for all uploaded artworks on this wall
-          const positions = calculateWallPositions(wallName, uploadedArtworks.length);
-          const wallRotation = wallDefinitions[wallName].rotation;
+          if (uploadedArtworks.length === 0) continue;
           
-          // Create artwork data with dynamically calculated positions
-          uploadedArtworks.forEach((item, posIndex) => {
+          // First pass: calculate dimensions for all artworks on this wall
+          const artworkData: {
+            artworkConfig: WallArtwork;
+            originalIndex: number;
+            aspectRatio: number;
+            displayWidth: number;
+            displayHeight: number;
+          }[] = [];
+          
+          for (const item of uploadedArtworks) {
             const { artworkConfig, originalIndex } = item;
             
-            const promise = (async (): Promise<ArtworkData> => {
-              // Use saved aspectRatio if available, otherwise detect from image
-              let artAspectRatio = artworkConfig.aspectRatio;
-              if (artAspectRatio == null) {
-                artAspectRatio = await getImageAspectRatio(artworkConfig.artwork!);
-              }
-              
-              // Use custom dimensions if provided, otherwise calculate from aspect ratio
-              const displayWidth = artworkConfig.displayWidth ?? 1.5;
-              const displayHeight = artworkConfig.displayHeight ?? (displayWidth * artAspectRatio);
-              
-              return {
-                id: `${wallName}-${originalIndex + 1}`,
-                title: `Artwork ${wallIndex * 4 + originalIndex + 1}`,
-                art: artworkConfig.artwork!,
-                artistCard: artworkConfig.artistBio || "/Artist Bio.jpg",
-                artistCardPdf: artworkConfig.artistBioPdf || null,
-                infoCard: artworkConfig.artistLabel || "/Art Label.jpg",
-                infoCardPdf: artworkConfig.artistLabelPdf || null,
-                position: positions[posIndex],
-                rotation: wallRotation,
-                aspectRatio: artAspectRatio,
-                displayWidth,
-                displayHeight,
-              };
-            })();
-            artworkPromises.push(promise);
+            // Use saved aspectRatio if available, otherwise detect from image
+            let artAspectRatio = artworkConfig.aspectRatio;
+            if (artAspectRatio == null) {
+              artAspectRatio = await getImageAspectRatio(artworkConfig.artwork!);
+            }
+            
+            // Use custom dimensions if provided, otherwise calculate from aspect ratio
+            const displayWidth = artworkConfig.displayWidth ?? 1.5;
+            const displayHeight = artworkConfig.displayHeight ?? (displayWidth * artAspectRatio);
+            
+            artworkData.push({
+              artworkConfig,
+              originalIndex,
+              aspectRatio: artAspectRatio,
+              displayWidth,
+              displayHeight,
+            });
+          }
+          
+          // Get all widths for position calculation
+          const artworkWidths = artworkData.map(a => a.displayWidth);
+          
+          // Calculate positions based on actual widths (edge-to-edge equal spacing)
+          const positions = calculateWallPositions(wallName, artworkWidths);
+          const wallRotation = wallDefinitions[wallName].rotation;
+          
+          // Create final artwork data with positions
+          artworkData.forEach((item, posIndex) => {
+            allArtworks.push({
+              id: `${wallName}-${item.originalIndex + 1}`,
+              title: `Artwork ${wallIndex * 4 + item.originalIndex + 1}`,
+              art: item.artworkConfig.artwork!,
+              artistCard: item.artworkConfig.artistBio || "/Artist Bio.jpg",
+              artistCardPdf: item.artworkConfig.artistBioPdf || null,
+              infoCard: item.artworkConfig.artistLabel || "/Art Label.jpg",
+              infoCardPdf: item.artworkConfig.artistLabelPdf || null,
+              position: positions[posIndex],
+              rotation: wallRotation,
+              aspectRatio: item.aspectRatio,
+              displayWidth: item.displayWidth,
+              displayHeight: item.displayHeight,
+            });
           });
-        });
+        }
         
-        const loadedArtworks = await Promise.all(artworkPromises);
-        setArtworks(loadedArtworks.filter((a): a is ArtworkData => a !== null));
+        setArtworks(allArtworks);
       } catch (err) {
         console.error("Error fetching artworks:", err);
         setError(err instanceof Error ? err.message : "Unknown error");
