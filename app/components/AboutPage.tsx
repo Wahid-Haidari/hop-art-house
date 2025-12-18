@@ -424,7 +424,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
 
                 {/* Second Paragraph */}
                 <p className="text-base leading-[170%] text-black" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  While my professional path is rooted in technology, art remains an important part of my life as a personal hobby. I am particularly interested in using technology to design practical, human-centered solutions that solve real problems.
+                  I am interested in using technology to design practical, human-centered solutions that solve real problems. While my professional path is rooted in technology, I always appreciate art.
                 </p>
               </div>
 
