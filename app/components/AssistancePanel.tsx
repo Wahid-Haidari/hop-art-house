@@ -29,13 +29,15 @@ export default function AssistancePanel({ visible }: AssistancePanelProps) {
   const displayInstructions = showInstructions || hoverShowInstructions;
 
   return (
-    <>
+    <div 
+      className="fixed z-50 pointer-events-auto"
+      style={{ bottom: "23px", left: "100px" }}
+      onMouseEnter={() => setHoverShowInstructions(true)}
+      onMouseLeave={() => setHoverShowInstructions(false)}
+    >
       {displayInstructions ? (
-        // Instructions Panel
-        <div 
-          className="fixed bottom-8 left-28 z-50 pointer-events-auto animate-in fade-in duration-300"
-          onMouseLeave={() => setHoverShowInstructions(false)}
-        >
+        // Instructions Panel - positioned above the trigger
+        <div className="absolute bottom-full left-0 mb-2 animate-in fade-in duration-300">
           <div 
             className="bg-[#F7C41A] border-2 border-black rounded-lg p-6 shadow-lg"
             style={{ width: "240px" }}
@@ -63,21 +65,15 @@ export default function AssistancePanel({ visible }: AssistancePanelProps) {
             </div>
           </div>
         </div>
-      ) : (
-        // Assistance Text
-        <div 
-          className="fixed z-50 pointer-events-auto"
-          style={{ bottom: "23px", left: "100px" }}
-          onMouseEnter={() => setHoverShowInstructions(true)}
-        >
-          <span 
-            className="text-black no-underline hover:opacity-70 cursor-pointer"
-            style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
-          >
-            Assistance
-          </span>
-        </div>
-      )}
-    </>
+      ) : null}
+      
+      {/* Assistance Text - always present as hover trigger */}
+      <span 
+        className="text-black no-underline hover:opacity-70 cursor-pointer"
+        style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
+      >
+        Assistance
+      </span>
+    </div>
   );
 }

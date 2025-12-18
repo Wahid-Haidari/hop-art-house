@@ -85,6 +85,11 @@ export default function Home() {
         >
             <Canvas 
               camera={{ position: [3, 2.6, 5], fov: 30 }}
+              gl={{ 
+                antialias: true,
+                toneMapping: 0, // NoToneMapping
+                outputColorSpace: 'srgb'
+              }}
               onCreated={({ camera }) => {
                 camera.lookAt(0, 2, -10);
               }}
@@ -99,7 +104,7 @@ export default function Home() {
               <directionalLight position={[5, 5, 5]} />
               <Floor/>
               <Ceiling/>
-              <Tree position={[0, 0, 0]} scale={0.4} />
+              {/* <Tree position={[0, 0, 0]} scale={0.4} /> */}
 
               {/* Walls */}
               <Wall position={[0, 3.75, -10]} />

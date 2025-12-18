@@ -62,6 +62,15 @@ function ImageCardInner({
   transparent?: boolean;
 }) {
   const texture = useTexture(url);
+  
+  // Set correct color space for accurate color reproduction
+  useEffect(() => {
+    if (texture) {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.needsUpdate = true;
+    }
+  }, [texture]);
+
   return (
     <mesh ref={meshRef} position={position} rotation={rotation}>
       <planeGeometry args={[width, height]} />
