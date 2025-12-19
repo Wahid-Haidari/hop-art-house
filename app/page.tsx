@@ -114,7 +114,7 @@ export default function Home() {
               {/* Wall 2 - Right wall */}
               <Wall position={[10, 3.75, 0]} rotation={[0, -Math.PI / 2, 0]} texturePath="/Japandi_02.jpg" />
               {/* Wall 3 - Front wall */}
-              <Wall position={[0, 3.75, 10]} rotation={[0, Math.PI, 0]} />
+              <Wall position={[0, 3.75, 10]} rotation={[0, Math.PI, 0]} texturePath="/Japandi_01.jpg" />
 
               {/* Artworks - Loop through all artworks */}
               {artworks.map((artwork) => (
