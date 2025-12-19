@@ -9,6 +9,7 @@ interface WallProps {
   rotation?: [number, number, number];
   width?: number;
   height?: number;
+  texturePath?: string;
 }
 
 export default function Wall({ 
@@ -16,8 +17,9 @@ export default function Wall({
   rotation = [0, 0, 0],
   width = 20,
   height = 7.5,
+  texturePath = "/Brick_Wall.jpg",
 }: WallProps) {
-  const texture = useTexture("/Brick_Wall.jpg");
+  const texture = useTexture(texturePath);
   
   // Set texture to cover the wall without stretching (like CSS object-fit: cover)
   useEffect(() => {
