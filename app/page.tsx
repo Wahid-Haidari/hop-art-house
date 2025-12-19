@@ -84,7 +84,7 @@ export default function Home() {
           className="w-full h-full"
         >
             <Canvas 
-              camera={{ position: [3, 2.6, 5], fov: 30 }}
+              camera={{ position: [3, 3, 5], fov: 30 }}
               gl={{ 
                 antialias: true,
                 toneMapping: 0, // NoToneMapping

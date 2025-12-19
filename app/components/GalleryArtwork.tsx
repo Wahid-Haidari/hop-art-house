@@ -5,6 +5,9 @@ import { useThree } from "@react-three/fiber";
 import { useEffect, useRef, Suspense, Component, ReactNode } from "react";
 import * as THREE from "three";
 
+// Card aspect ratio: 6x6.8 -> height/width = 6.8/6
+const CARD_ASPECT_RATIO = 6.8 / 6;
+
 interface GalleryArtworkProps {
   art: string;
   artistCard: string;
@@ -175,7 +178,8 @@ export default function GalleryArtwork({
   const ART_WIDTH = displayWidth;
   const ART_HEIGHT = displayHeight ?? (ART_WIDTH * aspectRatio);  // Use displayHeight if provided, else calculate
   const CARD_WIDTH = 0.5;
-  const CARD_HEIGHT = 0.7;
+  // Card height based on 6x6.8 aspect ratio
+  const CARD_HEIGHT = CARD_WIDTH * CARD_ASPECT_RATIO;
   const GAP = 0.1;
 
   // Calculate the Y offset to make artwork bottom-aligned

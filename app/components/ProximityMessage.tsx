@@ -42,7 +42,7 @@ export default function ProximityMessage({
   const ART_WIDTH = displayWidth;
   const ART_HEIGHT = displayHeight ?? (ART_WIDTH * aspectRatio);  // Use displayHeight if provided, else calculate
   const CARD_WIDTH = 0.5;
-  const CARD_HEIGHT = 0.7;
+  const CARD_HEIGHT = CARD_WIDTH * (6.8 / 6);  // Same aspect ratio as GalleryArtwork
   const GAP = 0.1;
 
   const artSideOffset = (ART_WIDTH / 2) + (CARD_WIDTH / 2) + GAP;
@@ -52,8 +52,11 @@ export default function ProximityMessage({
   const infoCardY = CARD_HEIGHT / 2;  // Bottom card starts at artwork bottom
   const artistCardY = infoCardY + CARD_HEIGHT + GAP;  // Top card above bottom card
   
-  // Message position: above the artist card with the same gap
-  const messageY = artY + artistCardY + (CARD_HEIGHT / 2) + GAP;
+  // Message position: above the artist card with the same gap as between cards
+  // Top of artist card = artistCardY + CARD_HEIGHT/2, then add GAP for spacing
+  // anchorY="bottom" means this Y is where the bottom of the text will be
+  const artistCardTop = artistCardY + CARD_HEIGHT / 2;
+  const messageY = artY + artistCardTop + GAP;
 
   // Check wall type
   const isLeftWall = Math.abs(artRotation[1] - Math.PI / 2) < 0.1;
@@ -61,21 +64,25 @@ export default function ProximityMessage({
   const isFrontWall = Math.abs(artRotation[1] - Math.PI) < 0.1 || Math.abs(artRotation[1] + Math.PI) < 0.1;
 
   // Position message above the artist card (same side as cards)
+  // For left-aligned text, we position at the left edge of the card
   let messageX: number;
   let messageZ: number;
   
   if (isLeftWall) {
+    // Left wall faces +X direction, so "left edge" is -Z offset from card center
     messageX = artX;
-    messageZ = artZ - artSideOffset;
+    messageZ = artZ - artSideOffset + CARD_WIDTH / 2;
   } else if (isRightWall) {
+    // Right wall faces -X direction, so "left edge" is +Z offset from card center
     messageX = artX;
-    messageZ = artZ + artSideOffset;
+    messageZ = artZ + artSideOffset - CARD_WIDTH / 2;
   } else if (isFrontWall) {
-    messageX = artX - artSideOffset;
+    // Front wall faces -Z direction, so "left edge" is +X offset from card center
+    messageX = artX - artSideOffset + CARD_WIDTH / 2;
     messageZ = artZ;
   } else {
-    // Back wall
-    messageX = artX + artSideOffset;
+    // Back wall faces +Z direction, so "left edge" is -X offset from card center
+    messageX = artX + artSideOffset - CARD_WIDTH / 2;
     messageZ = artZ;
   }
 
@@ -83,12 +90,13 @@ export default function ProximityMessage({
     <Text
       position={[messageX, messageY, messageZ]}
       rotation={artRotation}
-      fontSize={0.06}
-      font="/font/ITC Avant Garde Gothic Std Book.otf"
+      fontSize={0.055}
+      font="/font/ITC Avant Garde Gothic Std Medium.otf"
       color="black"
-      anchorX="center"
-      anchorY="middle"
-      textAlign="center"
+      anchorX="left"
+      anchorY="bottom"
+      textAlign="left"
+      maxWidth={CARD_WIDTH}
     >
       {"Click on displays\nto view full screen."}
     </Text>
