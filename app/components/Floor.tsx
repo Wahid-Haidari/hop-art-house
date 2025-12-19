@@ -15,7 +15,7 @@ export default function Floor({
   position = [0, 0, 0],
   width = 20,
   height = 20,
-  texturePath = "/floor.jpg"
+  texturePath = "/Floor.jpg"
 }: FloorProps) {
   const texture = useLoader(THREE.TextureLoader, texturePath);
   
