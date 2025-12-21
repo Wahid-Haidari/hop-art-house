@@ -168,13 +168,13 @@ export default function Home() {
 
               {/* Walls */}
               {/* Wall 1 - Back wall */}
-              <Wall position={[0, 3.75, -10]} texturePath="/Back_Wall.jpg" />
+              <Wall position={[0, 3.75, -10]} texturePath="/Front_Wall.jpg" />
               {/* Wall 4 - Left wall */}
               <Wall position={[-10, 3.75, 0]} rotation={[0, Math.PI / 2, 0]} texturePath="/Wall.jpg" />
               {/* Wall 2 - Right wall */}
               <Wall position={[10, 3.75, 0]} rotation={[0, -Math.PI / 2, 0]} texturePath="/Wall.jpg" />
               {/* Wall 3 - Front wall */}
-              <Wall position={[0, 3.75, 10]} rotation={[0, Math.PI, 0]} texturePath="/Front_Wall.jpg" />
+              <Wall position={[0, 3.75, 10]} rotation={[0, Math.PI, 0]} texturePath="/Back_Wall.jpg" />
 
               {/* Artworks - Loop through all artworks */}
               {artworks.map((artwork) => (
