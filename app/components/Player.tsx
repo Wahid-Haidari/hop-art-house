@@ -228,6 +228,7 @@ export default function MobilePlayer() {
   // Movement and camera update
   useFrame(() => {
     const speed = 0.05;
+    const mobileSpeed = 0.075; // 1.5x faster for mobile joystick
 
     if (isMobile) {
       // Mobile controls
@@ -253,11 +254,11 @@ export default function MobilePlayer() {
       let nextY = camera.position.y;
       let nextZ = camera.position.z;
 
-      nextX += forwardDir.x * forward * speed;
-      nextZ += forwardDir.z * forward * speed;
-      nextX += rightDir.x * right * speed;
-      nextZ += rightDir.z * right * speed;
-      nextY += up * speed;
+      nextX += forwardDir.x * forward * mobileSpeed;
+      nextZ += forwardDir.z * forward * mobileSpeed;
+      nextX += rightDir.x * right * mobileSpeed;
+      nextZ += rightDir.z * right * mobileSpeed;
+      nextY += up * mobileSpeed;
 
       // Collision detection
       const limit = 9.5;

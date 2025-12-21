@@ -172,7 +172,7 @@ export default function MobileControls() {
         className="fixed z-50 rounded-full flex items-center justify-center select-none"
         style={{ 
           touchAction: "none", 
-          backgroundColor: "rgba(200, 200, 200, 0.8)", 
+          backgroundColor: "rgba(255, 255, 255, 0.5)", 
           width: "100px",
           height: "100px",
           bottom: "26px",
@@ -243,7 +243,7 @@ export default function MobileControls() {
           className="rounded-full flex items-center justify-center select-none"
           style={{ 
             touchAction: "none",
-            backgroundColor: upPressed ? "rgba(180, 180, 180, 0.9)" : "rgba(200, 200, 200, 0.8)",
+            backgroundColor: upPressed ? "rgba(230, 230, 230, 0.7)" : "rgba(255, 255, 255, 0.6)",
             width: "48px",
             height: "48px",
           }}
@@ -260,7 +260,7 @@ export default function MobileControls() {
           className="rounded-full flex items-center justify-center"
           style={{ 
             touchAction: "none",
-            backgroundColor: downPressed ? "rgba(180, 180, 180, 0.9)" : "rgba(200, 200, 200, 0.8)",
+            backgroundColor: downPressed ? "rgba(230, 230, 230, 0.7)" : "rgba(255, 255, 255, 0.6)",
             width: "48px",
             height: "48px",
           }}
