@@ -30,11 +30,11 @@ export default function MobilePlayer() {
   // Desktop drag-to-look state
   const isDraggingRef = useRef(false);
   const previousMouseRef = useRef({ x: 0, y: 0 });
-  const cameraRotationRef = useRef({ yaw: 0, pitch: 0 });
+  const cameraRotationRef = useRef({ yaw: -0.45, pitch: 0 });
 
   // Mobile movement state
   const mobileMovementRef = useRef({ forward: 0, right: 0, up: 0 });
-  const mobileLookRef = useRef({ yaw: 0, pitch: 0 });
+  const mobileLookRef = useRef({ yaw: -0.45, pitch: 0 });
   const touchLookRef = useRef<{ x: number; y: number } | null>(null);
 
   // Check if mobile on mount

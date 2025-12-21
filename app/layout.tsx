@@ -31,6 +31,10 @@ const avantGardeBook = localFont({
 export const metadata: Metadata = {
   title: "Hop Art House",
   description: "Where human creativity lives and the people who value it come together.",
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
@@ -38,6 +42,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#F7C41A",
 };
 
 //Destructure children from props, and the props must match the type Readonly<{ children: React.ReactNode }>.

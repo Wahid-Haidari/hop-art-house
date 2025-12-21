@@ -31,8 +31,13 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
   return (
     <div
-      className="fixed top-0 left-0 w-screen h-screen bg-[#F7C41A] flex flex-col items-center px-10 md:px-[10%] z-[1000]"
+      className="bg-[#F7C41A] flex flex-col items-center px-10 md:px-[10%] z-[1000]"
       style={{ 
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
         opacity, 
         pointerEvents,
         justifyContent: isMobile ? "flex-start" : "center",

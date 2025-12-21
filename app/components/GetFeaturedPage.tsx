@@ -29,6 +29,47 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
+  // Fix body styles for this page (override gallery styles)
+  useEffect(() => {
+    // Save original styles
+    const originalStyles = {
+      bodyHeight: document.body.style.height,
+      bodyBg: document.body.style.background,
+      bodyPosition: document.body.style.position,
+      bodyOverflow: document.body.style.overflow,
+      htmlBg: document.documentElement.style.background,
+      htmlOverflow: document.documentElement.style.overflow,
+    };
+    
+    // Set correct styles for this page - allow natural document flow
+    document.body.style.height = 'auto';
+    document.body.style.position = 'static';
+    document.body.style.overflow = 'auto';
+    document.body.style.background = '#ffffff';
+    document.documentElement.style.setProperty('background', '#ffffff', 'important');
+    document.documentElement.style.overflow = 'auto';
+    
+    // Also set theme-color meta tag for the safe area
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    const originalThemeColor = metaThemeColor?.getAttribute('content') || '';
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', '#ffffff');
+    }
+    
+    return () => {
+      // Restore original styles when unmounting
+      document.body.style.height = originalStyles.bodyHeight;
+      document.body.style.position = originalStyles.bodyPosition;
+      document.body.style.overflow = originalStyles.bodyOverflow;
+      document.body.style.background = originalStyles.bodyBg;
+      document.documentElement.style.setProperty('background', originalStyles.htmlBg || '#000', 'important');
+      document.documentElement.style.overflow = originalStyles.htmlOverflow;
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', originalThemeColor);
+      }
+    };
+  }, []);
+
   // Handle scroll to show/hide mobile header
   useEffect(() => {
     if (!isMobile) return;

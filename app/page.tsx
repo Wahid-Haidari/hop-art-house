@@ -67,6 +67,42 @@ export default function Home() {
     return () => window.removeEventListener("wheel", handleWheel);
   }, [isMobile, showLanding, handleReturnToLanding]);
 
+  // Lock body scroll when in gallery (not landing)
+  useEffect(() => {
+    if (!showLanding) {
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.top = "0";
+      document.body.style.left = "0";
+      document.body.style.width = "100vw";
+      document.body.style.height = "100vh";
+      document.body.style.background = "#000";
+      document.documentElement.style.overflow = "hidden";
+      document.documentElement.style.setProperty('background', '#000', 'important');
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.width = "";
+      document.body.style.height = "";
+      document.body.style.background = "#F7C41A";
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.setProperty('background', '#F7C41A', 'important');
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.width = "";
+      document.body.style.height = "";
+      document.body.style.background = "";
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.background = "";
+    };
+  }, [showLanding]);
+
   return (
     <CartProvider>
       <PlayerProvider>
@@ -80,49 +116,65 @@ export default function Home() {
       {showRotatePhone && (
         <RotatePhone onLandscape={handleLandscape} />
       )}
-      <main className="w-full h-screen" style={{ touchAction: "none" }}>
+      {/* Gallery always renders (for preloading) but hidden when on landing/rotate screen */}
+      <main style={{ 
+        touchAction: "none", 
+        position: "fixed", 
+        top: 0, 
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: "hidden",
+        visibility: (showLanding || showRotatePhone) ? "hidden" : "visible",
+        pointerEvents: (showLanding || showRotatePhone) ? "none" : "auto",
+      }}>
         <div
           id="canvas-wrapper"
-          className="w-full h-full"
         >
             <Canvas 
-              camera={{ position: [3, 3, 5], fov: 30 }}
+              camera={{ position: [0, 3.6, 4], fov: 30 }}
               gl={{ 
                 antialias: true,
                 toneMapping: 0, // NoToneMapping
                 outputColorSpace: 'srgb'
               }}
               onCreated={({ camera }) => {
-                camera.lookAt(0, 2, -10);
+                camera.lookAt(10, 3.6, 0);
               }}
-              style={{ pointerEvents: 'auto', cursor: 'auto' }}
+            style={{ 
+              pointerEvents: 'auto', 
+              cursor: 'auto',
+              display: 'block',
+              }}
               onClick={(event) => {
                 // Ensure clicks are processed with correct mouse coordinates
                 event.stopPropagation?.();
               }}
             >
-              {/* Light */}
-              <ambientLight intensity={1} />
-              <directionalLight position={[5, 5, 5]} />
+              {/* Lighting */}
+              <ambientLight intensity={2} />
+              <directionalLight position={[5, 10, 5]} intensity={1} />
+              <directionalLight position={[-5, 10, -5]} intensity={0.5} />
+              <pointLight position={[0, 6, 0]} intensity={0.5} />
               <Floor/>
               <Ceiling/>
               {/* <Tree position={[0, 0, 0]} scale={0.4} /> */}
 
               {/* Art Note - corner between Wall 1 (back) and Wall 2 (right) */}
-              <ArtNote position={[9, 0, -9]} rotation={[0, -Math.PI, 0]} scale={0.03} />
+              <ArtNote position={[9, 0, -9]} rotation={[0, -Math.PI/2, 0]} scale={0.03} />
               
-              {/* Plant - corner between Wall 1 (back) and Wall 4 (left) */}
-              <Plant position={[-9, 0, -9]} rotation={[0, Math.PI / 4, 0]} scale={2} />
+              {/* Plant - corner between Wall 3 (front) and Wall 4 (left) */}
+              <Plant position={[-9, 0, 9]} rotation={[0, -Math.PI / 4, 0]} scale={2} />
 
               {/* Walls */}
               {/* Wall 1 - Back wall */}
-              <Wall position={[0, 3.75, -10]} texturePath="/Wall.jpg" />
+              <Wall position={[0, 3.75, -10]} texturePath="/Back_Wall.jpg" />
               {/* Wall 4 - Left wall */}
               <Wall position={[-10, 3.75, 0]} rotation={[0, Math.PI / 2, 0]} texturePath="/Wall.jpg" />
               {/* Wall 2 - Right wall */}
               <Wall position={[10, 3.75, 0]} rotation={[0, -Math.PI / 2, 0]} texturePath="/Wall.jpg" />
               {/* Wall 3 - Front wall */}
-              <Wall position={[0, 3.75, 10]} rotation={[0, Math.PI, 0]} texturePath="/Wall.jpg" />
+              <Wall position={[0, 3.75, 10]} rotation={[0, Math.PI, 0]} texturePath="/Front_Wall.jpg" />
 
               {/* Artworks - Loop through all artworks */}
               {artworks.map((artwork) => (
@@ -166,15 +218,15 @@ export default function Home() {
               <Player />
               {/* PointerLockControls disabled - using click-and-drag instead */}
             </Canvas>
-            {!showLanding && !showRotatePhone && <MobileControls/>}
+            <MobileControls/>
           </div>
-        <FullscreenOverlay
-          image={overlayImage}
-          onClose={() => setOverlayImage(null)}
-        />
-        {!showLanding && <GalleryFooter onReturnToLanding={handleReturnToLanding} />}
-        {!showLanding && <AssistancePanel visible={!showLanding} />}
-      </main>
+          <FullscreenOverlay
+            image={overlayImage}
+            onClose={() => setOverlayImage(null)}
+          />
+          <GalleryFooter onReturnToLanding={handleReturnToLanding} />
+          <AssistancePanel visible={true} />
+        </main>
       
     </PlayerProvider>
     </CartProvider>
