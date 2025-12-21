@@ -142,7 +142,10 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       </p>
 
       {/* Arrow */}
-      <div className="flex flex-col items-center">
+      <div 
+        className="flex flex-col items-center cursor-pointer"
+        onClick={onEnter}
+      >
         {/* Line */}
         <div 
           style={{ 
