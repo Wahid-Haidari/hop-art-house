@@ -11,6 +11,8 @@ import Ceiling from "./components/Ceiling";
 import { PlayerProvider } from "./components/PlayerContext";
 import ProximityMessage from "./components/ProximityMessage";
 import Tree from "./components/Tree";
+import ArtNote from "./components/ArtNote";
+import Plant from "./components/Plant";
 import { useArtworks } from "./hooks/useArtworks";
 import LandingPage from "./components/LandingPage";
 import { CartProvider } from "./components/CartContext";
@@ -105,6 +107,12 @@ export default function Home() {
               <Floor/>
               <Ceiling/>
               {/* <Tree position={[0, 0, 0]} scale={0.4} /> */}
+
+              {/* Art Note - corner between Wall 1 (back) and Wall 2 (right) */}
+              <ArtNote position={[9, 0, -9]} rotation={[0, -Math.PI, 0]} scale={0.03} />
+              
+              {/* Plant - corner between Wall 1 (back) and Wall 4 (left) */}
+              <Plant position={[-9, 0, -9]} rotation={[0, Math.PI / 4, 0]} scale={2} />
 
               {/* Walls */}
               {/* Wall 1 - Back wall */}
