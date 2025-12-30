@@ -27,6 +27,10 @@ export default function MobilePlayer() {
     Shift: false,
   });
 
+  // Secret toggle: U + I disables movement controls (for screenshots)
+  const controlsDisabledRef = useRef(false);
+  const secretKeysRef = useRef({ u: false, i: false });
+
   // Desktop drag-to-look state
   const isDraggingRef = useRef(false);
   const previousMouseRef = useRef({ x: 0, y: 0 });
@@ -130,6 +134,19 @@ export default function MobilePlayer() {
 
     const downHandler = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
+      
+      // Track secret keys (U + I)
+      if (key === 'u') secretKeysRef.current.u = true;
+      if (key === 'i') secretKeysRef.current.i = true;
+      
+      // Toggle controls disabled when both U and I are pressed
+      if (secretKeysRef.current.u && secretKeysRef.current.i) {
+        controlsDisabledRef.current = !controlsDisabledRef.current;
+        // Reset secret keys to prevent rapid toggling
+        secretKeysRef.current.u = false;
+        secretKeysRef.current.i = false;
+      }
+      
       if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
         keysRef.current[key] = true;
       } else if (e.key === " ") {
@@ -141,6 +158,11 @@ export default function MobilePlayer() {
 
     const upHandler = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
+      
+      // Track secret keys release
+      if (key === 'u') secretKeysRef.current.u = false;
+      if (key === 'i') secretKeysRef.current.i = false;
+      
       if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
         keysRef.current[key] = false;
       } else if (e.key === " ") {
@@ -273,6 +295,12 @@ export default function MobilePlayer() {
       camera.rotation.order = "YXZ";
       camera.rotation.y = cameraRotationRef.current.yaw;
       camera.rotation.x = cameraRotationRef.current.pitch;
+
+      // Skip movement controls if disabled (U + I toggle)
+      if (controlsDisabledRef.current) {
+        setPosition([camera.position.x, camera.position.y, camera.position.z]);
+        return;
+      }
 
       // Desktop keyboard controls
       const forward = new THREE.Vector3();
