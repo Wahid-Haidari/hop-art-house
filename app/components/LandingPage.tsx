@@ -10,6 +10,10 @@ interface LandingPageProps {
 export default function LandingPage({ onEnter }: LandingPageProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  // Separate visibility for Buffalo, AI, and ART IS HUMAN
+  const [buffaloVisible, setBuffaloVisible] = useState(true);
+  const [aiVisible, setAiVisible] = useState(false);
+  const [artIsHumanVisible, setArtIsHumanVisible] = useState(true);
   const isMobile = useMobile();
 
   // Animation sequence with fade out to yellow, then fade in next slide
@@ -23,7 +27,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
   }, []);
 
   // Timing for each slide's display duration (before fade out starts)
-  // Slide 0: 1s display, then Buffalo fades out / AI fades in (no yellow gap)
+  // Slide 0: 1s display, then Buffalo fades to yellow, AI fades in (ART IS HUMAN stays)
   // Slide 1: 0.75s display, then fade out to yellow
   // Slide 2: 1s display, then fade out to yellow, then enter gallery
   useEffect(() => {
@@ -33,11 +37,16 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
     
     const timer = setTimeout(() => {
       if (currentSlide === 0) {
-        // Transition from Buffalo to AI - just change slide, no isVisible toggle
-        setCurrentSlide(1);
+        // Fade Buffalo to yellow, then fade in AI
+        setBuffaloVisible(false);
+        setTimeout(() => {
+          setAiVisible(true);
+          setCurrentSlide(1);
+        }, 500);
       } else if (currentSlide === 1) {
-        // Transition to Logo - fade out to yellow first
-        setIsVisible(false);
+        // Transition to Logo - fade out AI and ART IS HUMAN together
+        setAiVisible(false);
+        setArtIsHumanVisible(false);
         setTimeout(() => {
           setCurrentSlide(2);
           setIsVisible(true);
@@ -57,11 +66,16 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
   // Handle click to advance or enter gallery
   const handleAdvance = () => {
     if (currentSlide === 0) {
-      // Direct transition, no fade
-      setCurrentSlide(1);
+      // Fade Buffalo to yellow, then fade in AI
+      setBuffaloVisible(false);
+      setTimeout(() => {
+        setAiVisible(true);
+        setCurrentSlide(1);
+      }, 500);
     } else if (currentSlide === 1) {
-      // Fade out then show logo
-      setIsVisible(false);
+      // Fade out AI and ART IS HUMAN together, then show logo
+      setAiVisible(false);
+      setArtIsHumanVisible(false);
       setTimeout(() => {
         setCurrentSlide(2);
         setIsVisible(true);
@@ -115,7 +129,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
               justifyContent: "center",
             }}
           >
-            {/* Buffalo - visible on slide 0 */}
+            {/* Buffalo - fades to yellow */}
             <img
               src="/Landing Page/Buffalo.svg"
               alt="Buffalo"
@@ -123,11 +137,11 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
                 width: "100%",
                 height: "100%",
                 position: "absolute",
-                opacity: currentSlide === 0 ? 1 : 0,
+                opacity: buffaloVisible ? 1 : 0,
                 transition: "opacity 500ms",
               }}
             />
-            {/* AI - visible on slide 1 */}
+            {/* AI - fades in from yellow */}
             <img
               src="/Landing Page/AI.svg"
               alt="AI"
@@ -135,18 +149,20 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
                 width: isMobile ? "80px" : "244px",
                 height: isMobile ? "80px" : "244px",
                 position: "absolute",
-                opacity: currentSlide === 1 ? 1 : 0,
+                opacity: aiVisible ? 1 : 0,
                 transition: "opacity 500ms",
               }}
             />
           </div>
-          {/* ART IS HUMAN - stays in place, never fades during slides 0-1 */}
+          {/* ART IS HUMAN - fades with AI when transitioning to Logo */}
           <img
             src="/Landing Page/ART IS HUMAN.svg"
             alt="Art is Human"
             style={{
               width: isMobile ? "180px" : "360px",
               height: "auto",
+              opacity: artIsHumanVisible ? 1 : 0,
+              transition: "opacity 500ms",
             }}
           />
         </div>

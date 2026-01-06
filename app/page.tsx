@@ -27,7 +27,7 @@ export default function Home() {
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [showLanding, setShowLanding] = useState(true);
   const [showRotatePhone, setShowRotatePhone] = useState(false);
-  const [galleryVisible, setGalleryVisible] = useState(false);
+  const [yellowOverlayVisible, setYellowOverlayVisible] = useState(true);
   const isMobile = useMobile();
   const { artworks, isLoading } = useArtworks();
 
@@ -42,21 +42,21 @@ export default function Home() {
     if (mobile && window.innerHeight > window.innerWidth) {
       setShowRotatePhone(true);
     } else {
-      // Start gallery fade in after a small delay
-      setTimeout(() => setGalleryVisible(true), 50);
+      // Start fading out the yellow overlay
+      setTimeout(() => setYellowOverlayVisible(false), 50);
     }
   };
 
   const handleReturnToLanding = useCallback(() => {
-    setGalleryVisible(false);
+    setYellowOverlayVisible(true);
     setShowLanding(true);
     window.scrollTo(0, 0);
   }, []);
 
   const handleLandscape = useCallback(() => {
     setShowRotatePhone(false);
-    // Start gallery fade in after a small delay
-    setTimeout(() => setGalleryVisible(true), 50);
+    // Start fading out the yellow overlay
+    setTimeout(() => setYellowOverlayVisible(false), 50);
   }, []);
 
   // Desktop: scroll up to return to landing page
@@ -74,9 +74,10 @@ export default function Home() {
     return () => window.removeEventListener("wheel", handleWheel);
   }, [isMobile, showLanding, handleReturnToLanding]);
 
-  // Keep yellow background until gallery is fully visible
+  // Manage body styles based on state
   useEffect(() => {
-    if (galleryVisible) {
+    if (!showLanding && !showRotatePhone) {
+      // Gallery is showing
       document.body.style.overflow = "hidden";
       document.body.style.position = "fixed";
       document.body.style.top = "0";
@@ -87,15 +88,15 @@ export default function Home() {
       document.documentElement.style.overflow = "hidden";
       document.documentElement.style.setProperty('background', '#000', 'important');
     } else {
-      // Keep yellow background when landing is shown OR during transition to gallery
-      document.body.style.overflow = showLanding ? "" : "hidden";
-      document.body.style.position = showLanding ? "" : "fixed";
-      document.body.style.top = showLanding ? "" : "0";
-      document.body.style.left = showLanding ? "" : "0";
-      document.body.style.width = showLanding ? "" : "100vw";
-      document.body.style.height = showLanding ? "" : "100vh";
+      // Landing or rotate phone showing
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.width = "";
+      document.body.style.height = "";
       document.body.style.background = "#F7C41A";
-      document.documentElement.style.overflow = showLanding ? "" : "hidden";
+      document.documentElement.style.overflow = "";
       document.documentElement.style.setProperty('background', '#F7C41A', 'important');
     }
     return () => {
@@ -109,7 +110,7 @@ export default function Home() {
       document.documentElement.style.overflow = "";
       document.documentElement.style.background = "";
     };
-  }, [showLanding, galleryVisible]);
+  }, [showLanding, showRotatePhone]);
 
   return (
     <CartProvider>
@@ -124,6 +125,23 @@ export default function Home() {
       {showRotatePhone && (
         <RotatePhone onLandscape={handleLandscape} />
       )}
+      {/* Yellow overlay that fades out to reveal gallery */}
+      {!showLanding && !showRotatePhone && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "#F7C41A",
+            zIndex: 999,
+            opacity: yellowOverlayVisible ? 1 : 0,
+            transition: "opacity 500ms ease-in-out",
+            pointerEvents: "none",
+          }}
+        />
+      )}
       {/* Gallery always renders (for preloading) but hidden when on landing/rotate screen */}
       <main style={{ 
         touchAction: "none", 
@@ -135,9 +153,6 @@ export default function Home() {
         overflow: "hidden",
         visibility: (showLanding || showRotatePhone) ? "hidden" : "visible",
         pointerEvents: (showLanding || showRotatePhone) ? "none" : "auto",
-        opacity: galleryVisible ? 1 : 0,
-        transition: "opacity 1000ms ease-in-out",
-        background: "#000",
       }}>
         <div
           id="canvas-wrapper"
