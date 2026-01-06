@@ -25,7 +25,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
   // Timing for each slide's display duration (before fade out starts)
   // Slide 0: 1s display, then Buffalo fades out / AI fades in (no yellow gap)
   // Slide 1: 0.75s display, then fade out to yellow
-  // Slide 2: 1s display then enter gallery
+  // Slide 2: 1s display, then fade out to yellow, then enter gallery
   useEffect(() => {
     if (!isVisible && currentSlide === 0) return; // Wait for initial fade in
     
@@ -43,8 +43,11 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
           setIsVisible(true);
         }, 500);
       } else {
-        // After Logo, enter gallery
-        onEnter();
+        // After Logo - fade out to yellow, then enter gallery
+        setIsVisible(false);
+        setTimeout(() => {
+          onEnter();
+        }, 500);
       }
     }, displayTimes[currentSlide]);
 
@@ -64,7 +67,11 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
         setIsVisible(true);
       }, 500);
     } else {
-      onEnter();
+      // Fade out to yellow, then enter gallery
+      setIsVisible(false);
+      setTimeout(() => {
+        onEnter();
+      }, 500);
     }
   };
 

@@ -27,6 +27,7 @@ export default function Home() {
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [showLanding, setShowLanding] = useState(true);
   const [showRotatePhone, setShowRotatePhone] = useState(false);
+  const [galleryVisible, setGalleryVisible] = useState(false);
   const isMobile = useMobile();
   const { artworks, isLoading } = useArtworks();
 
@@ -40,16 +41,22 @@ export default function Home() {
     // On mobile in portrait mode, show rotate phone screen
     if (mobile && window.innerHeight > window.innerWidth) {
       setShowRotatePhone(true);
+    } else {
+      // Start gallery fade in after a small delay
+      setTimeout(() => setGalleryVisible(true), 50);
     }
   };
 
   const handleReturnToLanding = useCallback(() => {
+    setGalleryVisible(false);
     setShowLanding(true);
     window.scrollTo(0, 0);
   }, []);
 
   const handleLandscape = useCallback(() => {
     setShowRotatePhone(false);
+    // Start gallery fade in after a small delay
+    setTimeout(() => setGalleryVisible(true), 50);
   }, []);
 
   // Desktop: scroll up to return to landing page
@@ -67,9 +74,9 @@ export default function Home() {
     return () => window.removeEventListener("wheel", handleWheel);
   }, [isMobile, showLanding, handleReturnToLanding]);
 
-  // Lock body scroll when in gallery (not landing)
+  // Keep yellow background until gallery is fully visible
   useEffect(() => {
-    if (!showLanding) {
+    if (galleryVisible) {
       document.body.style.overflow = "hidden";
       document.body.style.position = "fixed";
       document.body.style.top = "0";
@@ -80,14 +87,15 @@ export default function Home() {
       document.documentElement.style.overflow = "hidden";
       document.documentElement.style.setProperty('background', '#000', 'important');
     } else {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.width = "";
-      document.body.style.height = "";
+      // Keep yellow background when landing is shown OR during transition to gallery
+      document.body.style.overflow = showLanding ? "" : "hidden";
+      document.body.style.position = showLanding ? "" : "fixed";
+      document.body.style.top = showLanding ? "" : "0";
+      document.body.style.left = showLanding ? "" : "0";
+      document.body.style.width = showLanding ? "" : "100vw";
+      document.body.style.height = showLanding ? "" : "100vh";
       document.body.style.background = "#F7C41A";
-      document.documentElement.style.overflow = "";
+      document.documentElement.style.overflow = showLanding ? "" : "hidden";
       document.documentElement.style.setProperty('background', '#F7C41A', 'important');
     }
     return () => {
@@ -101,7 +109,7 @@ export default function Home() {
       document.documentElement.style.overflow = "";
       document.documentElement.style.background = "";
     };
-  }, [showLanding]);
+  }, [showLanding, galleryVisible]);
 
   return (
     <CartProvider>
@@ -127,6 +135,9 @@ export default function Home() {
         overflow: "hidden",
         visibility: (showLanding || showRotatePhone) ? "hidden" : "visible",
         pointerEvents: (showLanding || showRotatePhone) ? "none" : "auto",
+        opacity: galleryVisible ? 1 : 0,
+        transition: "opacity 1000ms ease-in-out",
+        background: "#000",
       }}>
         <div
           id="canvas-wrapper"
