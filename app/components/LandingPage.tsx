@@ -28,12 +28,12 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
   // Timing for each slide's display duration (before fade out starts)
   // Slide 0: 1s display, then Buffalo fades to yellow, AI fades in (ART IS HUMAN stays)
-  // Slide 1: 0.75s display, then fade out to yellow
-  // Slide 2: 1s display, then fade out to yellow, then enter gallery
+  // Slide 1: 1s display, then fade out to yellow
+  // Slide 2: 1.5s display, then fade out to yellow, then enter gallery
   useEffect(() => {
     if (!isVisible && currentSlide === 0) return; // Wait for initial fade in
     
-    const displayTimes = [1000, 750, 1000]; // How long each slide displays
+    const displayTimes = [1000, 1000, 1500]; // How long each slide displays
     
     const timer = setTimeout(() => {
       if (currentSlide === 0) {
@@ -103,27 +103,30 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
     >
       {/* Slides 0 & 1: Buffalo/AI + ART IS HUMAN */}
       <div
-        className="absolute inset-0 flex flex-col items-center justify-center"
+        className="absolute inset-0 flex flex-col items-center"
         style={{
           opacity: isVisible && currentSlide <= 1 ? 1 : 0,
           pointerEvents: currentSlide <= 1 ? "auto" : "none",
           transition: "opacity 500ms",
         }}
       >
+        {/* Top spacer for 400:466 ratio */}
+        <div style={{ flexGrow: 400 }} />
+
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: isMobile ? "20px" : "40px",
+            gap: isMobile ? "20px" : "30px",
           }}
         >
           {/* Buffalo/AI container */}
           <div
             style={{
               position: "relative",
-              width: isMobile ? "200px" : "605px",
-              height: isMobile ? "86px" : "260px",
+              width: isMobile ? "200px" : "456px",
+              height: isMobile ? "86px" : "196px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -146,8 +149,8 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
               src="/Landing Page/AI.svg"
               alt="AI"
               style={{
-                width: isMobile ? "80px" : "244px",
-                height: isMobile ? "80px" : "244px",
+                width: isMobile ? "80px" : "196px",
+                height: isMobile ? "80px" : "196px",
                 position: "absolute",
                 opacity: aiVisible ? 1 : 0,
                 transition: "opacity 500ms",
@@ -159,13 +162,16 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
             src="/Landing Page/ART IS HUMAN.svg"
             alt="Art is Human"
             style={{
-              width: isMobile ? "180px" : "360px",
+              width: isMobile ? "180px" : "271px",
               height: "auto",
               opacity: artIsHumanVisible ? 1 : 0,
               transition: "opacity 500ms",
             }}
           />
         </div>
+
+        {/* Bottom spacer for 400:466 ratio */}
+        <div style={{ flexGrow: 466 }} />
       </div>
 
       {/* Slide 2: Logo */}
