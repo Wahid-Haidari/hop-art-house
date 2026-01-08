@@ -176,21 +176,27 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
 
       {/* Slide 2: Logo */}
       <div
-        className="absolute inset-0 flex flex-col items-center justify-center"
+        className="absolute inset-0 flex flex-col items-center"
         style={{
           opacity: isVisible && currentSlide === 2 ? 1 : 0,
           pointerEvents: currentSlide === 2 ? "auto" : "none",
           transition: "opacity 500ms",
         }}
       >
+        {/* Top spacer for 400:466 ratio (same as Buffalo + ART IS HUMAN) */}
+        <div style={{ flexGrow: 400 }} />
+
         <img
           src="/Landing Page/Logo.svg"
           alt="Hop Art House Logo"
           style={{
-            width: isMobile ? "220px" : "535px",
-            height: isMobile ? "96px" : "233px",
+            width: isMobile ? "220px" : "576px",
+            height: isMobile ? "96px" : "251px",
           }}
         />
+
+        {/* Bottom spacer for 400:466 ratio */}
+        <div style={{ flexGrow: 466 }} />
       </div>
     </div>
   );
