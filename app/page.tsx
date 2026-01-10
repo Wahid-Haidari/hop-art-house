@@ -53,7 +53,7 @@ export default function Home() {
       setFadeOut(true);
       // Remove overlay completely after fade animation
       setTimeout(() => setGalleryReady(true), 500);
-    }, 1000);
+    }, 3000);
   };
 
   // Set body styles - yellow background while loading
@@ -102,7 +102,6 @@ export default function Home() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            paddingBottom: "15vh",
             gap: isMobile ? "20px" : "30px",
             opacity: fadeOut ? 0 : 1,
             transition: "opacity 500ms ease-out",
@@ -124,6 +123,16 @@ export default function Home() {
               height: "auto",
             }}
           />
+          <div 
+            className="font-[family-name:var(--font-avant-garde-book)]"
+            style={{ 
+              fontSize: isMobile ? "14px" : "18px", 
+              color: "#000",
+              marginTop: "20px"
+            }}
+          >
+            Loading...
+          </div>
         </div>
       )}
       {/* Gallery */}
@@ -173,13 +182,13 @@ export default function Home() {
                 <Floor/>
                 <Ceiling/>
                 {/* Wall 1 - Back wall */}
-                <Wall position={[0, 3.75, -10]} texturePath="/Wall_01.jpg" />
+                <Wall position={[0, 3.75, -10]} texturePath="/Wall_02.jpg" />
                 {/* Wall 2 - Right wall */}
                 <Wall position={[10, 3.75, 0]} rotation={[0, -Math.PI / 2, 0]} texturePath="/Wall_02.jpg" />  
                 {/* Wall 3 - Front wall */}
-                <Wall position={[0, 3.75, 10]} rotation={[0, Math.PI, 0]} texturePath="/Wall_03.jpg" />
+                <Wall position={[0, 3.75, 10]} rotation={[0, Math.PI, 0]} texturePath="/Wall_02.jpg" />
                 {/* Wall 4 - Left wall */}
-                <Wall position={[-10, 3.75, 0]} rotation={[0, Math.PI / 2, 0]} texturePath="/Wall_04.jpg" />
+                <Wall position={[-10, 3.75, 0]} rotation={[0, Math.PI / 2, 0]} texturePath="/Wall_02.jpg" />
               </Suspense>
 
               {/* Decorations - loads independently */}
