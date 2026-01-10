@@ -45,17 +45,19 @@ body {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
+  background: #F7C41A !important;
 }
 
 #canvas-wrapper canvas {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
+  background: #F7C41A !important;
 }
 
 /* Ensure Next.js wrappers don't create white space */
 #__next, 
 [data-nextjs-scroll-focus-boundary],
 main {
-  background: inherit;
+  background: #F7C41A;
 }
