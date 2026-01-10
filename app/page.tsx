@@ -248,7 +248,7 @@ export default function Home() {
             onClose={() => setOverlayImage(null)}
           />
           <GalleryFooter />
-          <AssistancePanel visible={true} />
+          <AssistancePanel visible={galleryReady} />
         </main>
       
     </PlayerProvider>

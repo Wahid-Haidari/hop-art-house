@@ -18,7 +18,7 @@ export default function AssistancePanel({ visible }: AssistancePanelProps) {
       setHoverShowInstructions(false);
       const timer = setTimeout(() => {
         setShowInstructions(false);
-      }, 12000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [visible]);
