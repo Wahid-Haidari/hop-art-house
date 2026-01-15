@@ -37,6 +37,9 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
       bodyBg: document.body.style.background,
       bodyPosition: document.body.style.position,
       bodyOverflow: document.body.style.overflow,
+      bodyWidth: document.body.style.width,
+      bodyLeft: document.body.style.left,
+      bodyRight: document.body.style.right,
       htmlBg: document.documentElement.style.background,
       htmlOverflow: document.documentElement.style.overflow,
     };
@@ -45,6 +48,9 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
     document.body.style.height = 'auto';
     document.body.style.position = 'static';
     document.body.style.overflow = 'auto';
+    document.body.style.width = '100vw';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
     document.body.style.background = '#ffffff';
     document.documentElement.style.setProperty('background', '#ffffff', 'important');
     document.documentElement.style.overflow = 'auto';
@@ -61,6 +67,9 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
       document.body.style.height = originalStyles.bodyHeight;
       document.body.style.position = originalStyles.bodyPosition;
       document.body.style.overflow = originalStyles.bodyOverflow;
+      document.body.style.width = originalStyles.bodyWidth;
+      document.body.style.left = originalStyles.bodyLeft;
+      document.body.style.right = originalStyles.bodyRight;
       document.body.style.background = originalStyles.bodyBg;
       document.documentElement.style.setProperty('background', originalStyles.htmlBg || '#000', 'important');
       document.documentElement.style.overflow = originalStyles.htmlOverflow;

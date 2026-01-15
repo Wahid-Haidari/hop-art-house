@@ -64,9 +64,15 @@ export default function Home() {
     document.body.style.left = "0";
     document.body.style.width = "100vw";
     document.body.style.height = "100vh";
-    document.body.style.background = "#F7C41A";
+    document.body.style.background = "#000";
     document.documentElement.style.overflow = "hidden";
-    document.documentElement.style.setProperty('background', '#F7C41A', 'important');
+    document.documentElement.style.setProperty('background', '#000', 'important');
+    
+    // Set theme-color for safe areas
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', '#000000');
+    }
     
     return () => {
       document.body.style.overflow = "";
