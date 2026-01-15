@@ -353,7 +353,7 @@ export default function MobilePlayer() {
 
   // Movement and camera update
   useFrame(() => {
-    const speed = 0.05;
+    const speed = 0.08;
     const mobileSpeed = 0.075; // 1.5x faster for mobile joystick
 
     if (isMobile) {
@@ -453,7 +453,7 @@ export default function MobilePlayer() {
       }
 
       // Apply pinch gesture movement (forward/backward) - works on trackpad too
-      const pinchSpeed = 1.5;
+      const pinchSpeed = 4.0;
       nextX += forward.x * pinchMovementRef.current * pinchSpeed;
       nextZ += forward.z * pinchMovementRef.current * pinchSpeed;
       // Reset pinch movement after applying (prevents continuous movement)

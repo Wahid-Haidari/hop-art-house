@@ -481,157 +481,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             </>
           )}
         </div>
-
-        {/* Footer Section - Desktop only */}
-        {!isMobile && (
-          <div className="mt-24">
-            {/* Black Horizontal Line */}
-            <div 
-              style={{ 
-                width: "100vw", 
-                height: "2px", 
-                backgroundColor: "black",
-                marginBottom: "60px",
-                marginLeft: "-15vw",
-              }} 
-            />
-
-            {/* Footer Content */}
-            <div 
-              className="flex items-center justify-center gap-32"
-              style={{ paddingBottom: "60px" }}
-            >
-              {/* Logo Section */}
-              <div className="flex items-center gap-6">
-                {/* Frog Logo */}
-                <div style={{ width: "120px", height: "120px" }}>
-                  <img
-                    src="/Frog Logo.svg"
-                    alt="Hop Art House Frog"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                {/* Text Logo */}
-                <div>
-                  <h3
-                    style={{
-                      fontSize: "28px",
-                      fontFamily: "var(--font-avant-garde-medium)",
-                      lineHeight: "100%",
-                      color: "black",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    HOP
-                  </h3>
-                  <h3
-                    style={{
-                      fontSize: "28px",
-                      fontFamily: "var(--font-avant-garde-medium)",
-                      lineHeight: "100%",
-                      color: "black",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    ART
-                  </h3>
-                  <h3
-                    style={{
-                      fontSize: "28px",
-                      fontFamily: "var(--font-avant-garde-medium)",
-                      lineHeight: "100%",
-                      color: "black",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    HOUSE
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: "10px",
-                      fontFamily: "var(--font-avant-garde-book)",
-                      letterSpacing: "2px",
-                      color: "black",
-                    }}
-                  >
-                    EXPRESS & INSPIRE
-                  </p>
-                </div>
-              </div>
-
-              {/* Navigation Links */}
-              <div className="flex flex-col items-center gap-4">
-                <span
-                  onClick={onClose}
-                  className="cursor-pointer hover:opacity-70"
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    color: "black",
-                  }}
-                >
-                  Home
-                </span>
-                <a
-                  href="#order"
-                  className="hover:opacity-70"
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    color: "black",
-                    textDecoration: "none",
-                  }}
-                >
-                  Order
-                </a>
-                <a
-                  href="#faq"
-                  className="hover:opacity-70"
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    color: "black",
-                    textDecoration: "none",
-                  }}
-                >
-                  FAQ
-                </a>
-                <a
-                  href="mailto:Hi@HopArt.House"
-                  className="hover:opacity-70"
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    color: "black",
-                    textDecoration: "none",
-                  }}
-                >
-                  Contact
-                </a>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* Footer - Bottom Left (Desktop only): Frog Logo */}
-      {!isMobile && (
-        <div 
-          className="fixed z-[3010] pointer-events-auto"
-          style={{
-            width: "45px",
-            height: "43px",
-            bottom: "20px",
-            left: "28px",
-          }}
-        >
-          <img
-            src="/Frog Logo.svg"
-            className="w-full h-full"
-            alt="Hop Art House"
-          />
-        </div>
-      )}
 
       {/* Mobile: Cart + Hamburger Menu */}
       {isMobile && (
@@ -757,6 +607,25 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             </div>
           </div>
         </>
+      )}
+
+      {/* Footer - Bottom Left (Desktop only): Frog Logo */}
+      {!isMobile && (
+        <div 
+          className="fixed z-[3010] pointer-events-auto"
+          style={{
+            width: "45px",
+            height: "43px",
+            bottom: "20px",
+            left: "28px",
+          }}
+        >
+          <img
+            src="/Frog Logo.svg"
+            className="w-full h-full"
+            alt="Hop Art House"
+          />
+        </div>
       )}
 
       {/* Desktop: Footer Navigation */}
