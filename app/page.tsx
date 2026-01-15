@@ -143,14 +143,20 @@ export default function Home() {
         left: 0,
         right: 0,
         bottom: 0,
+        width: "100vw",
+        height: "100vh",
         overflow: "hidden",
         visibility: showRotatePhone ? "hidden" : "visible",
         pointerEvents: showRotatePhone ? "none" : "auto",
-        background: "#F7C41A",
+        background: "#000",
       }}>
         <div
           id="canvas-wrapper"
-          style={{ background: "#F7C41A" }}
+          style={{ 
+            background: "#000",
+            width: "100vw",
+            height: "100vh",
+          }}
         >
             <Canvas 
               camera={{ position: [0, 3.6, 4], fov: 30 }}
@@ -164,7 +170,9 @@ export default function Home() {
               pointerEvents: 'auto', 
               cursor: 'auto',
               display: 'block',
-              background: "#F7C41A",
+              width: "100vw",
+              height: "100vh",
+              background: "#000",
               }}
               onClick={(event) => {
                 // Ensure clicks are processed with correct mouse coordinates

@@ -24,13 +24,13 @@ html {
   padding: 0;
   width: 100%;
   height: 100%;
-  background: #F7C41A;
+  background: #000;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background: #F7C41A;
+  background: #000;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-text-size-adjust: 100%;
@@ -45,14 +45,19 @@ body {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  background: #F7C41A !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  /* Cover safe areas on iOS */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: 0 !important;
+  background: #000 !important;
 }
 
 #canvas-wrapper canvas {
   display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: #F7C41A !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: #000 !important;
   touch-action: none !important; /* Prevent browser pinch-zoom so we can handle it */
 }
 
@@ -60,5 +65,5 @@ body {
 #__next, 
 [data-nextjs-scroll-focus-boundary],
 main {
-  background: #F7C41A;
+  background: #000;
 }
