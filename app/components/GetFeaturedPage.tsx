@@ -122,7 +122,11 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
     <div 
       ref={scrollContainerRef}
       className="fixed inset-0 z-[2000] overflow-y-auto"
-      style={{ backgroundColor: "white" }}
+      style={{ 
+        backgroundColor: "white",
+        width: "100vw",
+        height: "100%",
+      }}
       onWheel={handleWheel}
     >
       <div 
@@ -194,7 +198,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                 maxWidth: "550px",
               }}
             >
-              Hop Art Club
+              Hop Art House
             </h1>
 
             <p
@@ -258,7 +262,7 @@ export default function GetFeaturedPage({ onClose, onNavigateToAbout, onNavigate
                 style={{ color: "#2563eb" }}
                 className="underline hover:opacity-70"
               >
-                Hop Art Club
+                Hop Art House
               </a>
             </p>
 

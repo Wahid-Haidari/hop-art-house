@@ -43,7 +43,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#F7C41A",
+  themeColor: "#000000",
 };
 
 //Destructure children from props, and the props must match the type Readonly<{ children: React.ReactNode }>.
@@ -53,8 +53,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${avantGardeMedium.variable} ${avantGardeBook.variable} antialiased`}>
+    <html lang="en" style={{ background: "#000" }}>
+      <body 
+        className={`${geistSans.variable} ${geistMono.variable} ${avantGardeMedium.variable} ${avantGardeBook.variable} antialiased`}
+        style={{ background: "#000" }}
+      >
         {children}
       </body>
     </html>

@@ -60,6 +60,11 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
   return (
     <div 
       className={`fixed inset-0 z-[9999] flex ${isMobile ? 'justify-center' : 'justify-end'}`}
+      style={{
+        width: "100vw",
+        height: "100%",
+        backgroundColor: isMobile ? "white" : "transparent",
+      }}
     >
       {/* Backdrop - click to close */}
       <div 

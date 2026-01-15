@@ -144,7 +144,7 @@ export default function Home() {
         right: 0,
         bottom: 0,
         width: "100vw",
-        height: "100vh",
+        height: "100dvh",
         overflow: "hidden",
         visibility: showRotatePhone ? "hidden" : "visible",
         pointerEvents: showRotatePhone ? "none" : "auto",
@@ -155,7 +155,7 @@ export default function Home() {
           style={{ 
             background: "#000",
             width: "100vw",
-            height: "100vh",
+            height: "100dvh",
           }}
         >
             <Canvas 
@@ -171,7 +171,7 @@ export default function Home() {
               cursor: 'auto',
               display: 'block',
               width: "100vw",
-              height: "100vh",
+              height: "100dvh",
               background: "#000",
               }}
               onClick={(event) => {

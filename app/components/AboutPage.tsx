@@ -95,7 +95,11 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
     <div 
       ref={scrollContainerRef}
       className="fixed inset-0 z-[3000] overflow-y-auto"
-      style={{ backgroundColor: COLORS.primary }}
+      style={{ 
+        backgroundColor: COLORS.primary,
+        width: "100vw",
+        height: "100%",
+      }}
       onWheel={handleWheel}
     >
       <div 
