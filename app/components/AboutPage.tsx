@@ -41,15 +41,15 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
     document.body.style.width = '100vw';
     document.body.style.left = '0';
     document.body.style.right = '0';
-    document.body.style.background = COLORS.primary;
-    document.documentElement.style.setProperty('background', COLORS.primary, 'important');
+    document.body.style.background = '#000';
+    document.documentElement.style.setProperty('background', '#000', 'important');
     document.documentElement.style.overflow = 'auto';
     
     // Also set theme-color meta tag for the safe area
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     const originalThemeColor = metaThemeColor?.getAttribute('content') || '';
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', COLORS.primary);
+      metaThemeColor.setAttribute('content', '#000000');
     }
     
     return () => {

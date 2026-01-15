@@ -32,15 +32,15 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
     document.body.style.height = 'auto';
     document.body.style.position = 'static';
     document.body.style.overflow = 'auto';
-    document.body.style.background = '#ffffff';
-    document.documentElement.style.setProperty('background', '#ffffff', 'important');
+    document.body.style.background = '#000';
+    document.documentElement.style.setProperty('background', '#000', 'important');
     document.documentElement.style.overflow = 'auto';
     
     // Also set theme-color meta tag for the safe area
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     const originalThemeColor = metaThemeColor?.getAttribute('content') || '';
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', '#ffffff');
+      metaThemeColor.setAttribute('content', '#000000');
     }
     
     return () => {
@@ -63,7 +63,7 @@ export default function CartPage({ onClose, onCheckout }: CartPageProps) {
       style={{
         width: "100vw",
         height: "100%",
-        backgroundColor: isMobile ? "white" : "transparent",
+        backgroundColor: "#000",
       }}
     >
       {/* Backdrop - click to close */}
