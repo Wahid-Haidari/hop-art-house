@@ -53,6 +53,7 @@ body {
   width: 100% !important;
   height: 100% !important;
   background: #F7C41A !important;
+  touch-action: none !important; /* Prevent browser pinch-zoom so we can handle it */
 }
 
 /* Ensure Next.js wrappers don't create white space */

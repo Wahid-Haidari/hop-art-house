@@ -150,7 +150,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
                 marginBottom: "24px",
               }}
             >
-              AI-generated images are the fast food for eyes; easy, cheap, and efficient but void of soul. They imitate creativity by averaging stolen works, producing visuals that are smooth, symmetrical, and lifeless. Like processed sugar, they please instantly but leave nothing lasting behind. True art is born from process and presence, a dialogue between artist and work, filled with uncertainty, care, and emotion. Machines can't feel wonder, nostalgia, or love; they can only simulate what humans once created.
+              Hop Art House is dedicated to democratize art; honouring the artist’s hand, creative process, and emotional presence. We promote art made by humans. While AI has its place in science and technology, art is fundamentally human. It is born from intentionality, uncertainty, and individuality; qualities no machine can replicate.
             </p>
 
             {/* Second Paragraph */}
@@ -162,7 +162,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
                 color: "black",
               }}
             >
-              To honour that human spirit, I founded Hop Art, a curated art house celebrating digital works made by people, not algorithms. Each piece is crafted with intent and accompanied by a process video, proving that behind every artwork is a living hand and a thinking mind. In an automated age, Hop Art stands for the simple truth: art made by humans still holds warmth, depth, and wonder.
+              In a world flooded with noise, we stand for meaning and intention. We collaborate closely with artists to publish high-quality physical editions of digital works. The pieces include a link to the artist’s process, affirming authorship and revealing the humanity behind the art.
             </p>
           </div>
 
@@ -240,7 +240,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
                     marginBottom: "24px",
                   }}
                 >
-                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art House.
                 </p>
                 <p
                   style={{
@@ -294,7 +294,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
                     marginBottom: "24px",
                   }}
                 >
-                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art Club.
+                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art House.
                 </p>
 
                 {/* Second Paragraph */}

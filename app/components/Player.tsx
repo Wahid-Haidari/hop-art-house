@@ -41,6 +41,10 @@ export default function MobilePlayer() {
   const mobileLookRef = useRef({ yaw: -0.45, pitch: 0 });
   const touchLookRef = useRef<{ x: number; y: number } | null>(null);
 
+  // Pinch gesture state (for both mobile and desktop)
+  const pinchMovementRef = useRef(0); // positive = forward, negative = backward
+  const isPinchingRef = useRef(false); // true when two fingers are on screen
+
   // Check if mobile on mount
   useEffect(() => {
     setIsMobile(isMobileDevice());
@@ -52,6 +56,89 @@ export default function MobilePlayer() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Pinch gesture controls for desktop trackpad (uses wheel event with ctrlKey)
+  useEffect(() => {
+    const canvas = gl.domElement;
+    
+    const handleWheel = (e: WheelEvent) => {
+      // On trackpad, pinch-to-zoom fires wheel events with ctrlKey=true
+      if (e.ctrlKey) {
+        e.preventDefault();
+        // deltaY is negative when zooming in (pinch out), positive when zooming out (pinch in)
+        // We want pinch out = forward, so we negate deltaY
+        pinchMovementRef.current = -e.deltaY * 0.01;
+      }
+    };
+    
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      canvas.removeEventListener('wheel', handleWheel);
+    };
+  }, [gl]);
+
+  // Pinch gesture controls for mobile (native touch events)
+  useEffect(() => {
+    if (!isMobile) return;
+    
+    const canvas = gl.domElement;
+    let lastDistance = 0;
+    let isFirstTouch = true;
+    
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        isFirstTouch = true;
+        isPinchingRef.current = true;
+      }
+    };
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        
+        // Calculate distance between fingers
+        const dx = t2.clientX - t1.clientX;
+        const dy = t2.clientY - t1.clientY;
+        const currentDistance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (isFirstTouch) {
+          lastDistance = currentDistance;
+          isFirstTouch = false;
+          return;
+        }
+        
+        const delta = currentDistance - lastDistance;
+        
+        // Spread fingers = move forward, close fingers = move backward
+        pinchMovementRef.current = delta;
+        lastDistance = currentDistance;
+      }
+    };
+    
+    const handleTouchEnd = () => {
+      pinchMovementRef.current = 0;
+      isPinchingRef.current = false;
+      lastDistance = 0;
+      isFirstTouch = true;
+    };
+    
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd);
+    canvas.addEventListener('touchcancel', handleTouchEnd);
+    
+    return () => {
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+      canvas.removeEventListener('touchcancel', handleTouchEnd);
+    };
+  }, [gl, isMobile]);
 
   // Desktop click-and-drag look controls
   useEffect(() => {
@@ -147,9 +234,17 @@ export default function MobilePlayer() {
         secretKeysRef.current.i = false;
       }
       
+      // WASD keys
       if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
         keysRef.current[key] = true;
-      } else if (e.key === " ") {
+      }
+      // Arrow keys mapped to WASD
+      if (e.key === 'ArrowUp') keysRef.current.w = true;
+      if (e.key === 'ArrowDown') keysRef.current.s = true;
+      if (e.key === 'ArrowLeft') keysRef.current.a = true;
+      if (e.key === 'ArrowRight') keysRef.current.d = true;
+      
+      if (e.key === " ") {
         keysRef.current[" "] = true;
       } else if (e.key === "Shift") {
         keysRef.current.Shift = true;
@@ -163,9 +258,17 @@ export default function MobilePlayer() {
       if (key === 'u') secretKeysRef.current.u = false;
       if (key === 'i') secretKeysRef.current.i = false;
       
+      // WASD keys
       if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
         keysRef.current[key] = false;
-      } else if (e.key === " ") {
+      }
+      // Arrow keys mapped to WASD
+      if (e.key === 'ArrowUp') keysRef.current.w = false;
+      if (e.key === 'ArrowDown') keysRef.current.s = false;
+      if (e.key === 'ArrowLeft') keysRef.current.a = false;
+      if (e.key === 'ArrowRight') keysRef.current.d = false;
+      
+      if (e.key === " ") {
         keysRef.current[" "] = false;
       } else if (e.key === "Shift") {
         keysRef.current.Shift = false;
@@ -209,8 +312,9 @@ export default function MobilePlayer() {
       };
     };
 
-    // Look control handler
+    // Look control handler - disabled when pinching
     const handleLookMove = (e: CustomEvent) => {
+      if (isPinchingRef.current) return; // Disable look when two fingers on screen
       mobileLookRef.current.yaw += e.detail.x;
       mobileLookRef.current.pitch += e.detail.y;
       mobileLookRef.current.pitch = Math.max(
@@ -282,13 +386,30 @@ export default function MobilePlayer() {
       nextZ += rightDir.z * right * mobileSpeed;
       nextY += up * mobileSpeed;
 
-      // Collision detection
+      // Apply pinch gesture movement (forward/backward in camera direction)
+      if (pinchMovementRef.current !== 0) {
+        const pinchSpeed = 0.02;
+        nextX += forwardDir.x * pinchMovementRef.current * pinchSpeed;
+        nextZ += forwardDir.z * pinchMovementRef.current * pinchSpeed;
+        pinchMovementRef.current = 0;
+      }
+
+      // Collision detection - no sliding along walls
       const limit = 9.5;
       const minY = 1;
       const maxY = 100;
 
-      if (Math.abs(nextX) < limit) camera.position.x = nextX;
-      if (Math.abs(nextZ) < limit) camera.position.z = nextZ;
+      // Check if we would hit a boundary
+      const wouldHitX = Math.abs(nextX) >= limit;
+      const wouldHitZ = Math.abs(nextZ) >= limit;
+      
+      // If either axis would hit, don't move at all (prevents sliding)
+      if (!wouldHitX && !wouldHitZ) {
+        camera.position.x = nextX;
+        camera.position.z = nextZ;
+      }
+      // Otherwise stay in place - no sliding
+      
       if (nextY > minY && nextY < maxY) camera.position.y = nextY;
     } else {
       // Desktop: Apply camera rotation from drag
@@ -330,6 +451,13 @@ export default function MobilePlayer() {
         nextX += right.x * speed;
         nextZ += right.z * speed;
       }
+
+      // Apply pinch gesture movement (forward/backward) - works on trackpad too
+      const pinchSpeed = 1.5;
+      nextX += forward.x * pinchMovementRef.current * pinchSpeed;
+      nextZ += forward.z * pinchMovementRef.current * pinchSpeed;
+      // Reset pinch movement after applying (prevents continuous movement)
+      pinchMovementRef.current = 0;
 
       // Collision for horizontal
       const limit = 9.5;
