@@ -114,16 +114,8 @@ export default function Home() {
           }}
         >
           <img 
-            src="/Landing Page/AI.svg" 
-            alt="AI"
-            style={{
-              width: isMobile ? "80px" : "150px",
-              height: "auto",
-            }}
-          />
-          <img 
-            src="/Landing Page/ART IS HUMAN.svg" 
-            alt="Art is Human"
+            src="/Landing Page/Logo.svg" 
+            alt="Hop Art House"
             style={{
               width: isMobile ? "180px" : "271px",
               height: "auto",
@@ -137,7 +129,7 @@ export default function Home() {
               marginTop: "20px"
             }}
           >
-            Loading...
+            Curating...
           </div>
         </div>
       )}

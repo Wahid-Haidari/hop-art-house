@@ -9,7 +9,6 @@ interface RotatePhoneProps {
 
 export default function RotatePhone({ onLandscape }: RotatePhoneProps) {
   const [isLandscape, setIsLandscape] = useState(false);
-  const [showContinueButton, setShowContinueButton] = useState(false);
 
   useEffect(() => {
     const checkOrientation = () => {
@@ -42,18 +41,12 @@ export default function RotatePhone({ onLandscape }: RotatePhoneProps) {
       screen.orientation.addEventListener("change", checkOrientationDelayed);
     }
 
-    // Show continue button after 3 seconds
-    const buttonTimer = setTimeout(() => {
-      setShowContinueButton(true);
-    }, 3000);
-
     return () => {
       window.removeEventListener("resize", checkOrientation);
       window.removeEventListener("orientationchange", checkOrientationDelayed);
       if (screen.orientation) {
         screen.orientation.removeEventListener("change", checkOrientationDelayed);
       }
-      clearTimeout(buttonTimer);
     };
   }, [onLandscape]);
 
@@ -207,27 +200,25 @@ export default function RotatePhone({ onLandscape }: RotatePhoneProps) {
         </div>
       </div>
 
-      {/* Continue button - appears after 3 seconds for in-app browsers */}
-      {showContinueButton && (
-        <button
-          onClick={onLandscape}
-          className="cursor-pointer hover:opacity-80"
-          style={{
-            position: "absolute",
-            bottom: "15%",
-            backgroundColor: COLORS.primary,
-            color: "black",
-            border: "2px solid black",
-            padding: "12px 48px",
-            paddingTop: "14px",
-            fontSize: "18px",
-            fontFamily: "var(--font-avant-garde-medium)",
-            borderRadius: "8px",
-          }}
-        >
-          Continue Anyway
-        </button>
-      )}
+      {/* Continue button - always visible */}
+      <button
+        onClick={onLandscape}
+        className="cursor-pointer hover:opacity-80"
+        style={{
+          position: "absolute",
+          bottom: "15%",
+          backgroundColor: COLORS.primary,
+          color: "black",
+          border: "2px solid black",
+          padding: "12px 48px",
+          paddingTop: "14px",
+          fontSize: "18px",
+          fontFamily: "var(--font-avant-garde-medium)",
+          borderRadius: "8px",
+        }}
+      >
+        Continue Anyway
+      </button>
     </div>
   );
 }
