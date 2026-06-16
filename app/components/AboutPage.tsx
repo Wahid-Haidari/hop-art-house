@@ -63,9 +63,8 @@ function FounderPanel({ founder, isMobile }: { founder: Founder; isMobile: boole
     return (
       <section style={{ backgroundColor: "#F7C41A" }}>
         <div
-          className="relative w-full overflow-hidden"
+          className="about-mobile-founder-image relative w-full overflow-hidden"
           style={{
-            height: "188px",
             backgroundColor: "#050505",
           }}
         >
@@ -111,8 +110,8 @@ function FounderPanel({ founder, isMobile }: { founder: Founder; isMobile: boole
         </div>
 
         <div
+          className="about-mobile-founder-copy"
           style={{
-            padding: "20px 30px 50px",
             display: "grid",
             gap: "24px",
           }}
@@ -214,11 +213,10 @@ function FounderPanel({ founder, isMobile }: { founder: Founder; isMobile: boole
 function MobileIntro({ onClose }: { onClose: () => void }) {
   return (
     <section
+      className="about-mobile-intro"
       style={{
-        minHeight: "442px",
         backgroundColor: "#F7C41A",
         color: "#000",
-        padding: "18px 30px 42px",
       }}
     >
       <header className="flex items-start justify-between">
@@ -368,6 +366,40 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
       }}
       onWheel={handleWheel}
     >
+      {isMobile && (
+        <style>
+          {`
+            .about-mobile-intro {
+              min-height: 442px;
+              padding: 18px 30px 42px;
+            }
+
+            .about-mobile-founder-image {
+              height: 188px;
+            }
+
+            .about-mobile-founder-copy {
+              padding: 20px 30px 50px;
+            }
+
+            @media (orientation: landscape) {
+              .about-mobile-intro {
+                min-height: auto;
+                padding-bottom: 32px;
+              }
+
+              .about-mobile-founder-image {
+                height: min(46vw, 330px);
+              }
+
+              .about-mobile-founder-copy {
+                padding: 16px 30px 26px;
+              }
+            }
+          `}
+        </style>
+      )}
+
       <main>
         {isMobile && <MobileIntro onClose={onClose} />}
         {founders.map((founder) => (
