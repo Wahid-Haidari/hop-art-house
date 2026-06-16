@@ -1,14 +1,138 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { COLORS } from "../colors";
-import { useCart } from "./CartContext";
+import { useEffect, useRef, useState } from "react";
 import { useMobile } from "../hooks/useMobile";
+import { useCart } from "./CartContext";
 
 interface AboutPageProps {
   onClose: () => void;
   onNavigateToGetFeatured?: () => void;
   onNavigateToCart?: () => void;
+}
+
+interface Founder {
+  name: string;
+  role: string;
+  image: string;
+  alt: string;
+  objectPosition: string;
+  paragraphs: string[];
+}
+
+const founders: Founder[] = [
+  {
+    name: "HAMID MUBARIZ",
+    role: "Creative Director",
+    image: "/founders/Hamid.png",
+    alt: "Hamid Mubariz",
+    objectPosition: "center center",
+    paragraphs: [
+      "I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art House.",
+      "Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.",
+    ],
+  },
+  {
+    name: "WAHID HAIDARI",
+    role: "Technical Director",
+    image: "/founders/Wahid.png",
+    alt: "Wahid Haidari",
+    objectPosition: "center center",
+    paragraphs: [
+      "I was born and raised in Afghanistan and grew up in a household with two brothers who are artists. As a child, I spent a lot of time drawing with pencil and watercolor, which shaped my early appreciation for art and visual expression. I later moved to Japan for high school, then to the US for my bachelor's degree in Computer Science. I am currently pursuing a Master's in Management of Information Technology.",
+      "I am interested in using technology to design practical, human-centered solutions that solve real problems. While my professional path is rooted in technology, I always appreciate art.",
+    ],
+  },
+  {
+    name: "GRACE SUN",
+    role: "Business Director",
+    image: "/founders/Grace.png",
+    alt: "Grace Sun",
+    objectPosition: "center center",
+    paragraphs: [
+      "I was born and raised in Taipei, and later lived in Shanghai, Japan, France, and Canada. Moving between places shaped my awareness of culture, people, and how creative ideas shift across contexts.",
+      "I studied art during my early schooling, and creativity has remained part of my life ever since. I'm drawn to design, film, photography, and visual storytelling, with a focus on the human process behind making, the choices, imperfections, and intent that machines can't replicate.",
+      "Hop Art House was founded on the belief that art isn't defined by speed or polish, but by presence. I'm building a space dedicated to work made by people, not algorithms, at a time when that distinction matters more than ever.",
+    ],
+  },
+];
+
+function FounderPanel({ founder, isMobile }: { founder: Founder; isMobile: boolean }) {
+  return (
+    <section
+      className="relative w-full overflow-hidden"
+      style={{
+        minHeight: isMobile ? "760px" : "clamp(560px, 44.4vw, 680px)",
+        backgroundColor: "#020202",
+      }}
+    >
+      <img
+        src={founder.image}
+        alt={founder.alt}
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ objectPosition: founder.objectPosition }}
+      />
+
+      <div
+        className="absolute inset-0"
+        style={{
+          background: isMobile
+            ? "linear-gradient(180deg, rgba(0,0,0,.9) 0%, rgba(0,0,0,.58) 38%, rgba(0,0,0,.24) 100%), linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.18) 100%)"
+            : "linear-gradient(90deg, rgba(0,0,0,.98) 0%, rgba(0,0,0,.86) 34%, rgba(0,0,0,.36) 56%, rgba(0,0,0,0) 76%)",
+        }}
+      />
+
+      <div
+        className="relative z-10 flex h-full flex-col justify-start text-white"
+        style={{
+          width: isMobile ? "calc(100% - 48px)" : "min(43vw, 620px)",
+          paddingTop: isMobile ? "86px" : "clamp(68px, 5.9vw, 92px)",
+          marginLeft: isMobile ? "24px" : "7.5vw",
+        }}
+      >
+        <h1
+          style={{
+            fontFamily: "var(--font-avant-garde-book)",
+            fontSize: isMobile ? "clamp(38px, 12vw, 58px)" : "clamp(52px, 4.8vw, 74px)",
+            lineHeight: "0.98",
+            letterSpacing: "0",
+            marginBottom: isMobile ? "4px" : "2px",
+          }}
+        >
+          {founder.name}
+        </h1>
+        <p
+          style={{
+            fontFamily: "var(--font-avant-garde-book)",
+            fontSize: isMobile ? "clamp(24px, 7.2vw, 36px)" : "clamp(30px, 2.7vw, 44px)",
+            lineHeight: "1.05",
+            marginBottom: isMobile ? "28px" : "clamp(24px, 2vw, 34px)",
+          }}
+        >
+          {founder.role}
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gap: isMobile ? "22px" : "26px",
+          }}
+        >
+          {founder.paragraphs.map((paragraph) => (
+            <p
+              key={paragraph}
+              style={{
+                fontFamily: "var(--font-avant-garde-book)",
+                fontSize: isMobile ? "18px" : "clamp(18px, 1.45vw, 22px)",
+                lineHeight: "1.13",
+              }}
+            >
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigateToCart }: AboutPageProps) {
@@ -19,9 +143,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
   const lastScrollY = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fix body styles for this page (override gallery styles)
   useEffect(() => {
-    // Save original styles
     const originalStyles = {
       bodyHeight: document.body.style.height,
       bodyBg: document.body.style.background,
@@ -33,27 +155,24 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
       htmlBg: document.documentElement.style.background,
       htmlOverflow: document.documentElement.style.overflow,
     };
-    
-    // Set correct styles for this page - allow natural document flow
-    document.body.style.height = 'auto';
-    document.body.style.position = 'static';
-    document.body.style.overflow = 'auto';
-    document.body.style.width = '100vw';
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.background = '#000';
-    document.documentElement.style.setProperty('background', '#000', 'important');
-    document.documentElement.style.overflow = 'auto';
-    
-    // Also set theme-color meta tag for the safe area
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    const originalThemeColor = metaThemeColor?.getAttribute('content') || '';
+
+    document.body.style.height = "auto";
+    document.body.style.position = "static";
+    document.body.style.overflow = "auto";
+    document.body.style.width = "100vw";
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.background = "#000";
+    document.documentElement.style.setProperty("background", "#000", "important");
+    document.documentElement.style.overflow = "auto";
+
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    const originalThemeColor = metaThemeColor?.getAttribute("content") || "";
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', '#000000');
+      metaThemeColor.setAttribute("content", "#000000");
     }
-    
+
     return () => {
-      // Restore original styles when unmounting
       document.body.style.height = originalStyles.bodyHeight;
       document.body.style.position = originalStyles.bodyPosition;
       document.body.style.overflow = originalStyles.bodyOverflow;
@@ -61,444 +180,59 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
       document.body.style.left = originalStyles.bodyLeft;
       document.body.style.right = originalStyles.bodyRight;
       document.body.style.background = originalStyles.bodyBg;
-      document.documentElement.style.setProperty('background', originalStyles.htmlBg || '#000', 'important');
+      document.documentElement.style.setProperty("background", originalStyles.htmlBg || "#000", "important");
       document.documentElement.style.overflow = originalStyles.htmlOverflow;
       if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', originalThemeColor);
+        metaThemeColor.setAttribute("content", originalThemeColor);
       }
     };
   }, []);
 
-  // Handle scroll to show/hide mobile header
   useEffect(() => {
     if (!isMobile) return;
-    
+
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const handleScroll = () => {
       const currentScrollY = container.scrollTop;
-      
+
       if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
-        // Scrolling down
         setHeaderVisible(false);
       } else {
-        // Scrolling up
         setHeaderVisible(true);
       }
-      
+
       lastScrollY.current = currentScrollY;
     };
 
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
   }, [isMobile]);
-  
-  // Prevent wheel events from bubbling up to the window
-  // This stops the "scroll up to return to landing page" behavior
+
   const handleWheel = (e: React.WheelEvent) => {
     e.stopPropagation();
   };
-  
+
   return (
-    <div 
+    <div
       ref={scrollContainerRef}
       className="fixed inset-0 z-[3000] overflow-y-auto"
-      style={{ 
-        backgroundColor: COLORS.primary,
+      style={{
+        backgroundColor: "#000",
         width: "100vw",
         height: "100%",
       }}
       onWheel={handleWheel}
     >
-      <div 
-        className="py-16" 
-        style={{ 
-          paddingLeft: isMobile ? "34px" : "15%", 
-          paddingRight: isMobile ? "34px" : "10%",
-          paddingTop: isMobile ? "121px" : "64px",
-        }}
-      >
-        {/* First Section - Hop Art House */}
-        <div 
-          className={`flex ${isMobile ? 'flex-col' : 'items-start gap-16'} mb-24`}
-          style={{ maxWidth: "1200px" }}
-        >
-          {/* Left Content */}
-          <div style={{ maxWidth: isMobile ? "100%" : "600px" }}>
-            {/* Title */}
-            <h1
-              style={{
-                fontSize: isMobile ? "36px" : "48px",
-                fontFamily: "var(--font-avant-garde-medium)",
-                lineHeight: "100%",
-                color: "black",
-                marginBottom: isMobile ? "16px" : "24px",
-                letterSpacing: "2px",
-              }}
-            >
-              HOP ART HOUSE
-            </h1>
+      <main>
+        {founders.map((founder) => (
+          <FounderPanel key={founder.name} founder={founder} isMobile={isMobile} />
+        ))}
+      </main>
 
-            {/* Subtitle */}
-            <h2
-              style={{
-                fontSize: isMobile ? "20px" : "24px",
-                fontFamily: "var(--font-avant-garde-medium)",
-                lineHeight: "130%",
-                color: "black",
-                marginBottom: isMobile ? "10px" : "32px",
-              }}
-            >
-              It's not the paint, the brush, or the code, it's the human pulse behind them.
-            </h2>
-
-            {/* First Paragraph */}
-            <p
-              style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-avant-garde-book)",
-                lineHeight: "170%",
-                color: "black",
-                marginBottom: "24px",
-              }}
-            >
-              Hop Art House is dedicated to democratize art; honouring the artist’s hand, creative process, and emotional presence. We promote art made by humans. While AI has its place in science and technology, art is fundamentally human. It is born from intentionality, uncertainty, and individuality; qualities no machine can replicate.
-            </p>
-
-            {/* Second Paragraph */}
-            <p
-              style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-avant-garde-book)",
-                lineHeight: "170%",
-                color: "black",
-              }}
-            >
-              In a world flooded with noise, we stand for meaning and intention. We collaborate closely with artists to publish high-quality physical editions of digital works. The pieces include a link to the artist’s process, affirming authorship and revealing the humanity behind the art.
-            </p>
-          </div>
-
-          {/* Right Image - Frog Illustration (Desktop only) */}
-          {!isMobile && (
-            <div 
-              className="flex-shrink-0"
-              style={{ width: "350px", height: "350px" }}
-            >
-              <img
-                src="/Frog Logo.svg"
-                alt="Hop Art House Frog"
-                className="w-full h-full object-contain"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Second Section - Hamid Mubariz */}
-        <div 
-          className={`flex ${isMobile ? 'flex-col' : 'items-start gap-16'} mb-24`}
-          style={{ maxWidth: "1200px" }}
-        >
-          {isMobile ? (
-            /* Mobile Layout - Full width photo with name overlay, then text below */
-            <>
-              {/* Photo with name overlay - full width edge to edge */}
-              <div style={{ position: "relative", marginLeft: "-34px", width: "100vw" }}>
-                <img
-                  src="/founders/Hamid.png"
-                  alt="Hamid Mubariz"
-                  className="w-full"
-                  style={{ display: "block" }}
-                />
-                {/* Name and Title overlay at bottom of image */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "24px",
-                    left: "24px",
-                  }}
-                >
-                  <h1
-                    style={{
-                      fontSize: "28px",
-                      fontFamily: "var(--font-avant-garde-medium)",
-                      lineHeight: "110%",
-                      color: "white",
-                      letterSpacing: "1px",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    HAMID MUBARIZ
-                  </h1>
-                  <p
-                    style={{
-                      fontSize: "18px",
-                      fontFamily: "var(--font-avant-garde-book)",
-                      color: "white",
-                    }}
-                  >
-                    Creative Director
-                  </p>
-                </div>
-              </div>
-              
-              {/* Text content below */}
-              <div style={{ marginTop: "24px" }}>
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                    marginBottom: "24px",
-                  }}
-                >
-                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art House.
-                </p>
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                  }}
-                >
-                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
-                </p>
-              </div>
-            </>
-          ) : (
-            /* Desktop Layout - Text on left, photo on right */
-            <>
-              {/* Left Content */}
-              <div style={{ maxWidth: "600px" }}>
-                {/* Title */}
-                <h1
-                  style={{
-                    fontSize: "48px",
-                    fontFamily: "var(--font-avant-garde-medium)",
-                    lineHeight: "100%",
-                    color: "black",
-                    marginBottom: "8px",
-                    letterSpacing: "2px",
-                  }}
-                >
-                  HAMID MUBARIZ
-                </h1>
-                {/* Role */}
-                <p
-                  style={{
-                    fontSize: "18px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    color: "black",
-                    marginBottom: "24px",
-                  }}
-                >
-                  Creative Director
-                </p>
-
-                {/* First Paragraph */}
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                    marginBottom: "24px",
-                  }}
-                >
-                  I was born and raised in Afghanistan, and I've loved art for as long as I can remember. I still have drawings from when I was seven. At 17, I moved to Japan to attend UWC ISAK, where I studied Fine Art and met Grace, my classmate and now cofounder of Hop Art House.
-                </p>
-
-                {/* Second Paragraph */}
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "var(--font-avant-garde-book)",
-                    lineHeight: "170%",
-                    color: "black",
-                  }}
-                >
-                  Later, I studied Graphic Design, Fine Art, and the Business of Art and Design at Ringling College in the U.S. When the visa program I was on was canceled under the Trump administration, I had to leave. I came to Canada, sought asylum, and now live here as a refugee still making, still creating, still believing in the power of human-made art.
-                </p>
-              </div>
-
-              {/* Right Image - Hamid Photo */}
-              <div 
-                className="flex-shrink-0"
-                style={{ width: "300px", height: "380px", overflow: "hidden" }}
-              >
-                <img
-                  src="/founders/Hamid.png"
-                  alt="Hamid Mubariz"
-                  className="w-full h-full object-cover"
-                  style={{ border: "4px solid black", objectPosition: "right" }}
-                />
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Third Section - Grace Sun */}
-        <div 
-          className={`flex ${isMobile ? 'flex-col' : 'items-start gap-16'} mb-16`}
-          style={{ maxWidth: "1200px" }}
-        >
-          {isMobile ? (
-            /* Mobile Layout - Full width photo with name overlay, then text below */
-            <>
-              {/* Photo with name overlay - full width edge to edge */}
-              <div className="relative -ml-[34px] w-screen">
-                <img
-                  src="/founders/Grace.png"
-                  alt="Grace Sun"
-                  className="w-full block"
-                />
-                {/* Name and Title overlay at bottom of image */}
-                <div className="absolute bottom-6 left-6">
-                  <h1 className="text-[28px] leading-[110%] text-white tracking-[1px] mb-1" style={{ fontFamily: "var(--font-avant-garde-medium)" }}>
-                    GRACE SUN
-                  </h1>
-                  <p className="text-lg text-white" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                    Business Director
-                  </p>
-                </div>
-              </div>
-              
-              {/* Text content below */}
-              <div className="mt-6">
-                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  I was born and raised in Taipei, and later lived in Shanghai, Japan, France, and Canada. Moving between places shaped my awareness of culture, people, and how creative ideas shift across contexts.
-                </p>
-                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  I studied art during my early schooling, and creativity has remained part of my life ever since. I'm drawn to design, film, photography, and visual storytelling, with a focus on the human process behind making, the choices, imperfections, and intent that machines can't replicate.
-                </p>
-                <p className="text-base leading-[170%] text-black" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  Hop Art House was founded on the belief that art isn't defined by speed or polish, but by presence. I'm building a space dedicated to work made by people, not algorithms, at a time when that distinction matters more than ever.
-                </p>
-              </div>
-            </>
-          ) : (
-            /* Desktop Layout - Text on left, photo on right */
-            <>
-              {/* Left Content */}
-              <div className="max-w-[600px]">
-                {/* Title */}
-                <h1 className="text-5xl leading-none text-black mb-2 tracking-[2px]" style={{ fontFamily: "var(--font-avant-garde-medium)" }}>
-                  GRACE SUN
-                </h1>
-                {/* Role */}
-                <p className="text-lg text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  Business Director
-                </p>
-
-                {/* First Paragraph */}
-                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  I was born and raised in Taipei, and later lived in Shanghai, Japan, France, and Canada. Moving between places shaped my awareness of culture, people, and how creative ideas shift across contexts.
-                </p>
-
-                {/* Second Paragraph */}
-                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  I studied art during my early schooling, and creativity has remained part of my life ever since. I'm drawn to design, film, photography, and visual storytelling, with a focus on the human process behind making, the choices, imperfections, and intent that machines can't replicate.
-                </p>
-
-                {/* Third Paragraph */}
-                <p className="text-base leading-[170%] text-black" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  Hop Art House was founded on the belief that art isn't defined by speed or polish, but by presence. I'm building a space dedicated to work made by people, not algorithms, at a time when that distinction matters more than ever.
-                </p>
-              </div>
-
-              {/* Right Image - Grace Photo */}
-              <div className="flex-shrink-0 w-[300px] h-[380px] overflow-hidden">
-                <img
-                  src="/founders/Grace.png"
-                  alt="Grace Sun"
-                  className="w-full h-full object-cover border-4 border-black"
-                  style={{ objectPosition: "right" }}
-                />
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Fourth Section - Wahid Haidari */}
-        <div 
-          className={`flex ${isMobile ? 'flex-col' : 'items-start gap-16'} mb-16`}
-          style={{ maxWidth: "1200px" }}
-        >
-          {isMobile ? (
-            /* Mobile Layout - Full width photo with name overlay, then text below */
-            <>
-              {/* Photo with name overlay - full width edge to edge */}
-              <div className="relative -ml-[34px] w-screen">
-                <img
-                  src="/founders/Wahid.png"
-                  alt="Wahid Haidari"
-                  className="w-full block"
-                />
-                {/* Name and Title overlay at bottom of image */}
-                <div className="absolute bottom-6 left-6">
-                  <h1 className="text-[28px] leading-[110%] text-white tracking-[1px] mb-1" style={{ fontFamily: "var(--font-avant-garde-medium)" }}>
-                    WAHID HAIDARI
-                  </h1>
-                  <p className="text-lg text-white" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                    Technology Director
-                  </p>
-                </div>
-              </div>
-              
-              {/* Text content below */}
-              <div className="mt-6">
-                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  I was born and raised in Afghanistan and grew up in a household with two brothers who are artists. As a child, I spent a lot of time drawing with pencil and watercolor, which shaped my early appreciation for art and visual expression. I later moved to Japan for high school, then to the US for my bachelor's degree in Computer Science. I am currently pursuing a Master's in Management of Information Technology at the University of Oklahoma.
-                </p>
-                <p className="text-base leading-[170%] text-black" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  I am interested in using technology to design practical, human-centered solutions that solve real problems. While my professional path is rooted in technology, I always appreciate art.
-                </p>
-              </div>
-            </>
-          ) : (
-            /* Desktop Layout - Text on left, photo on right */
-            <>
-              {/* Left Content */}
-              <div className="max-w-[600px]">
-                {/* Title */}
-                <h1 className="text-5xl leading-none text-black mb-2 tracking-[2px]" style={{ fontFamily: "var(--font-avant-garde-medium)" }}>
-                  WAHID HAIDARI
-                </h1>
-                {/* Role */}
-                <p className="text-lg text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  Technology Director
-                </p>
-
-                {/* First Paragraph */}
-                <p className="text-base leading-[170%] text-black mb-6" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  I was born and raised in Afghanistan and grew up in a household with two brothers who are artists. As a child, I spent a lot of time drawing with pencil and watercolor, which shaped my early appreciation for art and visual expression. I later moved to Japan for high school, then to the US for my bachelor's degree in Computer Science. I am currently pursuing a Master's in Management of Information Technology.
-                </p>
-
-                {/* Second Paragraph */}
-                <p className="text-base leading-[170%] text-black" style={{ fontFamily: "var(--font-avant-garde-book)" }}>
-                  I am interested in using technology to design practical, human-centered solutions that solve real problems. While my professional path is rooted in technology, I always appreciate art.
-                </p>
-              </div>
-
-              {/* Right Image - Wahid Photo */}
-              <div className="flex-shrink-0 w-[300px] h-[380px] overflow-hidden">
-                <img
-                  src="/founders/Wahid.png"
-                  alt="Wahid Haidari"
-                  className="w-full h-full object-cover border-4 border-black"
-                  style={{ objectPosition: "right" }}
-                />
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile: Cart + Hamburger Menu */}
       {isMobile && (
-        <div 
+        <div
           className="fixed z-[3010] pointer-events-auto flex items-center"
           style={{
             top: headerVisible ? "20px" : "-60px",
@@ -507,28 +241,23 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             transition: "top 0.3s ease-in-out",
           }}
         >
-          {/* Cart */}
-          <div 
-            onClick={onNavigateToCart}
-            className="cursor-pointer hover:opacity-70"
-            style={{ position: "relative" }}
-          >
+          <div onClick={onNavigateToCart} className="cursor-pointer hover:opacity-70" style={{ position: "relative" }}>
             <img
               src="/Cart.svg"
-              style={{ width: "32px", height: "27px" }}
+              style={{ width: "32px", height: "27px", filter: "invert(1)" }}
               alt="cart"
             />
             {getTotalItems() > 0 && (
               <span
                 className="absolute flex items-center justify-center"
-                style={{ 
+                style={{
                   top: "calc(50% - 1px)",
                   left: "calc(50% + 5px)",
                   transform: "translate(-50%, -50%)",
-                  fontSize: "12px", 
-                  lineHeight: "100%", 
+                  fontSize: "12px",
+                  lineHeight: "100%",
                   fontFamily: "var(--font-avant-garde-book)",
-                  color: "white",
+                  color: "black",
                 }}
               >
                 {getTotalItems()}
@@ -536,30 +265,26 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             )}
           </div>
 
-          {/* Hamburger Menu Button */}
-          <div 
+          <div
             onClick={() => setMenuOpen(!menuOpen)}
             className="cursor-pointer flex flex-col justify-center items-center"
             style={{ width: "30px", height: "30px", gap: "5px" }}
           >
-            <div style={{ width: "24px", height: "2px", backgroundColor: "black" }} />
-            <div style={{ width: "24px", height: "2px", backgroundColor: "black" }} />
-            <div style={{ width: "24px", height: "2px", backgroundColor: "black" }} />
+            <div style={{ width: "24px", height: "2px", backgroundColor: "white" }} />
+            <div style={{ width: "24px", height: "2px", backgroundColor: "white" }} />
+            <div style={{ width: "24px", height: "2px", backgroundColor: "white" }} />
           </div>
         </div>
       )}
 
-      {/* Mobile Menu Side Panel */}
       {isMobile && menuOpen && (
         <>
-          {/* Backdrop */}
-          <div 
+          <div
             className="fixed inset-0 z-[3020] pointer-events-auto"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
             onClick={() => setMenuOpen(false)}
           />
-          {/* Side Panel */}
-          <div 
+          <div
             className="fixed z-[3030] pointer-events-auto bg-white"
             style={{
               top: 0,
@@ -571,46 +296,44 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
               borderLeft: "1px solid #e0e0e0",
             }}
           >
-            {/* Close Button */}
-            <div 
-              className="flex justify-end mb-8"
-            >
-              <div 
-                onClick={() => setMenuOpen(false)}
-                className="cursor-pointer"
-                style={{ fontSize: "28px", lineHeight: "1" }}
-              >
-                ✕
+            <div className="flex justify-end mb-8">
+              <div onClick={() => setMenuOpen(false)} className="cursor-pointer" style={{ fontSize: "28px", lineHeight: "1" }}>
+                x
               </div>
             </div>
-            
-            {/* Menu Items */}
+
             <div className="flex flex-col" style={{ gap: "24px" }}>
-              <span 
-                onClick={() => { onClose(); setMenuOpen(false); }}
+              <span
+                onClick={() => {
+                  onClose();
+                  setMenuOpen(false);
+                }}
                 className="text-black no-underline hover:opacity-70 cursor-pointer"
                 style={{ fontSize: "20px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
               >
                 Art House
               </span>
               <div style={{ height: "1px", backgroundColor: "#e0e0e0" }} />
-              <span 
+              <span
                 className="text-black no-underline cursor-default"
                 style={{ fontSize: "20px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-medium)" }}
               >
                 About
               </span>
               <div style={{ height: "1px", backgroundColor: "#e0e0e0" }} />
-              <span 
-                onClick={() => { onNavigateToGetFeatured?.(); setMenuOpen(false); }}
+              <span
+                onClick={() => {
+                  onNavigateToGetFeatured?.();
+                  setMenuOpen(false);
+                }}
                 className="text-black no-underline hover:opacity-70 cursor-pointer"
                 style={{ fontSize: "20px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
               >
                 Get Featured
               </span>
               <div style={{ height: "1px", backgroundColor: "#e0e0e0" }} />
-              <a 
-                href="mailto:Hi@HopArt.House" 
+              <a
+                href="mailto:Hi@HopArt.House"
                 className="text-black no-underline hover:opacity-70 cursor-pointer"
                 style={{ fontSize: "20px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
                 onClick={() => setMenuOpen(false)}
@@ -622,28 +345,23 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
         </>
       )}
 
-      {/* Footer - Bottom Left (Desktop only): Frog Logo */}
       {!isMobile && (
-        <div 
+        <div
           className="fixed z-[3010] pointer-events-auto"
           style={{
             width: "45px",
             height: "43px",
             bottom: "20px",
             left: "28px",
+            filter: "invert(1)",
           }}
         >
-          <img
-            src="/Frog Logo.svg"
-            className="w-full h-full"
-            alt="Hop Art House"
-          />
+          <img src="/Frog Logo.svg" className="w-full h-full" alt="Hop Art House" />
         </div>
       )}
 
-      {/* Desktop: Footer Navigation */}
       {!isMobile && (
-        <div 
+        <div
           className="fixed z-[3010] pointer-events-auto flex items-center"
           style={{
             bottom: "20px",
@@ -651,34 +369,34 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             gap: "36px",
           }}
         >
-          <span 
+          <span
             onClick={onClose}
-            className="text-black no-underline hover:opacity-70 cursor-pointer"
+            className="text-white no-underline hover:opacity-70 cursor-pointer"
             style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
           >
             Art House
           </span>
-          <span 
-            className="text-black no-underline cursor-default"
+          <span
+            className="text-white no-underline cursor-default"
             style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-medium)" }}
           >
             About
           </span>
-          <span 
+          <span
             onClick={onNavigateToGetFeatured}
-            className="text-black no-underline hover:opacity-70 cursor-pointer"
+            className="text-white no-underline hover:opacity-70 cursor-pointer"
             style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
           >
             Get Featured
           </span>
-          <a 
-            href="mailto:Hi@HopArt.House" 
-            className="text-black no-underline hover:opacity-70 cursor-pointer"
+          <a
+            href="mailto:Hi@HopArt.House"
+            className="text-white no-underline hover:opacity-70 cursor-pointer"
             style={{ fontSize: "15px", lineHeight: "100%", fontFamily: "var(--font-avant-garde-book)" }}
           >
             Contact
           </a>
-          <div 
+          <div
             onClick={onNavigateToCart}
             className="flex flex-col items-center cursor-pointer hover:opacity-70"
             style={{ gap: "0px", position: "relative", top: "-4px" }}
@@ -691,11 +409,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
                 {getTotalItems()}
               </span>
             )}
-            <img
-              src="/Cart.svg"
-              style={{ width: "32px", height: "27px" }}
-              alt="cart"
-            />
+            <img src="/Cart.svg" style={{ width: "32px", height: "27px", filter: "invert(1)" }} alt="cart" />
           </div>
         </div>
       )}
