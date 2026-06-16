@@ -13,6 +13,7 @@ interface AboutPageProps {
 interface Founder {
   name: string;
   role: string;
+  mobileRole?: string;
   image: string;
   alt: string;
   objectPosition: string;
@@ -34,6 +35,7 @@ const founders: Founder[] = [
   {
     name: "WAHID HAIDARI",
     role: "Technical Director",
+    mobileRole: "Technology Director",
     image: "/founders/Wahid.png",
     alt: "Wahid Haidari",
     objectPosition: "center center",
@@ -57,11 +59,87 @@ const founders: Founder[] = [
 ];
 
 function FounderPanel({ founder, isMobile }: { founder: Founder; isMobile: boolean }) {
+  if (isMobile) {
+    return (
+      <section style={{ backgroundColor: "#F7C41A" }}>
+        <div
+          className="relative w-full overflow-hidden"
+          style={{
+            height: "188px",
+            backgroundColor: "#050505",
+          }}
+        >
+          <img
+            src={founder.image}
+            alt={founder.alt}
+            className="h-full w-full object-cover"
+            style={{ objectPosition: founder.objectPosition }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.34) 44%, rgba(0,0,0,0) 82%)",
+            }}
+          />
+          <div
+            className="absolute text-white"
+            style={{
+              left: "30px",
+              bottom: "16px",
+            }}
+          >
+            <h2
+              style={{
+                fontFamily: "var(--font-avant-garde-book)",
+                fontSize: "23px",
+                lineHeight: "1",
+                letterSpacing: "0",
+              }}
+            >
+              {founder.name}
+            </h2>
+            <p
+              style={{
+                fontFamily: "var(--font-avant-garde-book)",
+                fontSize: "16px",
+                lineHeight: "1.08",
+              }}
+            >
+              {founder.mobileRole ?? founder.role}
+            </p>
+          </div>
+        </div>
+
+        <div
+          style={{
+            padding: "20px 30px 50px",
+            display: "grid",
+            gap: "24px",
+          }}
+        >
+          {founder.paragraphs.map((paragraph) => (
+            <p
+              key={paragraph}
+              style={{
+                color: "#000",
+                fontFamily: "var(--font-avant-garde-book)",
+                fontSize: "15px",
+                lineHeight: "1.05",
+              }}
+            >
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       className="relative w-full overflow-hidden"
       style={{
-        minHeight: isMobile ? "760px" : "clamp(560px, 44.4vw, 680px)",
+        minHeight: "clamp(560px, 44.4vw, 680px)",
         backgroundColor: "#020202",
       }}
     >
@@ -75,27 +153,25 @@ function FounderPanel({ founder, isMobile }: { founder: Founder; isMobile: boole
       <div
         className="absolute inset-0"
         style={{
-          background: isMobile
-            ? "linear-gradient(180deg, rgba(0,0,0,.9) 0%, rgba(0,0,0,.58) 38%, rgba(0,0,0,.24) 100%), linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.18) 100%)"
-            : "linear-gradient(90deg, rgba(0,0,0,.98) 0%, rgba(0,0,0,.86) 34%, rgba(0,0,0,.36) 56%, rgba(0,0,0,0) 76%)",
+          background: "linear-gradient(90deg, rgba(0,0,0,.98) 0%, rgba(0,0,0,.86) 34%, rgba(0,0,0,.36) 56%, rgba(0,0,0,0) 76%)",
         }}
       />
 
       <div
         className="relative z-10 flex h-full flex-col justify-start text-white"
         style={{
-          width: isMobile ? "calc(100% - 48px)" : "min(43vw, 620px)",
-          paddingTop: isMobile ? "86px" : "clamp(68px, 5.9vw, 92px)",
-          marginLeft: isMobile ? "24px" : "7.5vw",
+          width: "min(43vw, 620px)",
+          paddingTop: "clamp(68px, 5.9vw, 92px)",
+          marginLeft: "7.5vw",
         }}
       >
         <h1
           style={{
             fontFamily: "var(--font-avant-garde-book)",
-            fontSize: isMobile ? "clamp(38px, 12vw, 58px)" : "clamp(52px, 4.8vw, 74px)",
+            fontSize: "clamp(52px, 4.8vw, 74px)",
             lineHeight: "0.98",
             letterSpacing: "0",
-            marginBottom: isMobile ? "4px" : "2px",
+            marginBottom: "2px",
           }}
         >
           {founder.name}
@@ -103,9 +179,9 @@ function FounderPanel({ founder, isMobile }: { founder: Founder; isMobile: boole
         <p
           style={{
             fontFamily: "var(--font-avant-garde-book)",
-            fontSize: isMobile ? "clamp(24px, 7.2vw, 36px)" : "clamp(30px, 2.7vw, 44px)",
+            fontSize: "clamp(30px, 2.7vw, 44px)",
             lineHeight: "1.05",
-            marginBottom: isMobile ? "28px" : "clamp(24px, 2vw, 34px)",
+            marginBottom: "clamp(24px, 2vw, 34px)",
           }}
         >
           {founder.role}
@@ -114,7 +190,7 @@ function FounderPanel({ founder, isMobile }: { founder: Founder; isMobile: boole
         <div
           style={{
             display: "grid",
-            gap: isMobile ? "22px" : "26px",
+            gap: "26px",
           }}
         >
           {founder.paragraphs.map((paragraph) => (
@@ -122,7 +198,7 @@ function FounderPanel({ founder, isMobile }: { founder: Founder; isMobile: boole
               key={paragraph}
               style={{
                 fontFamily: "var(--font-avant-garde-book)",
-                fontSize: isMobile ? "18px" : "clamp(18px, 1.45vw, 22px)",
+                fontSize: "clamp(18px, 1.45vw, 22px)",
                 lineHeight: "1.13",
               }}
             >
@@ -135,9 +211,76 @@ function FounderPanel({ founder, isMobile }: { founder: Founder; isMobile: boole
   );
 }
 
+function MobileIntro({ onClose }: { onClose: () => void }) {
+  return (
+    <section
+      style={{
+        minHeight: "442px",
+        backgroundColor: "#F7C41A",
+        color: "#000",
+        padding: "18px 30px 42px",
+      }}
+    >
+      <header className="flex items-start justify-between">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Return to Art House"
+          style={{
+            width: "45px",
+            height: "43px",
+            cursor: "pointer",
+            padding: 0,
+            border: 0,
+            background: "transparent",
+          }}
+        >
+          <img src="/Frog Logo.svg" className="h-full w-full" alt="" />
+        </button>
+      </header>
+
+      <div style={{ marginTop: "48px" }}>
+        <h1
+          style={{
+            fontFamily: "var(--font-avant-garde-medium)",
+            fontSize: "26px",
+            lineHeight: "1",
+            letterSpacing: "0",
+            marginBottom: "20px",
+          }}
+        >
+          HOP ART HOUSE
+        </h1>
+
+        <div style={{ display: "grid", gap: "18px" }}>
+          <p
+            style={{
+              fontFamily: "var(--font-avant-garde-book)",
+              fontSize: "14px",
+              lineHeight: "1.08",
+            }}
+          >
+            Hop Art House is dedicated to human-made art, honouring the artist's hand, creative process, and emotional presence. While AI has its place in science and technology, art is fundamentally human. It is born from intentionality, uncertainty, and individuality; qualities no machine can replicate.
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--font-avant-garde-book)",
+              fontSize: "14px",
+              lineHeight: "1.08",
+            }}
+          >
+            In a world flooded with noise, we stand for meaning and intention. We collaborate closely with artists to publish high-quality physical editions of digital works. The pieces include a link to the artist's process, affirming authorship and revealing the humanity behind the art.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigateToCart }: AboutPageProps) {
   const { getTotalItems } = useCart();
   const isMobile = useMobile();
+  const pageBackground = isMobile ? "#F7C41A" : "#000";
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -162,14 +305,14 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
     document.body.style.width = "100vw";
     document.body.style.left = "0";
     document.body.style.right = "0";
-    document.body.style.background = "#000";
-    document.documentElement.style.setProperty("background", "#000", "important");
+    document.body.style.background = pageBackground;
+    document.documentElement.style.setProperty("background", pageBackground, "important");
     document.documentElement.style.overflow = "auto";
 
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     const originalThemeColor = metaThemeColor?.getAttribute("content") || "";
     if (metaThemeColor) {
-      metaThemeColor.setAttribute("content", "#000000");
+      metaThemeColor.setAttribute("content", pageBackground);
     }
 
     return () => {
@@ -186,7 +329,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
         metaThemeColor.setAttribute("content", originalThemeColor);
       }
     };
-  }, []);
+  }, [pageBackground]);
 
   useEffect(() => {
     if (!isMobile) return;
@@ -219,13 +362,14 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
       ref={scrollContainerRef}
       className="fixed inset-0 z-[3000] overflow-y-auto"
       style={{
-        backgroundColor: "#000",
+        backgroundColor: pageBackground,
         width: "100vw",
         height: "100%",
       }}
       onWheel={handleWheel}
     >
       <main>
+        {isMobile && <MobileIntro onClose={onClose} />}
         {founders.map((founder) => (
           <FounderPanel key={founder.name} founder={founder} isMobile={isMobile} />
         ))}
@@ -244,7 +388,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
           <div onClick={onNavigateToCart} className="cursor-pointer hover:opacity-70" style={{ position: "relative" }}>
             <img
               src="/Cart.svg"
-              style={{ width: "32px", height: "27px", filter: "invert(1)" }}
+              style={{ width: "32px", height: "27px" }}
               alt="cart"
             />
             {getTotalItems() > 0 && (
@@ -257,7 +401,7 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
                   fontSize: "12px",
                   lineHeight: "100%",
                   fontFamily: "var(--font-avant-garde-book)",
-                  color: "black",
+                  color: "white",
                 }}
               >
                 {getTotalItems()}
@@ -270,9 +414,9 @@ export default function AboutPage({ onClose, onNavigateToGetFeatured, onNavigate
             className="cursor-pointer flex flex-col justify-center items-center"
             style={{ width: "30px", height: "30px", gap: "5px" }}
           >
-            <div style={{ width: "24px", height: "2px", backgroundColor: "white" }} />
-            <div style={{ width: "24px", height: "2px", backgroundColor: "white" }} />
-            <div style={{ width: "24px", height: "2px", backgroundColor: "white" }} />
+            <div style={{ width: "24px", height: "2px", backgroundColor: "black" }} />
+            <div style={{ width: "24px", height: "2px", backgroundColor: "black" }} />
+            <div style={{ width: "24px", height: "2px", backgroundColor: "black" }} />
           </div>
         </div>
       )}
